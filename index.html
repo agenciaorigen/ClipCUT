@@ -1,0 +1,3254 @@
+<!doctype html>
+<!-- ClipCut v5.8 — la vista previa ya no se congela si un subtítulo queda vacío o falla algo al dibujar; MP4 a 30 cuadros exactos desde cero y sin cuadros repetidos, para que WhatsApp no desfase el audio al recomprimir; audio sincronizado: la exportación rápida acepta más tipos de audio (los convierte), avisa si tuvo que grabar en tiempo real y hay un ajuste para mover el audio; elegir a mano: mirar el video completo, buscar en lo que se dice, marcar inicio y final (teclas I y O) y crear el clip con subtítulos; el transcriptor ya no se queda colgado: vigilancia y reintento automático, nunca transcribe en la página, solo procesador, partes de 30 s y reloj de avance; título inicial con formato (viral, caja, bloque, simple), color, altura y tamaño, guardados en la marca; al buscar otros clips, los anteriores salen de la tira mientras busca (y vuelven si se cancela); más ordenada: Ajustes aparte (clave, calidad), Elegir clips con dos opciones claras (mejores momentos o resumen), Textos separado en Este clip y Estilo y marca, logo como marca de agua con transparencia; placa final con el logo grande y un texto (ej.: Seguinos en @cuenta) en los últimos segundos del clip; el audio se lee de a pedazos (antes cargaba el video entero en memoria y la pestaña se cerraba con episodios largos); la compu ya no se traba: como mucho dos transcriptores a la vez, la placa de video la usa uno solo y se libera la memoria al terminar; resumen del episodio: DeepSeek elige varios momentos que juntos cuentan de qué se trató y los arma en un solo Reel; elegir clips mucho más rápido: lectura rápida del episodio con varios transcriptores a la vez y calidad alta solo en los clips elegidos; gancho al inicio (la frase más fuerte primero), texto para publicar con descripción y hashtags, y tomas creadas solas al seguir a quien habla; tomas guardadas: encuadres con nombre que se reusan con un toque o una tecla (en vivo mientras se reproduce) y que al reacomodarlas actualizan todos sus planos; DeepSeek marca la palabra clave de los subtítulos (sale grande y en color y el zoom cae ahí), el transcriptor se prepara mientras trabajás, tiempo que falta al transcribir y atajos de teclado; marcas por cliente (logo, textos y zoom con un nombre), zoom automático en los momentos fuertes y subtítulos que siguen el ritmo de la voz palabra por palabra; la transcripción corre en segundo plano (la página ya no se congela); exportación cuadro a cuadro con WebCodecs (más rápida y sin trabas), elección por contenido primero, proyectos guardados, subtítulos configurables, formato 1:1, SRT y logo; subtítulos mejores en forma automática: limpieza, corrección con DeepSeek y calidad alta por defecto; los textos (título y subtítulos) pasan a un paso propio antes de descargar; títulos y subtítulos animados estilo viral (palabra grande dorada, resaltado, palabra por palabra); buscar otros clips distintos (no repite) y transcripción guardada; exportación sin trabas (cuadro a cuadro) y calidad liviana 720p; cada clip tiene su propio plano y cada diseño recuerda cómo lo acomodaste; subtítulos: calidad alta, corrección con DeepSeek y edición a mano; botón para crear subtítulos en cualquier clip; estilo oscuro con brillo naranja y circuitos; seguir a quien habla es opcional; el clip se frena siempre al final; puntos de cambio de plano arrastrables; el transcriptor se carga en la página (antes fallaba en segundo plano); blanco minimalista; transcripción con Whisper, cortes en oraciones, subtítulos y elección por contenido con DeepSeek; estilo editorial (negro, dorado y serif): subí un episodio, elegí los mejores momentos, encuadrá en vertical siguiendo a quien habla y descargá en MP4. Todo en el navegador. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClipCut — clips verticales desde tu episodio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Anton&family=Playfair+Display:ital,wght@1,700&family=Montserrat:wght@900&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#050506;
+  --card:#0d0d0f;
+  --card2:#141417;
+  --line:#222226;
+  --text:#f4f4f5;
+  --muted:#8e8e98;
+  --accent:#ff5a1f;   /* naranja brasa */
+  --glow:#ff5a1f66;
+  font-family:"Plus Jakarta Sans",-apple-system,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px);background-size:72px 72px}
+/* haz de luz naranja arriba a la derecha */
+body::before{content:"";position:fixed;top:-20vh;right:-10vw;width:60vw;height:60vh;pointer-events:none;z-index:0;
+  background:radial-gradient(closest-side,#ff5a1f30,transparent);filter:blur(40px)}
+h1,h2,h3{margin:0;line-height:1.1;letter-spacing:-.025em;font-weight:600}
+h2{font-size:1.55rem}
+h3{font-size:.95rem;margin:1.5rem 0 .6rem;color:#d4d4d8}
+p{margin:.3rem 0}
+.muted,.hint{color:var(--muted)}
+.hint{font-size:.86rem}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Controles */
+button,input,select{font:inherit;color:inherit}
+button,select,input[type=number],input[type=password],input[type=text],input[type=search]{min-height:2.75rem;padding:.55rem 1.15rem;border-radius:999px;border:1px solid var(--line);background:var(--card2)}
+button{cursor:pointer;font-weight:500;transition:background .15s,border-color .15s,box-shadow .15s}
+button:hover:not(:disabled){border-color:#3a3a40;background:#1b1b1f}
+button:disabled{opacity:.35;cursor:not-allowed}
+.go,.rec{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 1px #ff7a45 inset,0 8px 24px -8px var(--glow)}
+.go:hover:not(:disabled),.rec:hover:not(:disabled){background:#ff6a33;border-color:#ff6a33;box-shadow:0 0 0 1px #ff8a5c inset,0 10px 30px -6px var(--glow)}
+.wide{width:100%}
+textarea{resize:vertical;font:inherit;line-height:1.45;padding:.7rem .85rem;border:1px solid var(--line)}
+select,input[type=number],input[type=password],input[type=text],input[type=search],textarea{border-radius:12px;width:100%;color:var(--text);background:var(--card2)}
+#subList{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;max-height:18rem;overflow:auto}
+#subList li{display:grid;grid-template-columns:3.6rem 1fr;gap:.5rem;align-items:center}
+#subList span{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+#subList input{min-height:2.4rem;padding:.35rem .7rem}
+input[type=range]{accent-color:var(--accent);width:100%}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:1.15rem;height:1.15rem;margin:0}
+label{display:grid;gap:.35rem;font-size:.86rem;color:var(--muted)}
+label.check{display:flex;align-items:center;gap:.6rem;color:var(--text);font-size:.93rem;margin:.55rem 0}
+label small{font-size:.8rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+details{border-top:1px solid var(--line);margin-top:1.5rem;padding-top:.9rem}
+summary{cursor:pointer;font-weight:500;min-height:2rem}
+summary::marker{color:var(--accent)}
+details[open] summary{margin-bottom:.5rem}
+fieldset{border:0;padding:0;margin:1rem 0 .5rem;display:grid;gap:.5rem}
+legend{font-weight:600;font-size:.93rem;margin-bottom:.5rem;padding:0}
+.opt{display:flex;gap:.75rem;align-items:flex-start;padding:.85rem 1rem;border:1px solid var(--line);border-radius:16px;background:var(--card2);cursor:pointer;color:var(--text)}
+.opt:has(input:checked){border-color:#ff5a1f99;background:linear-gradient(180deg,#ff5a1f14,transparent);box-shadow:0 0 24px -10px var(--glow)}
+.opt input{margin-top:.2rem}
+.opt strong{display:block;font-weight:600}
+.opt small{color:var(--muted);font-size:.84rem}
+
+/* Encabezado: barra flotante */
+.top{position:sticky;top:0;z-index:5;padding:.75rem 1rem 0}
+.bar{max-width:76rem;margin:auto;padding:.45rem .5rem .45rem 1.1rem;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;align-items:center;justify-content:space-between;
+  background:#0d0d0fcc;backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:999px}
+.brand{font-size:1.1rem;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:.5rem}
+.brand svg{width:22px;height:22px}
+[role=tablist]{display:flex;gap:2px;flex-wrap:wrap}
+[role=tab]{border:0;background:none;min-height:2.3rem;padding:.3rem 1rem;border-radius:999px;color:var(--muted);font-size:.9rem}
+[role=tab] i{display:none}
+[role=tab]:hover:not(:disabled){background:#ffffff0d;color:var(--text);border-color:transparent}
+[role=tab][aria-selected=true],[role=tab][aria-selected=true]:hover:not(:disabled){background:var(--accent);color:#fff;box-shadow:0 6px 20px -8px var(--glow)}
+.status{max-width:76rem;margin:auto;padding:.5rem 1.2rem 0;display:flex;gap:.9rem;align-items:center;font-size:.86rem;color:var(--muted)}
+.status progress{flex:1;max-width:16rem;accent-color:var(--accent);height:.35rem}
+.status button{min-height:2rem;padding:.15rem .9rem;font-size:.85rem}
+
+main{position:relative;z-index:1;max-width:76rem;margin:auto;padding:1.5rem 1rem 4rem}
+
+/* Paso 1: portada */
+#p1{max-width:64rem;margin:0 auto;padding:3.5rem 0 2rem;display:grid;gap:2.5rem;text-align:center;position:relative}
+#p1::after{content:"";position:absolute;left:-20%;right:-20%;bottom:-6rem;height:16rem;pointer-events:none;z-index:-1;
+  background:radial-gradient(60% 100% at 50% 100%,#ff5a1f88,#ff5a1f22 45%,transparent 70%);filter:blur(10px)}
+.badge{display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--card2);font-size:.8rem;color:#d4d4d8}
+.badge::before{content:"✦";color:var(--accent)}
+.hero h1{margin-top:1.1rem;font-size:clamp(2.6rem,6.5vw,4.8rem);font-weight:600;letter-spacing:-.045em;line-height:1.02;
+  background:linear-gradient(180deg,#ffffff 30%,#8e8e98);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 span{display:block}
+.hero p{max-width:34rem;margin:1.25rem auto 0;font-size:1.05rem;color:var(--muted)}
+.side1{display:grid;gap:1.25rem}
+
+/* El recuadro para subir es el "chip" central, conectado por circuitos a lo que hace la app */
+.chipzone{position:relative;display:grid;grid-template-columns:1fr minmax(0,30rem) 1fr;align-items:center;gap:1rem}
+.circuit{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.circuit path{fill:none;stroke:#2a2a30;stroke-width:1.2}
+.circuit .pulse{stroke:var(--accent);stroke-width:1.6;stroke-dasharray:24 400;animation:pulse 3.2s linear infinite;filter:drop-shadow(0 0 4px var(--accent))}
+@keyframes pulse{from{stroke-dashoffset:424}to{stroke-dashoffset:0}}
+.tiles{display:grid;gap:3.5rem;justify-items:center;position:relative}
+.tile{display:grid;place-items:center;gap:.35rem;width:84px;padding:.7rem .4rem;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#18181b,#0d0d0f);font-size:.72rem;color:var(--muted);box-shadow:0 10px 30px -12px #000}
+.tile svg{width:26px;height:26px;color:#e4e4e7}
+@media (max-width:760px){.chipzone{grid-template-columns:1fr}.tiles,.circuit{display:none}}
+.drop{position:relative;display:grid;place-items:center;gap:.5rem;color:var(--text);padding:3rem 1.5rem;border:1px solid #2e2e34;border-radius:26px;cursor:pointer;
+  background:radial-gradient(120% 100% at 50% 0%,#1d1d21,#0d0d0f 70%);box-shadow:0 0 0 6px #0d0d0f,0 0 0 7px #1f1f23,0 30px 80px -30px var(--glow);transition:box-shadow .2s,border-color .2s}
+.drop:hover,.drop.over,.drop:focus-within{border-color:#ff5a1f99;box-shadow:0 0 0 6px #0d0d0f,0 0 0 7px #ff5a1f55,0 30px 90px -20px var(--glow)}
+.drop svg{width:46px;height:46px;color:var(--accent);filter:drop-shadow(0 0 10px var(--glow))}
+.drop strong{font-size:1.2rem;font-weight:600}
+.loaded{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;text-align:left;max-width:30rem;width:100%;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:1rem 1.25rem}
+.loaded strong{font-weight:600}
+.loaded dl{display:flex;gap:1.25rem;margin:.15rem 0 0;font-size:.86rem}
+.loaded dd{margin:0;color:var(--muted);font-variant-numeric:tabular-nums}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0;padding:0;list-style:none;counter-reset:how;text-align:left}
+.how li{font-size:.9rem;color:#d4d4d8;counter-increment:how;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+.how li::before{content:"0" counter(how);display:block;margin-bottom:.4rem;color:var(--accent);font-weight:600;font-size:.8rem}
+@media (max-width:640px){.how{grid-template-columns:1fr}}
+
+/* Pasos 2 a 4 */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:1.25rem;align-items:start}
+@media (max-width:980px){.work{grid-template-columns:1fr}}
+.bench{display:grid;gap:1rem}
+.monitor{background:#000;border:1px solid var(--line);border-radius:24px;padding:14px;display:grid;gap:12px;box-shadow:0 40px 90px -50px var(--glow)}
+#stage{position:relative;aspect-ratio:var(--ar,16/9);width:min(100%,calc(58vh * var(--ar,1.78)));margin:auto;background:#000;border-radius:14px;overflow:hidden}
+#stage video{display:block;width:100%;height:100%}
+#ov{position:absolute;inset:0}
+.box{position:absolute;display:block;min-height:0;padding:2px 6px;border-radius:8px;text-align:left;font-size:.75rem;font-weight:600;color:#fff;text-shadow:0 1px 2px #000;border:2px solid var(--accent);background:#ff5a1f1f;cursor:move;touch-action:none}
+.box:hover:not(:disabled){background:#ff5a1f2e;border-color:var(--accent)}
+.box:nth-child(2){border-color:#a78bfa;background:#a78bfa1f}
+.box:nth-child(3){border-color:#fbbf24;background:#fbbf241f}
+.handle{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;background:currentColor;border-radius:6px 0 6px 0;cursor:nwse-resize}
+.controls{display:flex;gap:.9rem;align-items:center;color:var(--muted)}
+.controls button{min-width:7rem;color:var(--text)}
+.controls input{flex:1}
+.controls span{font-variant-numeric:tabular-nums;font-size:.86rem}
+
+/* Paso 4: el monitor muestra el clip final */
+.work[data-step="4"] #stage,.work[data-step="5"] #stage{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.work:not([data-step="4"]):not([data-step="5"]) #pvSlotFinal{display:none}
+#pvSlotFinal{display:grid;justify-items:center;gap:.6rem;color:var(--muted);font-size:.86rem}
+#pvSlotFinal #preview{width:auto;height:min(62vh,720px);max-width:100%;border-radius:18px;box-shadow:0 0 0 1px var(--line),0 30px 80px -30px var(--glow)}
+#pvWrap{display:grid;place-items:center;margin:1rem 0}
+#preview{display:block;width:190px;background:#000;border-radius:16px;box-shadow:0 0 0 1px var(--line),0 20px 50px -24px var(--glow)}
+
+/* Clips */
+.strip{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#333 transparent}
+#strip{display:flex;gap:12px;list-style:none;margin:0;padding:4px;min-height:92px}
+#strip li{position:relative;flex:0 0 auto}
+.frame{display:block;padding:0;border:1px solid var(--line);border-radius:14px;background:#000;overflow:hidden;width:160px;min-height:0;color:#fff;position:relative;text-align:left}
+.frame:hover:not(:disabled){background:#000;border-color:#3a3a40}
+.frame img,.frame .ph{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;opacity:.8}
+.frame[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 10px 30px -10px var(--glow)}
+.frame[aria-pressed=true] img{opacity:1}
+.frame b{position:absolute;left:8px;top:6px;font-size:.78rem;font-weight:600;background:#000b;border-radius:6px;padding:0 .4rem}
+.frame span{position:absolute;right:8px;bottom:6px;font-size:.74rem;font-weight:600;font-variant-numeric:tabular-nums;background:#000b;border-radius:6px;padding:0 .4rem}
+.frame em{position:absolute;left:8px;bottom:6px;font-style:normal;font-size:.74rem;font-weight:700;background:var(--accent);color:#fff;border-radius:6px;padding:0 .4rem}
+.drop-x{position:absolute;top:-7px;right:-7px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#27272a;border:2px solid var(--card);color:#fff;font-size:.95rem;line-height:1}
+.drop-x:hover:not(:disabled){background:var(--accent);border-color:var(--card)}
+.work:not([data-step="2"]) .drop-x{display:none}
+.strip-empty{color:var(--muted);font-size:.9rem;align-self:center;padding:0 .5rem}
+
+/* Clip elegido */
+.clipbar{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:1rem 1.1rem;display:grid;gap:.7rem}
+.cb-head{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.cb-head>div{flex:1;min-width:11rem}
+.cb-head strong{font-size:1.05rem;font-weight:600}
+.cb-head small{display:block;color:var(--muted);font-variant-numeric:tabular-nums}
+.cb-head button[aria-label]{width:2.75rem;padding:0;font-size:1.2rem}
+.tl{display:grid;gap:6px;padding:0 10px}
+.tl-label{font-size:.78rem;color:var(--muted);margin:0 -10px}
+#tlShots{position:relative;height:28px}
+.shot{position:absolute;top:0;bottom:0;min-height:0;padding:0 8px 0 16px;border:0;border-right:2px solid var(--card);border-radius:8px;font-size:.72rem;font-weight:600;color:#fff;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.shot:hover:not(:disabled){filter:brightness(1.12);border-color:var(--card)}
+.shot.vertical,.shot.vertical:hover{background:#ff5a1f}.shot.dividido,.shot.dividido:hover{background:#7c5cf0}.shot.trio,.shot.trio:hover{background:#f5a524;color:#111}.shot.spotlight,.shot.spotlight:hover{background:#e0457b}.shot.centrado,.shot.centrado:hover{background:#52525b}
+.shot.alt{background-image:linear-gradient(#00000038,#00000038)}
+#tlTrack{position:relative;height:42px;background:var(--card2);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+#tlGaps{position:absolute;inset:0;pointer-events:none}
+.tl-clip{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#ff5a1f2a,#ff5a1f10);border-block:2px solid var(--accent)}
+.tl-gap{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,#000c 0 3px,transparent 3px 7px)}
+#tlHead{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 8px #fff;pointer-events:none;z-index:2}
+.tl-h{position:absolute;top:-5px;bottom:-5px;width:20px;margin-left:-10px;background:var(--accent);border-radius:7px;cursor:ew-resize;touch-action:none;z-index:1;box-shadow:0 0 14px -2px var(--glow)}
+.tl-h::after{content:"";position:absolute;inset:14px 7px;border-inline:1.5px solid #fff}
+.tl-scale{display:flex;justify-content:space-between;gap:1rem;font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums;margin:0 -10px}
+.row{display:flex;flex-wrap:wrap;gap:.5rem}
+.work:not([data-step="3"]) #addKey2,.work:not([data-step="3"]) #takeBar{display:none}
+.takes{display:flex;flex-wrap:wrap;gap:.5rem}
+.take{display:flex;align-items:center;gap:.5rem;min-height:0;padding:.3rem .7rem .3rem .3rem;border-radius:12px;font-size:.85rem}
+.take img{width:27px;height:48px;border-radius:6px;object-fit:cover;background:#000}
+.take kbd{font:600 .72rem/1 inherit;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:.2rem .35rem}
+.take[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 14px -4px var(--glow)}
+#takeList{list-style:none;padding:0;margin:.6rem 0 0;display:grid;gap:.5rem}
+#takeList li{display:grid;grid-template-columns:27px 1fr auto;gap:.6rem;align-items:center}
+#takeList img{width:27px;height:48px;border-radius:6px;object-fit:cover;background:#000}
+#addKey2{margin-left:auto}
+.kdot{position:absolute;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;min-height:0;padding:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px -2px #000;z-index:2;cursor:ew-resize;touch-action:none}
+.kdot.vertical,.kdot.vertical:hover{background:#ff5a1f}.kdot.dividido,.kdot.dividido:hover{background:#7c5cf0}.kdot.trio,.kdot.trio:hover{background:#f5a524}.kdot.spotlight,.kdot.spotlight:hover{background:#e0457b}.kdot.centrado,.kdot.centrado:hover{background:#52525b}
+.kdot:hover:not(:disabled){border-color:#fff;transform:scale(1.1)}
+
+/* Panel del paso */
+.panel{background:linear-gradient(180deg,#121215,#0b0b0d);border:1px solid var(--line);border-radius:24px;padding:1.5rem}
+.panel>footer{margin-top:1.5rem;display:grid;gap:.5rem}
+.panel h2+.hint{margin-top:.5rem}
+.kicker{display:inline-flex;align-items:center;gap:.4rem;margin-bottom:.6rem;padding:.2rem .7rem;border:1px solid var(--line);border-radius:999px;font-size:.75rem;color:#d4d4d8;background:var(--card2)}
+.kicker::before{content:"✦";color:var(--accent)}
+
+/* Diseños */
+.layouts{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem}
+.layouts button{display:grid;justify-items:center;gap:.35rem;padding:.6rem .1rem;font-size:.72rem;min-height:0;border-radius:14px}
+.layouts svg{width:22px;height:39px;fill:none;stroke:currentColor;stroke-width:.7}
+.layouts svg rect{fill:currentColor;fill-opacity:.18}
+.layouts button[aria-pressed=true]{border-color:var(--accent);color:#fff;background:linear-gradient(180deg,#ff5a1f33,#ff5a1f11);box-shadow:0 0 18px -6px var(--glow)}
+.layouts button[aria-pressed=true] svg{color:var(--accent)}
+#keys{list-style:none;padding:0;margin:0;display:grid;gap:.4rem;max-height:15rem;overflow:auto}
+#keys li{display:flex;gap:.4rem}
+#keys li button{border-radius:12px}
+#keys li button:first-child{flex:1;text-align:left;font-variant-numeric:tabular-nums}
+#keys li[aria-current=true] button:first-child{border-color:#ff5a1f99}
+.tslist{list-style:none;margin:.6rem 0 0;padding:0;max-height:16rem;overflow:auto;display:grid;gap:2px;border-radius:14px}
+.tslist button{display:grid;grid-template-columns:3.6rem 1fr;gap:.5rem;width:100%;text-align:left;min-height:0;padding:.45rem .6rem;border-radius:10px;border:0;background:transparent;font-size:.86rem;line-height:1.35}
+.tslist button:hover:not(:disabled){background:var(--card2)}
+.tslist time{color:var(--accent);font-variant-numeric:tabular-nums;font-size:.8rem;padding-top:.1rem}
+.tslist .hint{padding:.5rem}
+kbd{font:600 .72rem/1 inherit;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:.15rem .35rem;margin-left:.3rem}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;margin:1rem 0 .4rem;background:var(--card2);border:1px solid var(--line);border-radius:999px}
+.seg button{min-height:2.4rem;border:0;background:transparent;padding:.4rem .6rem;font-size:.88rem}
+.seg button[aria-pressed=true]{background:var(--accent);color:#fff;box-shadow:0 0 18px -6px var(--glow)}
+.gear{display:inline-flex;align-items:center;gap:.4rem;min-height:2.4rem;padding:.4rem .9rem;font-size:.88rem}
+#settings{max-width:30rem;width:calc(100% - 2rem);background:linear-gradient(180deg,#141417,#0c0c0e);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:1.5rem}
+#settings::backdrop{background:#000a;backdrop-filter:blur(3px)}
+#settings form{display:grid;gap:.9rem}
+#settings h2{margin:0;font-size:1.3rem}
+#settings small{color:var(--muted);font-size:.8rem}
+.note{font-size:.86rem;padding:.75rem 1rem;border-radius:14px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.note.warn{border-color:#f5a52455;color:#f5c66b}
+.sel-info{display:flex;gap:1rem;align-items:center;margin:1.25rem 0}
+.sel-info img{width:104px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.sel-info strong{font-weight:600}
+.sel-info small{display:block;color:var(--muted);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">
+      <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="5" y="1" width="12" height="20" rx="3.5" fill="#ff5a1f"/><path d="M9.5 8v6l5-3z" fill="#fff"/></svg>
+      ClipCut
+    </div>
+    <nav role="tablist" aria-label="Pasos">
+      <button type="button" role="tab" id="tab1" aria-controls="p1" aria-selected="true"><i>01</i>Subir</button>
+      <button type="button" role="tab" id="tab2" aria-controls="p2" aria-selected="false" tabindex="-1" disabled><i>02</i>Elegir clips</button>
+      <button type="button" role="tab" id="tab3" aria-controls="p3" aria-selected="false" tabindex="-1" disabled><i>03</i>Encuadrar</button>
+      <button type="button" role="tab" id="tab4" aria-controls="p4" aria-selected="false" tabindex="-1" disabled><i>04</i>Textos y marca</button>
+      <button type="button" role="tab" id="tab5" aria-controls="p5" aria-selected="false" tabindex="-1" disabled><i>05</i>Descargar</button>
+    </nav>
+    <button type="button" id="openSettings" class="gear" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ajustes</button>
+  </div>
+  <div class="status">
+    <p id="status" role="status" aria-live="polite"></p>
+    <progress id="prog" max="1" value="0" hidden aria-label="Progreso"></progress>
+    <button type="button" id="stop" hidden>Cancelar</button>
+  </div>
+</header>
+<dialog id="settings" aria-labelledby="setTitle">
+  <form method="dialog">
+    <h2 id="setTitle">Ajustes</h2>
+    <label id="dsWrap">Clave de DeepSeek
+      <input id="dsKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…">
+      <small>La usa para elegir clips por lo que se dice, corregir subtítulos, títulos, ganchos y textos. Queda guardada solo en este navegador. Cuesta menos de un centavo por clip.</small>
+    </label>
+    <label class="check"><input id="autoFix" type="checkbox" checked> Corregir los subtítulos con DeepSeek apenas se crean</label>
+    <label>Calidad de los subtítulos
+      <select id="asrQ">
+        <option value="small">Alta: menos errores (descarga 250 MB la primera vez)</option>
+        <option value="base">Normal: más rápida (75 MB)</option>
+      </select>
+    </label>
+    <p class="hint">Todo se procesa en tu compu: el video no se sube a ningún lado.</p>
+    <button class="go wide" value="ok">Listo</button>
+  </form>
+</dialog>
+
+<main>
+  <!-- Paso 1 -->
+  <section id="p1" role="tabpanel" aria-labelledby="tab1">
+    <div class="hero">
+      <span class="badge">Clips verticales con IA</span>
+      <h1>Tu episodio, <span>convertido en clips.</span></h1>
+      <p>Encontramos los momentos con más energía, les sacamos los silencios y los pasamos a vertical siguiendo a quien habla. El video nunca sale de tu computadora.</p>
+    </div>
+    <div class="side1">
+    <div class="chipzone">
+      <svg class="circuit" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M150 70 H240 Q260 70 260 90 V120 Q260 140 280 140 H330"/><path d="M150 230 H240 Q260 230 260 210 V180 Q260 160 280 160 H330"/>
+        <path d="M850 70 H760 Q740 70 740 90 V120 Q740 140 720 140 H670"/><path d="M850 230 H760 Q740 230 740 210 V180 Q740 160 720 160 H670"/>
+        <path class="pulse" d="M150 70 H240 Q260 70 260 90 V120 Q260 140 280 140 H330"/><path class="pulse" style="animation-delay:-1.6s" d="M850 230 H760 Q740 230 740 210 V180 Q740 160 720 160 H670"/>
+      </svg>
+      <div class="tiles" aria-hidden="true">
+        <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg>Voz</span>
+        <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="10" r="5"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>Caras</span>
+      </div>
+    <label class="drop" id="drop">
+      <svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><rect x="13" y="3" width="18" height="38" rx="3" stroke="currentColor" stroke-width="1.4"/><path d="M22 29V14m0 0-5 5m5-5 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <strong>Arrastrá el video acá</strong>
+      <span class="muted">o hacé clic para elegirlo. MP4, MOV o WebM de hasta 2 GB.</span>
+      <input id="file" type="file" accept="video/*" class="sr-only">
+    </label>
+      <div class="tiles" aria-hidden="true">
+        <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 13h4M13 13h4M7 16h7"/></svg>Subtítulos</span>
+        <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="2" width="10" height="20" rx="2.5"/></svg>9:16</span>
+      </div>
+    </div>
+    <div id="info" class="loaded" hidden>
+      <div>
+        <strong id="infoName"></strong>
+        <dl><div><dt class="sr-only">Duración</dt><dd id="infoDur"></dd></div><div><dt class="sr-only">Resolución</dt><dd id="infoRes"></dd></div><div><dt class="sr-only">Tamaño</dt><dd id="infoSize"></dd></div></dl>
+      </div>
+      <label style="margin:.6rem 0">Marca del cliente
+        <select class="brandSel" aria-describedby="brandHint1"></select>
+      </label>
+      <p class="hint" id="brandHint1" style="margin-top:-.3rem">Pone su logo, sus colores y su estilo de textos y zoom. Las marcas se crean en el paso Textos.</p>
+      <div class="row"><button type="button" id="resetProj" hidden>Empezar de cero</button><button type="button" class="go" data-go="2">Elegir clips</button></div>
+    </div>
+    <ol class="how">
+      <li>Elegimos los mejores momentos</li>
+      <li>Seguimos a quien habla</li>
+      <li>Descargás en MP4 vertical</li>
+    </ol>
+    </div>
+  </section>
+
+  <div id="work" class="work" hidden>
+    <div class="bench">
+      <div class="monitor">
+        <div id="pvSlotFinal"><span>Así se va a ver</span></div>
+        <div id="stage">
+          <video id="player" playsinline></video>
+          <div id="ov"></div>
+        </div>
+        <div class="controls">
+          <button type="button" id="play">Reproducir</button>
+          <input id="seek" type="range" min="0" step="0.1" value="0" aria-label="Posición del video">
+          <span id="time" aria-hidden="true">0:00.0</span>
+        </div>
+      </div>
+
+      <section id="clipbar" class="clipbar" hidden aria-label="Clip elegido">
+        <div class="cb-head">
+          <button type="button" id="prevClip" aria-label="Clip anterior">‹</button>
+          <div><strong id="cbTitle"></strong><small id="cbMeta"></small></div>
+          <button type="button" id="nextClip" aria-label="Clip siguiente">›</button>
+          <button type="button" id="playClip" class="go">Ver clip</button>
+        </div>
+        <div class="tl">
+          <span class="tl-label">Planos del clip. Tocá uno para verlo.</span>
+          <div id="tlShots"></div>
+          <span class="tl-label">Inicio y final. Arrastrá los bordes para recortar.</span>
+          <div id="tlTrack">
+            <div id="tlClip" class="tl-clip"></div>
+            <div id="tlGaps"></div>
+            <div id="hStart" class="tl-h" role="slider" tabindex="0" aria-label="Inicio del clip"></div>
+            <div id="hEnd" class="tl-h" role="slider" tabindex="0" aria-label="Final del clip"></div>
+            <div id="tlHead"></div>
+          </div>
+          <div class="tl-scale"><span id="tlFrom"></span><span>Lo rayado es silencio que se quita</span><span id="tlTo"></span></div>
+        </div>
+        <div class="row">
+          <button type="button" id="trimS">Empezar acá</button>
+          <button type="button" id="trimE">Terminar acá</button>
+          <button type="button" id="addKey2" class="go">+ Plano acá</button>
+        </div>
+        <div id="takeBar" class="takes" role="group" aria-label="Tomas guardadas: tocá una para usarla" hidden></div>
+      </section>
+
+      <div class="strip" aria-label="Tus clips">
+        <ul id="strip"></ul>
+      </div>
+    </div>
+
+    <!-- Paso 2 -->
+    <section id="p2" role="tabpanel" aria-labelledby="tab2" class="panel" hidden>
+      <span class="kicker">Paso dos</span>
+      <h2>Elegir clips</h2>
+      <div class="seg" role="group" aria-label="Qué querés armar">
+        <button type="button" data-what="clips" aria-pressed="true">Mejores momentos</button>
+        <button type="button" data-what="reel" aria-pressed="false">Resumen</button>
+        <button type="button" data-what="hand" aria-pressed="false">A mano</button>
+      </div>
+
+      <div id="whatClips">
+        <p class="hint">Varios clips cortos, cada uno con una idea completa. Salen con título y subtítulos.</p>
+        <div class="grid2" style="margin-top:.75rem">
+          <label>Cuántos clips
+            <select id="n"><option>3</option><option selected>5</option><option>8</option><option>10</option></select>
+          </label>
+          <label>Duración
+            <select id="dur">
+              <option value="15-30">De 15 a 30 s</option>
+              <option value="30-60" selected>De 30 a 60 s</option>
+              <option value="45-90">De 45 a 90 s</option>
+            </select>
+          </label>
+        </div>
+        <button type="button" id="best" class="go wide" style="margin-top:.9rem">Buscar los mejores momentos</button>
+        <button type="button" id="resetSeen" class="wide" style="margin-top:.5rem" hidden>Volver a los mejores</button>
+      </div>
+
+      <div id="whatReel" hidden>
+        <p class="hint">Un solo Reel con 4 a 8 momentos de todo el video que juntos cuentan de qué se trató. Sale con título y subtítulos.</p>
+        <label style="margin-top:.75rem">Largo
+          <select id="reelLen"><option value="30">Unos 30 s</option><option value="60" selected>Unos 60 s</option><option value="90">Unos 90 s</option></select>
+        </label>
+        <button type="button" id="reelMake" class="go wide" style="margin-top:.9rem">Armar el resumen</button>
+      </div>
+
+      <div id="whatHand" hidden>
+        <p class="hint">Mirá el video completo y marcá vos dónde empieza y termina el clip. Buscá una frase o un tema para saltar directo a esa parte.</p>
+        <label style="margin-top:.75rem">Buscar en lo que se dice
+          <input id="tsQ" type="search" placeholder="Ej.: turismo, emprender, la escuela…" autocomplete="off">
+        </label>
+        <button type="button" id="tsRead" class="wide" style="margin-top:.5rem">Leer el episodio para poder buscar</button>
+        <ul id="tsList" class="tslist" aria-label="Lo que se dice en el episodio"></ul>
+        <div class="grid2" style="margin-top:.75rem">
+          <button type="button" id="markIn">Marcar inicio <kbd>I</kbd></button>
+          <button type="button" id="markOut">Marcar final <kbd>O</kbd></button>
+        </div>
+        <p class="note" id="markInfo" style="margin-top:.6rem"></p>
+        <label class="check"><input id="snapSent" type="checkbox" checked> Ajustar a oraciones completas</label>
+        <button type="button" id="handAdd" class="go wide" disabled>Crear el clip</button>
+      </div>
+
+      <p class="note" id="aiNote" style="margin-top:.9rem"></p>
+      <p class="hint" id="found" style="margin-top:.75rem"></p>
+
+      <details>
+        <summary>Más opciones</summary>
+        <label class="check"><input id="cutSil" type="checkbox" checked> Quitar los silencios</label>
+        <fieldset>
+          <legend>Cómo elegir los momentos</legend>
+          <label class="opt"><input type="radio" name="mode" value="ia" checked><span><strong>Por lo que se dice, con DeepSeek</strong><small>Lee el episodio una vez y elige las ideas que se entienden solas. La lectura queda guardada: buscar otra vez no la repite.</small></span></label>
+          <label class="opt"><input type="radio" name="mode" value="audio"><span><strong>Por la energía de la voz</strong><small>Sin entender lo que se dice. Sirve si no tenés clave de DeepSeek.</small></span></label>
+        </fieldset>
+        <label class="check" id="wWrap"><input id="whisper" type="checkbox" checked> Cortar en oraciones completas y crear subtítulos</label>
+        <label>Sensibilidad a la voz: más alta, más cosas cuentan como silencio
+          <input id="sens" type="range" min="10" max="50" value="25">
+        </label>
+        <h3>Por escenas</h3>
+        <div class="grid2">
+          <label>Cambio de imagen
+            <input id="thr" type="range" min="5" max="60" value="25">
+          </label>
+          <label>Duración máxima
+            <select id="len">
+              <option value="0">Una escena por clip</option>
+              <option value="15">15 s</option>
+              <option value="30" selected>30 s</option>
+              <option value="60">60 s</option>
+            </select>
+          </label>
+        </div>
+        <button type="button" id="detect" class="wide" style="margin-top:.6rem">Cortar todo el video por escenas</button>
+        <p class="hint">A los clips cortados por escenas, los subtítulos se les crean en el paso Textos.</p>
+      </details>
+      <footer><button type="button" class="go wide" data-go="3">Encuadrar los clips</button></footer>
+    </section>
+
+    <!-- Paso 3 -->
+    <section id="p3" role="tabpanel" aria-labelledby="tab3" class="panel" hidden>
+      <span class="kicker">Paso tres</span>
+      <h2>Encuadrar</h2>
+      <p class="hint">Elegí el diseño para el tramo donde está el cabezal. Para cambiar de diseño en otro momento, poné el cabezal ahí y tocá "+ Plano acá". Los puntos de colores debajo del monitor se pueden arrastrar.</p>
+      <div id="pvSlot3">
+        <div id="pvWrap"><canvas id="preview" width="360" height="640" aria-label="Vista vertical del clip"></canvas></div>
+      </div>
+      <button type="button" id="follow" class="wide" style="margin-top:.25rem">Seguir a quien habla automáticamente</button>
+      <p class="hint" style="margin-top:.4rem">Opcional. Lee los labios, arma los planos de todos tus clips y guarda una toma por persona. Reemplaza los planos que hayas armado a mano. La primera vez descarga el detector de caras, unos 4 MB.</p>
+      <h3>Diseño del plano</h3>
+      <div class="layouts" role="group" aria-label="Diseño del plano">
+        <button type="button" data-layout="vertical">Vertical</button>
+        <button type="button" data-layout="dividido">Dividido</button>
+        <button type="button" data-layout="trio">Trío</button>
+        <button type="button" data-layout="spotlight">Spotlight</button>
+        <button type="button" data-layout="centrado">Centrado</button>
+      </div>
+      <p class="hint" style="margin-top:.5rem">Mové los recuadros sobre el monitor y agrandalos desde la esquina. Con teclado: flechas para mover, + y − para el tamaño.</p>
+      <h3>Tomas guardadas</h3>
+      <p class="hint">Acomodá un encuadre y guardalo como toma: por ejemplo Locutor, Invitado y Los dos. Después tocá la toma (o apretá su número) debajo del video: en pausa cambia el plano actual; mientras se reproduce, corta y cambia en ese momento, como en vivo. Si reacomodás un plano hecho con una toma, se actualizan la toma y todos sus planos.</p>
+      <button type="button" id="saveTake" class="wide">Guardar este encuadre como toma</button>
+      <ul id="takeList"></ul>
+      <label style="margin-top:.75rem">Zoom automático en los momentos fuertes
+        <select id="zoom">
+          <option value="no">Apagado</option>
+          <option value="suave" selected>Suave</option>
+          <option value="marcado">Marcado</option>
+        </select>
+      </label>
+      <p class="hint" style="margin-top:.3rem">Se acerca en la palabra clave que marca DeepSeek al corregir los subtítulos. Sin eso, cuando la voz sube de energía.</p>
+      <h3>Planos de este clip</h3>
+      <ul id="keys"></ul>
+      <button type="button" id="addKey" class="wide" style="margin-top:.5rem">+ Plano acá</button>
+      <details>
+        <summary>Más opciones</summary>
+        <label>Formato
+          <select id="fmt">
+            <option value="vertical" selected>Vertical 9:16, para Reels, TikTok y Shorts</option>
+            <option value="cuadrado">Cuadrado 1:1, para el feed y LinkedIn</option>
+            <option value="original">Original, sin recortar</option>
+          </select>
+        </label>
+      </details>
+      <footer><button type="button" class="go wide" data-go="4">Agregar textos</button></footer>
+    </section>
+
+    <!-- Paso 4: textos -->
+    <section id="p4" role="tabpanel" aria-labelledby="tab4" class="panel" hidden>
+      <span class="kicker">Paso cuatro</span>
+      <h2>Textos y marca</h2>
+      <div class="seg" role="group" aria-label="Qué querés editar">
+        <button type="button" data-t4="clip" aria-pressed="true">Este clip</button>
+        <button type="button" data-t4="brand" aria-pressed="false">Estilo y marca</button>
+      </div>
+
+      <!-- Lo de cada clip -->
+      <div id="t4clip">
+        <p class="hint">Lo que cambies acá es solo para el clip elegido en la tira.</p>
+        <h3>Título</h3>
+        <input id="clipTitle" type="text" maxlength="40" placeholder="Ej.: Cómo arrancar de cero" aria-label="Título del clip">
+        <button type="button" id="sugTitle" class="wide" style="margin-top:.5rem">Sugerir un título con DeepSeek</button>
+
+        <h3>Gancho al inicio</h3>
+        <p class="hint" style="margin-top:0">El clip arranca con 2 a 4 segundos de su frase más fuerte y después sigue desde el principio.</p>
+        <div class="grid2">
+          <button type="button" id="hookAdd">Agregar a este clip</button>
+          <button type="button" id="hookAll">Agregar a todos</button>
+        </div>
+        <div class="row" id="hookRow" hidden style="margin-top:.5rem;align-items:center">
+          <span class="hint" id="hookInfo" style="flex:1"></span>
+          <button type="button" id="hookPlay">Ver</button>
+          <button type="button" id="hookDel">Quitar</button>
+        </div>
+
+        <h3>Subtítulos</h3>
+        <p class="hint" style="margin-top:0">Se crean solos al buscar los clips. Si un clip no los tiene (por ejemplo, uno armado a mano), creálos acá.</p>
+        <button type="button" id="mkSubs" class="wide">Crear los subtítulos que faltan</button>
+        <div id="subEdit" hidden style="margin-top:.75rem">
+          <p class="hint">Corregí a mano: al tocar una línea, el video salta a ese momento.</p>
+          <ul id="subList"></ul>
+        </div>
+        <div class="grid2" style="margin-top:.6rem">
+          <button type="button" id="fixSubs">Corregir con DeepSeek</button>
+          <button type="button" id="redoSubs">Volver a transcribir</button>
+        </div>
+        <p class="hint">Volver a transcribir pisa lo que hayas corregido en este clip.</p>
+        <details>
+          <summary>Traducir los subtítulos de este clip</summary>
+          <label>Idioma
+            <select id="trLang">
+              <option value="">Original, en español</option>
+              <option value="portugués de Brasil">Portugués</option>
+              <option value="inglés">Inglés</option>
+              <option value="guaraní">Guaraní</option>
+            </select>
+          </label>
+          <button type="button" id="trSubs" class="wide" style="margin-top:.5rem">Traducir con DeepSeek</button>
+          <p class="hint">El original queda guardado: elegí "Original" y tocá el botón para volver.</p>
+        </details>
+      </div>
+
+      <!-- Lo de todos los clips: se guarda con la marca -->
+      <div id="t4brand" hidden>
+        <p class="hint">Vale para todos los clips. Guardalo como marca del cliente para usarlo con otros videos.</p>
+        <h3>Marca del cliente</h3>
+        <div class="grid2" style="align-items:end">
+          <label>Usar la marca<select class="brandSel"></select></label>
+          <button type="button" id="brandDel" hidden>Borrar esta marca</button>
+        </div>
+        <div class="grid2" style="margin-top:.5rem;align-items:end">
+          <label>Nombre del cliente<input id="brandName" type="text" maxlength="40" placeholder="Ej.: Don Aldo"></label>
+          <button type="button" id="brandSave" class="go">Guardar marca</button>
+        </div>
+        <p class="hint">Guarda todo lo de esta pestaña y el zoom del paso Encuadrar. Con el mismo nombre, la actualiza.</p>
+
+        <h3>Subtítulos</h3>
+        <label>Estilo
+          <select id="subStyle">
+            <option value="viral">Viral: palabra grande dorada</option>
+            <option value="karaoke">Resaltado: la palabra que se dice en amarillo</option>
+            <option value="palabra">Palabra por palabra, con zoom</option>
+            <option value="clasico">Clásico: blanco con borde</option>
+          </select>
+        </label>
+        <div class="grid2" style="margin-top:.6rem">
+          <label>Altura<input id="subY" type="range" min="12" max="90" value="74"></label>
+          <label>Tamaño<input id="subSize" type="range" min="60" max="150" value="100"></label>
+        </div>
+        <label style="margin-top:.6rem">Color destacado (palabra clave, título y placa final)
+          <select id="subColor">
+            <option value="dorado">Dorado con brillo</option>
+            <option value="amarillo">Amarillo</option>
+            <option value="blanco">Blanco</option>
+            <option value="celeste">Celeste</option>
+            <option value="naranja">Naranja</option>
+            <option value="verde">Verde</option>
+          </select>
+        </label>
+        <label class="check"><input id="subsOn" type="checkbox" checked> Mostrar subtítulos</label>
+
+        <h3>Título inicial</h3>
+        <label>Formato
+          <select id="titleStyle">
+            <option value="viral">Viral: la última palabra grande con brillo</option>
+            <option value="caja">Caja de color, como en TikTok</option>
+            <option value="bloque">Bloque: todo en mayúsculas grandes</option>
+            <option value="simple">Simple: blanco con una línea de color</option>
+          </select>
+        </label>
+        <label style="margin-top:.6rem">Color
+          <select id="titleColor">
+            <option value="igual">Igual al color destacado</option>
+            <option value="dorado">Dorado con brillo</option>
+            <option value="amarillo">Amarillo</option>
+            <option value="blanco">Blanco</option>
+            <option value="celeste">Celeste</option>
+            <option value="naranja">Naranja</option>
+            <option value="verde">Verde</option>
+            <option value="rojo">Rojo</option>
+            <option value="rosa">Rosa</option>
+            <option value="violeta">Violeta</option>
+          </select>
+        </label>
+        <div class="grid2" style="margin-top:.6rem">
+          <label>Altura<input id="titleY" type="range" min="10" max="80" value="26"></label>
+          <label>Tamaño<input id="titleSize" type="range" min="60" max="150" value="100"></label>
+        </div>
+        <label class="check"><input id="titleOn" type="checkbox" checked> Mostrar el título en los primeros 3 segundos</label>
+        <button type="button" id="titlePlay" class="wide">Ver el título</button>
+
+        <h3>Logo o marca de agua</h3>
+        <label>Imagen (mejor PNG con fondo transparente)
+          <input id="logoFile" type="file" accept="image/*">
+        </label>
+        <div class="grid2" style="margin-top:.6rem">
+          <label>Lugar
+            <select id="logoPos">
+              <option value="arriba-izq">Arriba a la izquierda</option>
+              <option value="arriba-der">Arriba a la derecha</option>
+              <option value="abajo-izq">Abajo a la izquierda</option>
+              <option value="abajo-der">Abajo a la derecha</option>
+            </select>
+          </label>
+          <label>Tamaño<input id="logoSize" type="range" min="8" max="35" value="16"></label>
+        </div>
+        <label style="margin-top:.6rem">Transparencia: más a la izquierda, más suave (marca de agua)
+          <input id="logoAlpha" type="range" min="25" max="100" value="92">
+        </label>
+        <label class="check"><input id="logoOn" type="checkbox" checked> Mostrar el logo durante todo el clip</label>
+
+        <h3>Placa final</h3>
+        <label class="check"><input id="endOn" type="checkbox" checked> Al final, el logo grande y un texto</label>
+        <div class="grid2" style="align-items:end">
+          <label>Texto<input id="endText" type="text" maxlength="60" placeholder="Seguinos en @tucuenta"></label>
+          <label>Duración<select id="endSec"><option value="2">2 segundos</option><option value="3" selected>3 segundos</option><option value="4">4 segundos</option></select></label>
+        </div>
+        <button type="button" id="endPlay" class="wide" style="margin-top:.5rem">Ver el final del clip</button>
+        <p class="hint">Las palabras con @ o # salen en el color destacado.</p>
+      </div>
+      <footer><button type="button" class="go wide" data-go="5">Ver cómo queda y descargar</button></footer>
+    </section>
+
+    <!-- Paso 5 -->
+    <section id="p5" role="tabpanel" aria-labelledby="tab5" class="panel" hidden>
+      <span class="kicker">Paso cinco</span>
+      <h2>Descargar</h2>
+      <p class="hint">El monitor muestra el clip final, encuadrado y sin silencios. Elegí otro en la tira para revisarlo.</p>
+      <div class="sel-info" id="selInfo"></div>
+      <label>Calidad de descarga
+        <select id="outQ">
+          <option value="high">Alta, 1080×1920</option>
+          <option value="light">Liviana, 720×1280 (si el video sale trabado)</option>
+        </select>
+      </label>
+      <p class="note" id="outInfo" style="margin-top:.75rem"></p>
+      <details>
+        <summary>Si el audio sale corrido</summary>
+        <label>Mover el audio: <output id="avSyncOut">0 ms</output>
+          <input id="avSync" type="range" min="-400" max="400" step="20" value="0" aria-describedby="avSyncHint">
+        </label>
+        <p class="hint" id="avSyncHint">Si la voz llega tarde (los labios se mueven antes), corré a la izquierda; si llega antes, a la derecha. Queda guardado. Se aplica al descargar.</p>
+      </details>
+      <h3>Texto para publicar</h3>
+      <button type="button" id="postMake" class="wide">Escribir descripción y hashtags con DeepSeek</button>
+      <textarea id="postText" rows="7" aria-label="Texto para publicar con este clip" placeholder="Acá aparece la descripción para Instagram, con una pregunta para que comenten y los hashtags. Podés editarla." style="margin-top:.5rem"></textarea>
+      <button type="button" id="postCopy" class="wide" style="margin-top:.5rem">Copiar texto</button>
+      <footer>
+        <button type="button" id="dlOne" class="rec wide">Descargar este clip</button>
+        <button type="button" id="all" class="wide">Descargar todos los clips</button>
+        <button type="button" id="srt" class="wide">Descargar los subtítulos de este clip (.srt)</button>
+        <button type="button" id="whole" class="wide">Descargar el episodio completo encuadrado</button>
+        <p class="hint">Cada clip se graba en tiempo real: uno de 30 s tarda 30 s. Dejá esta pestaña abierta.</p>
+      </footer>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const player = $('player');
+const MAX_MB = 2048;
+let step = 1, sel = -1, clipsGen = 0, followedGen = -1, file, rmsCache, url, name = 'video', duration = 0, scenes = [], clips = [], cancel = false, busy = false;
+
+const say = t => { $('status').textContent = t; };
+const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+const once = (el, ev) => new Promise(r => el.addEventListener(ev, r, { once: true }));
+const free = v => { v.pause(); v.removeAttribute('src'); v.load(); if (v !== player) v.remove(); };
+
+async function seek(v, t) {
+  if (Math.abs(v.currentTime - t) < 0.001) return;
+  v.currentTime = t;
+  await Promise.race([once(v, 'seeked'), new Promise(r => setTimeout(r, 5000))]);
+}
+
+async function hiddenVideo() {
+  const v = document.createElement('video');
+  v.preload = 'auto';
+  v.playsInline = true;
+  v.muted = true;
+  v.setAttribute('aria-hidden', 'true');
+  v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none';
+  document.body.append(v);
+  v.src = url;
+  await Promise.race([
+    once(v, 'loadeddata'),
+    once(v, 'error').then(() => { throw new Error('No se pudo leer el video.'); })
+  ]);
+  return v;
+}
+
+// Recorre tramos del video reproduciéndolo rápido y sin sonido, y llama a fn(t, primero) cada `step` segundos.
+// Es varias veces más rápido que saltar de a un fotograma. Si el navegador no lo permite, salta de a uno.
+async function scan(v, ranges, step, rate, fn, label) {
+  const total = ranges.reduce((s, [a, b]) => s + b - a, 0);
+  let done = 0;
+  const progress = t => { const p = Math.min((done + t) / total, 1); $('prog').value = p; say(`${label}… ${Math.round(p * 100)} %`); };
+  for (const [a, b] of ranges) {
+    if (cancel) break;
+    await seek(v, a);
+    if (v.requestVideoFrameCallback) {
+      let next = a, first = true;
+      v.playbackRate = rate;
+      await new Promise(res => {
+        const end = () => { v.pause(); v.onended = null; res(); };
+        v.onended = end;
+        const onFrame = (_, m) => {
+          const t = m.mediaTime;
+          if (cancel || t >= b) return end();
+          if (t < next) return v.requestVideoFrameCallback(onFrame);
+          // pausa mientras analiza, así no se saltea nada aunque la compu sea lenta
+          v.pause();
+          fn(t, first, a); first = false; next = t + step; progress(t - a);
+          v.play().then(() => v.requestVideoFrameCallback(onFrame)).catch(end);
+        };
+        v.requestVideoFrameCallback(onFrame);
+        v.play().catch(end);
+      });
+    } else {
+      for (let t = a; t < b && !cancel; t += step) { await seek(v, t); fn(t, t === a); progress(t - a); }
+    }
+    done += b - a;
+  }
+}
+
+// Muestra u oculta la barra de progreso y el botón Cancelar
+const busyUI = on => {
+  if (on) cancel = false;
+  $('stop').hidden = $('prog').hidden = !on; $('prog').value = 0;
+};
+
+// Miniatura del fotograma actual de un video
+const snapCv = Object.assign(document.createElement('canvas'), { width: 160, height: 90 });
+const snap = v => { snapCv.getContext('2d').drawImage(v, 0, 0, 160, 90); return snapCv.toDataURL('image/jpeg', 0.6); };
+const parts = c => c.parts || [[c.start, c.end]];
+// Lo que se ve al descargar: el gancho (si tiene) y después el clip desde el principio
+const playParts = c => c.hook ? [c.hook, ...parts(c)] : parts(c);
+const clipLen = c => playParts(c).reduce((t, [s, e]) => t + e - s, 0);
+
+// Evita tareas simultáneas y muestra los errores en pantalla
+async function guard(f) {
+  if (busy) return say('Hay una tarea en curso, esperá a que termine.');
+  busy = true;
+  try { await f(); }
+  catch (e) { say('Error: ' + (e.message || 'no se pudo completar.')); }
+  finally { busy = false; }
+}
+
+const btn = (text, fn, label) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = text; b.onclick = fn;
+  if (label) b.setAttribute('aria-label', label);
+  return b;
+};
+
+// ---------- Encuadre: diseños y posiciones ----------
+// Cada diseño reparte el lienzo vertical (1080x1920) en franjas [x, y, ancho, alto] (de 0 a 1).
+// Cada franja muestra un recuadro del video original con la misma proporción, así nada se deforma.
+let OUT = [1080, 1920]; // tamaño de salida: vertical 9:16 o cuadrado 1:1
+const LAYOUTS = {
+  vertical:  { name: 'Vertical',  slots: [[0, 0, 1, 1]], labels: ['Recorte'] },
+  dividido:  { name: 'Dividido',  slots: [[0, 0, 1, .5], [0, .5, 1, .5]], labels: ['Arriba', 'Abajo'] },
+  trio:      { name: 'Trío',      slots: [[0, 0, 1, 1 / 3], [0, 1 / 3, 1, 1 / 3], [0, 2 / 3, 1, 1 / 3]], labels: ['Arriba', 'Medio', 'Abajo'] },
+  spotlight: { name: 'Spotlight', slots: [[0, 0, 1, .65], [0, .65, 1, .35]], labels: ['Principal', 'Secundario'] },
+  centrado:  { name: 'Centrado',  slots: [], labels: [] } // cuadro completo al medio con fondo desenfocado
+};
+let vw = 16, vh = 9, keys = [], cur = null;
+
+const asp = s => s[2] * OUT[0] / (s[3] * OUT[1]);        // proporción ancho/alto de la franja
+const boxW = (b, a) => b.h * vh * a / vw;                 // ancho del recuadro (0 a 1) según su alto
+const slotOf = i => LAYOUTS[cur.layout].slots[i];
+const vertical = () => $('fmt').value !== 'original'; // reencuadrado (vertical o cuadrado)
+const activeAt = t => keys.filter(k => k.t <= t + 0.01).pop() || keys[0];
+
+function clamp(b, a) {
+  b.h = Math.min(Math.max(b.h, 0.1), Math.min(1, vw / (a * vh)));
+  b.x = Math.min(Math.max(b.x, 0), 1 - boxW(b, a));
+  b.y = Math.min(Math.max(b.y, 0), 1 - b.h);
+}
+
+// Recuadros iniciales repartidos de izquierda a derecha (ej. Dividido: una persona a cada lado)
+function setLayout(k, id) {
+  const sl = LAYOUTS[id].slots;
+  k.layout = id;
+  k.boxes = sl.map((s, i) => {
+    const a = asp(s), b = { h: vw / (sl.length * a * vh), x: 0, y: 0 };
+    clamp(b, a);
+    b.x = (i + 0.5) / sl.length - boxW(b, a) / 2;
+    b.y = (1 - b.h) / 2;
+    clamp(b, a);
+    return b;
+  });
+}
+
+// Cambia el diseño de un plano sin perder cómo estaba acomodado cada diseño
+function switchLayout(k, id) {
+  if (k.layout === id) return;
+  (k.saved ??= {})[k.layout] = k.boxes.map(b => ({ ...b }));
+  if (k.saved[id]) { k.layout = id; k.boxes = k.saved[id].map(b => ({ ...b })); }
+  else setLayout(k, id);
+}
+
+// Cada clip arranca con su propio plano: así lo que acomodás en un clip no cambia a los demás
+function ensureClipKeys() {
+  if (!keys.length) return;
+  let added = false;
+  for (const c of clips) {
+    if (keys.some(k => Math.abs(k.t - c.start) < 0.02)) continue;
+    const src = activeAt(c.start);
+    keys.push({ t: +c.start.toFixed(2), layout: src.layout, boxes: src.boxes.map(b => ({ ...b })), who: src.who, take: src.take });
+    added = true;
+  }
+  if (added) { keys.sort((a, b) => a.t - b.t); cur = null; }
+}
+
+// Dibuja un fotograma con el encuadre de la posición k. Se usa igual en la vista previa y al exportar.
+const tiny = document.createElement('canvas'); tiny.width = 27; tiny.height = 48;
+const tinyCtx = tiny.getContext('2d');
+function draw(g, v, k, t = v.currentTime) {
+  drawBase(g, v, k, t);
+  const e = endAlpha(t);
+  if (vertical() && e < 1) { caption(g, t, k); clipTitle(g, t); }
+  if (e) endCard(g, e); else drawLogo(g);
+}
+// ---------- Placa final: logo grande y un texto en los últimos segundos del clip ----------
+// Cuánto aparece la placa en el momento t (0 = nada, 1 = completa), según lo que falta para que termine el clip
+function endAlpha(t) {
+  if (!$('endOn').checked || (!logoImg && !$('endText').value.trim())) return 0;
+  if (exporting ? exportHook : hookUntil != null) return 0; // durante el gancho no
+  const inC = x => x && parts(x).some(([a, b]) => t >= a - 0.01 && t <= b + 0.05);
+  const c = inC(clips[sel]) ? clips[sel] : clips.find(inC);
+  if (!c) return 0;
+  let rem = 0;
+  for (const [a, b] of parts(c)) if (b > t) rem += b - Math.max(a, t);
+  const D = +$('endSec').value;
+  return rem > D ? 0 : Math.min(1, (D - rem) / 0.4);
+}
+function endCard(g, al) {
+  const W = g.canvas.width, H = g.canvas.height, text = $('endText').value.trim(), s = 0.85 + 0.15 * ease(al);
+  g.save();
+  g.fillStyle = `rgba(0,0,0,${0.72 * al})`; g.fillRect(0, 0, W, H);
+  g.globalAlpha = al;
+  let y = H * (text ? 0.42 : 0.5);
+  if (logoImg) {
+    let w = W * 0.45 * s, h = w * logoImg.height / logoImg.width;
+    if (h > H * 0.28) { w *= H * 0.28 / h; h = H * 0.28; }
+    g.drawImage(logoImg, (W - w) / 2, y - h / 2, w, h);
+    y += h / 2 + W * 0.12;
+  } else y = H * 0.5;
+  if (text) { // en renglones; las palabras con @ o # en el color destacado
+    const fs = W * 0.065;
+    g.font = `900 ${fs}px Montserrat, "Segoe UI", sans-serif`;
+    g.textAlign = 'left'; g.textBaseline = 'middle';
+    const rows = [[]];
+    for (const w of text.split(/\s+/)) {
+      const row = rows.at(-1);
+      if (row.length && g.measureText([...row, w].join(' ')).width > W * 0.84) rows.push([w]); else row.push(w);
+    }
+    const sp = g.measureText(' ').width;
+    rows.forEach((row, r) => {
+      const ry = y + r * fs * 1.25 + (1 - ease(al)) * fs * 0.6;
+      let x = (W - g.measureText(row.join(' ')).width) / 2;
+      for (const w of row) {
+        g.lineJoin = 'round'; g.lineWidth = fs * 0.16; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeText(w, x, ry);
+        g.fillStyle = /^[@#]/.test(w) ? (hiColor() || '#ffd400') : '#fff'; g.fillText(w, x, ry);
+        x += g.measureText(w).width + sp;
+      }
+    });
+  }
+  g.restore();
+}
+
+
+// Logo en una esquina, guardado en el navegador (achicado a 400 px)
+let logoImg = null;
+function loadLogo(url) { const im = new Image(); im.onload = () => { logoImg = im; dirty = true; }; im.src = url; }
+try { const u = localStorage.getItem('clipcut.logo'); if (u) loadLogo(u); } catch {}
+function drawLogo(g) {
+  if (!logoImg || !$('logoOn').checked) return;
+  const W = g.canvas.width, H = g.canvas.height, w = W * $('logoSize').value / 100, h = w * logoImg.height / logoImg.width, m = W * 0.045;
+  const pos = $('logoPos').value;
+  g.save(); g.globalAlpha = $('logoAlpha').value / 100;
+  g.drawImage(logoImg, pos.endsWith('der') ? W - w - m : m, pos.startsWith('abajo') ? H - h - m * 2.5 : m * 1.3, w, h);
+  g.restore();
+}
+// ---------- Zoom automático: acercamiento suave cuando la voz sube de energía ----------
+const ZOOM = { suave: 0.08, marcado: 0.16 };
+let zoomSegs = [], zoomFor = null;
+function zoomPeaks(rms) {
+  const win = 10, sm = new Float32Array(rms.length); // promedio del último medio segundo
+  let s = 0;
+  for (let i = 0; i < rms.length; i++) { s += rms[i] - (i >= win ? rms[i - win] : 0); sm[i] = s / win; }
+  const thr = Float32Array.from(sm).sort()[Math.floor(0.85 * (sm.length - 1))];
+  const out = [];
+  for (let i = 0, next = 0; i < sm.length; i++) {
+    const t = i * HOP;
+    if (t >= next && sm[i] > thr) { out.push([t - 0.3, t + 2.5]); next = t + 5.5; } // dura 2,8 s y deja al menos 3 s sin zoom
+  }
+  return out;
+}
+function keyZooms(c) {
+  const out = [];
+  for (const l of clipLines(c)) {
+    const words = String(l.text || '').split(/\s+/).filter(Boolean);
+    if (!words[l.key]) continue;
+    const s = wordTimes(l.a, l.b, words)[l.key][0];
+    if (!out.length || s - out.at(-1)[0] > 4.5) out.push([s - 0.25, s + 2]);
+  }
+  return out;
+}
+function zoomAt(t) {
+  const amt = ZOOM[$('zoom').value];
+  if (!amt) return 1;
+  const c = clips.find(x => t >= x.start && t < x.end), kz = c ? keyZooms(c) : [];
+  if (!kz.length && !rmsCache) return 1;
+  if (!kz.length && zoomFor !== rmsCache) { zoomSegs = zoomPeaks(rmsCache); zoomFor = rmsCache; }
+  const s = (kz.length ? kz : zoomSegs).find(([a, b]) => t >= a && t < b);
+  return s ? 1 + amt * ease(Math.min((t - s[0]) / 0.3, (s[1] - t) / 0.4)) : 1;
+}
+
+function drawBase(g, v, k, t) {
+  const W = g.canvas.width, H = g.canvas.height, z = zoomAt(t);
+  const src = (x, y, w, h) => [x + (w - w / z) / 2, y + (h - h / z) / 2, w / z, h / z]; // el recorte, achicado hacia su centro
+  if (!vertical()) return g.drawImage(v, ...src(0, 0, vw, vh), 0, 0, W, H);
+  if (k.layout === 'centrado') {
+    const sw = Math.min(vw, vh * W / H);          // fondo: el video achicado y estirado = desenfoque barato
+    tinyCtx.drawImage(v, (vw - sw) / 2, 0, sw, vh, 0, 0, 27, 48);
+    g.drawImage(tiny, 0, 0, W, H);
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, 0, W, H);
+    const h = W * vh / vw;
+    return g.drawImage(v, ...src(0, 0, vw, vh), 0, (H - h) / 2, W, h);
+  }
+  LAYOUTS[k.layout].slots.forEach((s, i) => {
+    const b = k.boxes[i];
+    g.drawImage(v, ...src(b.x * vw, b.y * vh, boxW(b, asp(s)) * vw, b.h * vh), s[0] * W, s[1] * H, s[2] * W, s[3] * H);
+  });
+}
+
+function place(el, b, a) {
+  dirty = true;
+  Object.assign(el.style, { left: b.x * 100 + '%', top: b.y * 100 + '%', width: boxW(b, a) * 100 + '%', height: b.h * 100 + '%' });
+}
+
+function renderOverlay() {
+  dirty = true;
+  const L = LAYOUTS[cur.layout];
+  $('ov').hidden = !vertical() || step !== 3;
+  $('ov').replaceChildren(...cur.boxes.map((b, i) => {
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'box'; el.dataset.i = i; el.textContent = L.labels[i];
+    el.setAttribute('aria-label', `Recuadro ${L.labels[i]}: flechas para mover, + y − para el tamaño`);
+    const h = document.createElement('span'); h.className = 'handle'; h.setAttribute('aria-hidden', 'true');
+    el.append(h);
+    place(el, b, asp(L.slots[i]));
+    return el;
+  }));
+  document.querySelectorAll('[data-layout]').forEach(x => {
+    x.setAttribute('aria-pressed', x.dataset.layout === cur.layout);
+    x.disabled = !vertical();
+  });
+  $('addKey').disabled = $('saveTake').disabled = !vertical();
+  renderTakes();
+  const sc = clips[sel];
+  $('keys').replaceChildren(...keys.map((k, i) => [k, i]).filter(([k, i]) => !sc || (k.t < sc.end && (keys[i + 1]?.t ?? duration) > sc.start)).map(([k, i]) => {
+    const li = document.createElement('li');
+    li.setAttribute('aria-current', k === cur);
+    li.append(btn(`${takeOf(k) ? takeOf(k).name + ', ' : ''}${LAYOUTS[k.layout].name}${typeof k.who === 'number' ? `, persona ${k.who + 1}` : ''}, desde ${fmt(k.t)}`, () => { playing = null; player.currentTime = k.t; }));
+    if (i && !clips.some(c => Math.abs(c.start - k.t) < 0.02)) li.append(btn('Quitar', () => { keys.splice(i, 1); sync(true); }, `Quitar plano ${i + 1}`));
+    return li;
+  }));
+  renderTimeline();
+}
+
+function sync(force) {
+  const k = activeAt(player.currentTime);
+  if (force || k !== cur) { cur = k; renderOverlay(); }
+}
+
+// Mover y redimensionar con mouse o dedo
+$('ov').onpointerdown = e => {
+  const el = e.target.closest('.box');
+  if (!el) return;
+  const i = +el.dataset.i, b = cur.boxes[i], a = asp(slotOf(i)), r = $('ov').getBoundingClientRect();
+  const resize = e.target.classList.contains('handle'), x0 = e.clientX, y0 = e.clientY, s = { ...b };
+  el.setPointerCapture(e.pointerId);
+  el.onpointermove = m => {
+    const dx = (m.clientX - x0) / r.width, dy = (m.clientY - y0) / r.height;
+    if (resize) b.h = s.h + dy; else { b.x = s.x + dx; b.y = s.y + dy; }
+    clamp(b, a); place(el, b, a);
+  };
+  el.onpointerup = el.onpointercancel = () => { el.onpointermove = null; takeEdited(); };
+};
+
+// Mover y redimensionar con teclado
+$('ov').onkeydown = e => {
+  const el = e.target.closest('.box');
+  if (!el) return;
+  const i = +el.dataset.i, b = cur.boxes[i], a = asp(slotOf(i)), st = e.shiftKey ? 0.05 : 0.01;
+  const m = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, -st], ArrowDown: [0, st] }[e.key];
+  if (m) { b.x += m[0]; b.y += m[1]; }
+  else if (e.key === '+' || e.key === '=') b.h += st;
+  else if (e.key === '-') b.h -= st;
+  else return;
+  e.preventDefault(); clamp(b, a); place(el, b, a); takeEdited();
+};
+
+document.querySelectorAll('[data-layout]').forEach(x => {
+  x.onclick = () => { if (cur.layout !== x.dataset.layout) delete cur.take; switchLayout(cur, x.dataset.layout); sync(true); };
+});
+
+// ---------- Tomas guardadas: encuadres con nombre para reusar ----------
+let takes = [];
+const takeOf = k => k && takes.find(x => x.id === k.take);
+function takeThumb(tk, src = player) {
+  const c = document.createElement('canvas');
+  c.width = 54; c.height = Math.round(54 * OUT[1] / OUT[0]);
+  try { drawBase(c.getContext('2d'), src, tk, -1); return c.toDataURL('image/jpeg', 0.7); } catch { return ''; }
+}
+function renderTakes() {
+  const img = tk => Object.assign(new Image(), { src: tk.thumb || 'data:,', alt: '' });
+  $('takeBar').hidden = !takes.length;
+  $('takeBar').replaceChildren(...takes.map((tk, i) => {
+    const b = btn('', () => useTake(tk), `Usar la toma ${tk.name}${i < 9 ? `, tecla ${i + 1}` : ''}`);
+    b.className = 'take'; b.setAttribute('aria-pressed', cur?.take === tk.id);
+    b.replaceChildren(img(tk), Object.assign(document.createElement('span'), { textContent: tk.name }));
+    if (i < 9) b.append(Object.assign(document.createElement('kbd'), { textContent: i + 1 }));
+    return b;
+  }));
+  // la lista del panel se rehace solo si cambió la cantidad, así no se pierde el foco mientras escribís un nombre
+  if ($('takeList').children.length === takes.length) {
+    [...$('takeList').children].forEach((li, i) => { li.querySelector('img').src = takes[i].thumb || 'data:,'; });
+    return;
+  }
+  $('takeList').replaceChildren(...takes.map(tk => {
+    const li = document.createElement('li');
+    const name = Object.assign(document.createElement('input'), { type: 'text', value: tk.name, maxLength: 24 });
+    name.setAttribute('aria-label', 'Nombre de la toma');
+    name.oninput = () => { tk.name = name.value.trim() || 'Toma'; renderTakes(); renderTimeline(); };
+    li.append(img(tk), name, btn('Borrar', () => {
+      takes = takes.filter(x => x !== tk);
+      keys.forEach(k => { if (k.take === tk.id) delete k.take; }); // los planos quedan como estaban
+      sync(true); renderTakes();
+    }, `Borrar la toma ${tk.name}`));
+    return li;
+  }));
+}
+// En pausa cambia el plano actual; reproduciendo, corta en este momento
+function useTake(tk) {
+  if (!vertical() || !cur) return;
+  const t = +player.currentTime.toFixed(2);
+  let k = cur;
+  if (!player.paused && t - cur.t > 0.4) { k = { t }; keys.push(k); keys.sort((a, b) => a.t - b.t); }
+  k.take = tk.id; k.layout = tk.layout; k.boxes = tk.boxes.map(b => ({ ...b })); delete k.who;
+  sync(true);
+}
+// Reacomodar un plano unido a una toma actualiza la toma y todos sus planos
+function takeEdited() {
+  const tk = takeOf(cur);
+  if (!tk) return;
+  tk.layout = cur.layout; tk.boxes = cur.boxes.map(b => ({ ...b })); tk.thumb = takeThumb(tk);
+  for (const k of keys) if (k.take === tk.id && k !== cur) { k.layout = tk.layout; k.boxes = tk.boxes.map(b => ({ ...b })); }
+  renderTakes();
+}
+$('saveTake').onclick = () => {
+  if (!cur || !vertical()) return say('Las tomas son para los formatos vertical y cuadrado.');
+  let n = takes.length + 1;
+  while (takes.some(x => x.name === `Toma ${n}`)) n++;
+  const tk = { id: Date.now().toString(36), name: `Toma ${n}`, layout: cur.layout, boxes: cur.boxes.map(b => ({ ...b })) };
+  tk.thumb = takeThumb(tk);
+  takes.push(tk); cur.take = tk.id;
+  sync(true); renderTakes();
+  const inp = $('takeList').lastElementChild?.querySelector('input');
+  inp?.focus(); inp?.select();
+  say(`Guardaste "${tk.name}". Escribile un nombre, por ejemplo Invitado. Para usarla, tocala debajo del video o apretá ${takes.length < 10 ? 'el ' + takes.length : 'sobre ella'}.`);
+};
+
+$('addKey').onclick = () => {
+  const t = +player.currentTime.toFixed(1);
+  if (keys.some(k => Math.abs(k.t - t) < 0.05)) return say('Ya hay un cambio de plano en este momento: cambiale el diseño directamente.');
+  keys.push({ t, layout: cur.layout, boxes: cur.boxes.map(b => ({ ...b })), take: cur.take });
+  keys.sort((a, b) => a.t - b.t);
+  sync(true);
+  say(`Plano nuevo en ${fmt(t)}. Elegí su diseño y acomodá los recuadros.`);
+};
+
+$('subsOn').onchange = () => { dirty = true; };
+try { $('asrQ').value = localStorage.getItem('clipcut.voz') || 'small'; } catch {}
+$('asrQ').onchange = () => { try { localStorage.setItem('clipcut.voz', $('asrQ').value); } catch {} };
+try { $('outQ').value = localStorage.getItem('clipcut.calidad') || 'high'; } catch {}
+$('outQ').onchange = () => { try { localStorage.setItem('clipcut.calidad', $('outQ').value); } catch {} outInfo(); };
+$('fmt').addEventListener('change', outInfo);
+$('fmt').onchange = () => {
+  const pv = $('preview'), sq = $('fmt').value === 'cuadrado';
+  OUT = sq ? [1080, 1080] : [1080, 1920];
+  // los recuadros se ajustan a la nueva proporción
+  for (const k of keys) {
+    k.boxes.forEach((b, i) => clamp(b, asp(LAYOUTS[k.layout].slots[i])));
+    for (const [id, bs] of Object.entries(k.saved || {})) bs.forEach((b, i) => clamp(b, asp(LAYOUTS[id].slots[i])));
+  }
+  for (const tk of takes) { tk.boxes.forEach((b, i) => clamp(b, asp(LAYOUTS[tk.layout].slots[i]))); tk.thumb = takeThumb(tk); }
+  [pv.width, pv.height] = !vertical() ? [640, Math.round(640 * vh / vw)] : sq ? [480, 480] : [360, 640];
+  outInfo();
+  sync(true);
+};
+
+// Vista previa en vivo
+const pctx = $('preview').getContext('2d');
+let dirty = true, lastT = -1, hookUntil = null, exporting = false, exportHook = false;
+// Arranca el clip desde el principio: si tiene gancho, primero lo muestra
+function fromTop(c) {
+  hookUntil = c.hook ? c.hook[1] : null;
+  player.currentTime = c.hook ? c.hook[0] : parts(c)[0][0];
+}
+let drawErr = '';
+(function loop() {
+  requestAnimationFrame(loop); // se pide el próximo cuadro primero: si algo falla al dibujar, la vista previa sigue
+  if (keys.length && player.readyState >= 2) try {
+    const t = player.currentTime;
+    const c = clips[sel];
+    if (c && hookUntil != null && !player.paused && t >= hookUntil - 0.03) { hookUntil = null; player.currentTime = parts(c)[0][0]; } // terminó el gancho: arranca el clip
+    else if (c && step > 1 && !player.paused && hookUntil == null && t >= c.start - 0.05) {
+      const ps = parts(c), k = ps.findIndex(([, b]) => t < b - 0.02);
+      if (k < 0) { player.pause(); player.currentTime = c.end; }      // terminó el clip: se frena
+      else if (t < ps[k][0] - 0.05) player.currentTime = ps[k][0];   // saltea el silencio
+    }
+    if (dirty || t !== lastT) { // en pausa no gasta nada
+      sync(); draw(pctx, player, cur); lastT = t; dirty = false;
+      if (sel >= 0) $('tlHead').style.left = pct(t);
+    }
+  } catch (e) {
+    dirty = false;
+    if (drawErr !== e.message) { drawErr = e.message; console.error(e); say(`La vista previa tuvo un problema (${e.message}). Si se repite, mandame este mensaje.`); }
+  }
+})();
+
+// ---------- Carga y reproducción ----------
+function load(f) {
+  if (!f) return;
+  if (!f.type.startsWith('video/')) return say('El archivo elegido no es un video.');
+  if (f.size > MAX_MB * 2 ** 20) return say(`El video supera el máximo de ${MAX_MB} MB.`);
+  file = f; rmsCache = null;
+  if (url) URL.revokeObjectURL(url);
+  url = URL.createObjectURL(f);
+  name = f.name.replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, '_') || 'video';
+  clips = []; scenes = []; lines = []; seen = []; takes = []; transcript = transcriptQ = audioCache = null; bestLabel(); sel = -1; clipsGen++; render();
+  player.src = url;
+  say('Cargando video…');
+}
+$('file').onchange = e => load(e.target.files[0]);
+const drop = $('drop');
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); load(e.dataTransfer.files[0]); };
+player.onerror = () => say('Tu navegador no puede reproducir este formato. Probá con MP4 (H.264) o WebM.');
+player.onloadedmetadata = async () => {
+  if (!isFinite(player.duration)) {
+    say('Calculando la duración del video…');
+    player.currentTime = 1e101;
+    await Promise.race([once(player, 'durationchange'), new Promise(r => setTimeout(r, 8000))]);
+    if (!isFinite(player.duration)) return say('No se pudo leer la duración del video. Probá exportarlo de nuevo desde el celular o la cámara.');
+    player.currentTime = 0;
+  }
+  if (!player.videoWidth) return say('El archivo no tiene imagen de video.');
+  duration = player.duration; vw = player.videoWidth; vh = player.videoHeight;
+  $('stage').style.setProperty('--ar', vw / vh);
+  $('seek').max = duration;
+  const k = { t: 0 }; setLayout(k, 'vertical'); keys = [k];
+  $('infoName').textContent = file.name;
+  $('infoDur').textContent = fmt(duration);
+  $('infoRes').textContent = `${vw}×${vh}`;
+  $('infoSize').textContent = `${(file.size / 2 ** 20).toFixed(0)} MB`;
+  $('info').hidden = false;
+  tabs.forEach(t => { t.disabled = false; });
+  $('fmt').onchange();
+  setTimeout(() => { if (!transcript && !busy) warmAsr(); }, 1500);
+  say(restoreProject() ? `Recuperamos tu trabajo con este video: ${clips.length === 1 ? 'un clip' : clips.length + ' clips'}${transcript ? ', con la transcripción' : ''}.` : 'Video cargado.');
+};
+
+// ---------- Proyecto guardado ----------
+// Todo lo que armás con un video se guarda solo en el navegador. Si volvés a abrir el mismo video, sigue donde lo dejaste.
+// Se guardan los últimos 5 proyectos (el video en sí no se guarda: hay que volver a elegirlo).
+const projKey = () => file && `clipcut.p.${file.name}.${file.size}`;
+let lastSaved = '';
+function projectState() {
+  return { v: 1, fmt: $('fmt').value, sel, seen, transcript, transcriptQ, lines, takes,
+    clips: clips.map(({ start, end, parts, orig, title, score, thumb, whole, hook, post, reel }) => ({ start, end, parts, orig, title, score, thumb, whole, hook, post, reel })),
+    keys: keys.map(({ t, layout, boxes, who, saved, take }) => ({ t, layout, boxes, who, saved, take })) };
+}
+function saveProject() {
+  const key = projKey();
+  if (!key || !duration || !keys.length) return;
+  let json = JSON.stringify(projectState());
+  if (json === lastSaved) return;
+  try {
+    const idx = JSON.parse(localStorage.getItem('clipcut.proyectos') || '[]').filter(k => k !== key);
+    idx.unshift(key);
+    idx.splice(5).forEach(k => localStorage.removeItem(k)); // deja solo los 5 más recientes
+    try { localStorage.setItem(key, json); }
+    catch { // sin lugar: se guarda sin miniaturas
+      const st = projectState(); st.clips.forEach(c => delete c.thumb); json = JSON.stringify(st);
+      localStorage.setItem(key, json);
+    }
+    localStorage.setItem('clipcut.proyectos', JSON.stringify(idx));
+    lastSaved = json;
+    $('resetProj').hidden = false;
+  } catch { /* el navegador no deja guardar: se sigue trabajando igual */ }
+}
+setInterval(saveProject, 2000);
+addEventListener('beforeunload', saveProject);
+
+function restoreProject() {
+  let st;
+  try { st = JSON.parse(localStorage.getItem(projKey()) || 'null'); } catch { st = null; }
+  if (!st || st.v !== 1) { $('resetProj').hidden = true; return false; }
+  if ($('fmt').querySelector(`option[value="${st.fmt}"]`)) { $('fmt').value = st.fmt; $('fmt').onchange(); }
+  clips = st.clips || []; keys = st.keys?.length ? st.keys : keys; lines = st.lines || [];
+  transcript = st.transcript || null; transcriptQ = st.transcriptQ || null; seen = st.seen || []; takes = st.takes || [];
+  sel = Math.min(st.sel ?? 0, clips.length - 1); cur = null; clipsGen++;
+  lastSaved = JSON.stringify(projectState());
+  bestLabel(); render(); renderSubs();
+  if (clips[sel]) select(sel);
+  $('resetProj').hidden = false;
+  loudness().then(() => { dirty = true; }, () => {}); // zoom y tiempo de cada palabra
+  return true;
+}
+
+$('resetProj').onclick = () => {
+  try { localStorage.removeItem(projKey()); } catch {}
+  clips = []; lines = []; transcript = transcriptQ = null; seen = []; takes = []; sel = -1; clipsGen++;
+  const k = { t: 0 }; setLayout(k, 'vertical'); keys = [k]; cur = null;
+  lastSaved = ''; bestLabel(); render(); renderSubs();
+  $('resetProj').hidden = true;
+  say('Listo: empezás de cero con este video.');
+};
+
+$('play').onclick = () => {
+  if (!player.paused) return player.pause();
+  const c = clips[sel];
+  if (!c || step === 1) return player.play();
+  // con un clip elegido reproduce solo el clip, salteando silencios, y se pausa al terminar
+  const ps = parts(c), t = player.currentTime;
+  let k = ps.findIndex(([, b]) => t < b - 0.1);
+  if (k < 0 || t < ps[0][0] - 0.05) { k = 0; fromTop(c); }
+  else if (t < ps[k][0]) player.currentTime = ps[k][0];
+  player.play().then(() => { playing = { ps, k }; }).catch(() => {});
+};
+// Atajos: 1 a 9 usan las tomas guardadas (en Encuadrar); espacio reproduce o pausa; flechas, 2 segundos atrás o adelante (no actúan mientras escribís o estás sobre un botón)
+addEventListener('keydown', e => {
+  if (step === 3 && /^[1-9]$/.test(e.key) && takes[e.key - 1] && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest('input, select, textarea, [contenteditable]')) {
+    e.preventDefault(); return useTake(takes[e.key - 1]);
+  }
+  if (step === 2 && handMode() && /^[io]$/i.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest('input, select, textarea, [contenteditable]')) {
+    e.preventDefault(); return $(e.key.toLowerCase() === 'i' ? 'markIn' : 'markOut').click();
+  }
+  if (!duration || step === 1 || e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, select, textarea, button, summary, [contenteditable], #ov, #tlShots, #clipbar')) return;
+  if (e.key === ' ') { e.preventDefault(); $('play').click(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); player.currentTime = Math.min(duration, Math.max(0, player.currentTime + (e.key === 'ArrowLeft' ? -2 : 2))); }
+});
+player.addEventListener('play', () => { $('play').textContent = 'Pausar'; });
+player.addEventListener('pause', () => { $('play').textContent = 'Reproducir'; });
+player.addEventListener('timeupdate', () => {
+  $('seek').value = player.currentTime;
+  $('time').textContent = fmt(player.currentTime);
+});
+$('seek').oninput = e => { playing = null; player.currentTime = e.target.valueAsNumber; };
+
+// ---------- Recorte manual ----------
+// ---------- A mano: mirar el video completo, buscar por lo que se dice y marcar inicio y final ----------
+let markA = null, markB = null;
+const handMode = () => !$('whatHand').hidden;
+// Entrar en "A mano": se suelta el clip elegido, así el video se mira y se reproduce entero
+function enterHand() {
+  sel = -1; playing = null; hookUntil = null; render();
+  renderTs(); renderMarks();
+}
+function renderMarks() {
+  const ok = markA != null && markB != null && Math.abs(markB - markA) >= 3;
+  $('markInfo').textContent = markA == null && markB == null ? 'Poné el video donde querés que empiece y tocá Marcar inicio.'
+    : `Inicio ${markA == null ? '—' : fmt(markA)} · Final ${markB == null ? '—' : fmt(markB)}${ok ? ` · ${Math.round(Math.abs(markB - markA))} s` : ''}`;
+  $('handAdd').disabled = !ok;
+}
+$('markIn').onclick = () => { markA = player.currentTime; if (markB != null && markB <= markA) markB = null; renderMarks(); };
+$('markOut').onclick = () => { markB = player.currentTime; if (markA != null && markA >= markB) markA = null; renderMarks(); };
+// Lo que se dice en el episodio, para buscar y saltar
+function renderTs() {
+  const has = !!transcript;
+  $('tsRead').hidden = has; $('tsQ').disabled = !has;
+  if (!has) return $('tsList').replaceChildren();
+  const q = $('tsQ').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const sents = sentencesOf(transcript).filter(x => !q || x.text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q));
+  $('tsList').replaceChildren(...sents.slice(0, 300).map(x => {
+    const li = document.createElement('li');
+    const b = btn('', () => { sel = -1; render(); player.currentTime = x.a; player.play().catch(() => {}); }, `Ir a ${fmt(x.a)}: ${x.text}`);
+    b.append(Object.assign(document.createElement('time'), { textContent: fmt(x.a) }), Object.assign(document.createElement('span'), { textContent: x.text }));
+    li.append(b);
+    return li;
+  }));
+  if (!sents.length) $('tsList').replaceChildren(Object.assign(document.createElement('li'), { className: 'hint', textContent: 'No aparece. Probá con otra palabra.' }));
+}
+$('tsQ').oninput = renderTs;
+$('tsRead').onclick = () => guard(async () => {
+  busyUI(true);
+  try { await ensureTranscript(); } finally { busyUI(false); }
+  renderTs();
+  say(cancel ? 'Lectura cancelada.' : 'Listo: ya podés buscar en lo que se dice. Queda guardado para este video.');
+});
+$('handAdd').onclick = () => guard(async () => {
+  let a = Math.min(markA, markB), b = Math.max(markA, markB);
+  const cut = $('cutSil').checked;
+  busyUI(true);
+  let c;
+  try {
+    if ($('snapSent').checked && transcript) { // empieza y termina en una oración completa (si hay una cerca)
+      const ss = sentencesOf(transcript);
+      const st = ss.filter(x => Math.abs(x.a - a) < 4).sort((x, y) => Math.abs(x.a - a) - Math.abs(y.a - a))[0];
+      const en = ss.filter(x => Math.abs(x.b - b) < 4).sort((x, y) => Math.abs(x.b - b) - Math.abs(y.b - b))[0];
+      if (st) a = Math.max(0, st.a - 0.1);
+      if (en && en.b > a + 3) b = Math.min(duration, en.b + 0.3);
+    }
+    if (cut && !lastPh.length) findMoments(await loudness(), { min: 15, max: 30, n: 1, sens: $('sens').value / 100, cut }); // frases, para quitar silencios
+    c = { start: +a.toFixed(2), end: +b.toFixed(2) };
+    c.parts = partsFor(c.start, c.end, cut);
+    say('Creando los subtítulos del clip…');
+    const ch = clipChunks(c, modelId()) || await transcribeClip(c);
+    if (!cancel) { lines = lines.filter(l => !clipLines(c).includes(l)); addLines(ch); }
+  } finally { busyUI(false); }
+  if (cancel) return say('Cancelado.');
+  const v = await hiddenVideo();
+  await seek(v, Math.min(c.start + 1, c.end)); c.thumb = snap(v); free(v);
+  clips.push(c); clips.sort((x, y) => x.start - y.start); clipsGen++;
+  markA = markB = null; renderMarks();
+  select(clips.indexOf(c));
+  const fixed = await autoFix([c]);
+  say(`Clip agregado a la tira (${Math.round(clipLen(c))} s), con subtítulos.${fixed} Ponele título en Textos y marca, o marcá otro.`);
+});
+
+// ---------- Mejores momentos (por el audio) ----------
+const HOP = 0.05; // una medición de volumen cada 50 ms
+
+// Lee el audio del video de a pedazos (sin cargar el archivo entero en memoria, que en un episodio largo
+// pesa más de 1 GB y cerraba la pestaña) y lo guarda a 16 kHz en mono: sirve para medir la voz y para Whisper.
+let audioCache = null, audioFor = null, audioJob = null;
+async function decodeAudio() {
+  if (audioFor === file && audioCache) return audioCache;
+  if (audioFor === file && audioJob) return audioJob;
+  audioFor = file;
+  audioJob = (async () => {
+    let pcm;
+    try { pcm = await decodeStreaming(); }
+    catch (e) {
+      console.warn('Lectura por partes no disponible:', e);
+      if (file.size > 400 * 2 ** 20) throw new Error('No se pudo leer el audio de este video. Actualizá Chrome o Edge, o probá con un video más liviano.');
+      pcm = await decodeWhole(); // método anterior, solo para videos chicos
+    }
+    const hop = Math.round(16000 * HOP), rms = new Float32Array(Math.floor(pcm.length / hop));
+    for (let i = 0; i < rms.length; i++) {
+      let s = 0;
+      for (let j = i * hop; j < (i + 1) * hop; j++) s += pcm[j] * pcm[j];
+      rms[i] = Math.sqrt(s / hop) / 32768;
+    }
+    return audioCache = { pcm, rms };
+  })();
+  try { return await audioJob; }
+  catch (e) { audioFor = null; throw e; }
+  finally { audioJob = null; }
+}
+async function decodeStreaming() {
+  const M = await mediabunny();
+  const input = new M.Input({ source: new M.BlobSource(file), formats: M.ALL_FORMATS });
+  const at = await input.getPrimaryAudioTrack();
+  if (!at) throw new Error('El video no tiene sonido.');
+  const out = new Int16Array(Math.ceil((duration || 1) * 16000) + 16000);
+  let buf = new Float32Array(0), mono = buf, idx = -1, sum = 0, cnt = 0, last = 0, k = 0;
+  for await (const s of new M.AudioSampleSink(at).samples()) {
+    if (cancel) { s.close(); throw new Error('Cancelado.'); }
+    const n = s.numberOfFrames, ch = s.numberOfChannels, sr = s.sampleRate, t0 = s.timestamp;
+    if (buf.length < n) buf = new Float32Array(n);
+    if (mono.length < n) mono = new Float32Array(n);
+    mono.fill(0, 0, n);
+    for (let c = 0; c < ch; c++) {
+      s.copyTo(buf, { planeIndex: c, format: 'f32-planar' });
+      for (let i = 0; i < n; i++) mono[i] += buf[i] / ch;
+    }
+    s.close();
+    // de la frecuencia original a 16 kHz: se promedian las muestras que caen en cada lugar
+    const step = 16000 / sr;
+    let pos = t0 * 16000;
+    for (let i = 0; i < n; i++, pos += step) {
+      const j = Math.floor(pos);
+      if (j !== idx) {
+        if (idx >= 0 && idx < out.length && cnt) out[idx] = Math.max(-32768, Math.min(32767, sum / cnt * 32767));
+        idx = j; sum = 0; cnt = 0;
+      }
+      sum += mono[i]; cnt++;
+    }
+    last = idx;
+    if (++k % 200 === 0) { say(`Leyendo el audio… ${Math.min(99, Math.round(t0 / (duration || 1) * 100))} %`); await new Promise(r => setTimeout(r)); } // deja respirar a la página
+  }
+  if (idx >= 0 && idx < out.length && cnt) out[idx] = Math.max(-32768, Math.min(32767, sum / cnt * 32767));
+  return out.subarray(0, Math.min(out.length, last + 1));
+}
+async function decodeWhole() {
+  let buf;
+  try { buf = await new OfflineAudioContext(1, 1, 16000).decodeAudioData(await file.arrayBuffer()); }
+  catch { throw new Error('No se pudo leer el audio del video. ¿Tiene sonido?'); }
+  const out = new Int16Array(buf.length), n = buf.numberOfChannels, chs = Array.from({ length: n }, (_, c) => buf.getChannelData(c));
+  for (let i = 0; i < out.length; i++) { let v = 0; for (const d of chs) v += d[i]; out[i] = Math.max(-32768, Math.min(32767, v / n * 32767)); }
+  return out;
+}
+async function loudness() {
+  if (rmsCache) return rmsCache;
+  return rmsCache = (await decodeAudio()).rms;
+}
+const pcm16 = async () => (await decodeAudio()).pcm;
+
+// Umbral de voz: entre el ruido de fondo y la voz fuerte, según la sensibilidad
+function voiceThr(rms, sens) {
+  const sorted = Float32Array.from(rms).sort(), pct = p => sorted[Math.floor(p * (sorted.length - 1))];
+  const floor = pct(0.1), loud = pct(0.95) || 1e-9;
+  return { thr: floor + (loud - floor) * sens, loud };
+}
+
+let lastPh = []; // frases detectadas en el audio (tramos con voz)
+// Tramos que ya se mostraron en este video, para que "Buscar otros" traiga momentos distintos
+let seen = [], transcript = null;
+const overlaps = (a, b, list) => list.some(([x, y]) => Math.min(b, y) - Math.max(a, x) > 2); // se pisan más de 2 s
+function bestLabel() {
+  $('best').textContent = seen.length ? 'Buscar otros clips distintos' : 'Buscar los mejores momentos';
+  $('resetSeen').hidden = !seen.length;
+}
+$('resetSeen').onclick = () => { seen = []; bestLabel(); say('La próxima búsqueda vuelve a empezar por los mejores momentos.'); };
+
+function findMoments(rms, { min, max, n, sens, cut, exclude = [] }) {
+  const { thr, loud } = voiceThr(rms, sens);
+
+  // Frases: tramos con voz separados por pausas de 0,35 s o más
+  const ph = [];
+  let s = -1, last = -1;
+  const close = () => {
+    if ((last - s + 1) * HOP >= 0.3) {
+      let sum = 0, sq = 0;
+      for (let i = s; i <= last; i++) { sum += rms[i]; sq += rms[i] ** 2; }
+      ph.push({ s: s * HOP, e: (last + 1) * HOP, sum, sq, cnt: last - s + 1 });
+    }
+    s = -1;
+  };
+  for (let i = 0; i < rms.length; i++) {
+    if (rms[i] > thr) { if (s < 0) s = i; last = i; }
+    else if (s >= 0 && (i - last) * HOP >= 0.35) close();
+  }
+  if (s >= 0) close();
+  lastPh = ph;
+
+  // Candidatos: grupos de frases seguidas que entran en la duración pedida
+  const gap = i => i < 0 || i >= ph.length ? 1.5 : ph[i + 1].s - ph[i].e;
+  const edge = g => Math.min(g, 1.5) / 1.5; // pausa larga = probable inicio o final de una idea
+  // Pausas "de fin de idea": las más largas del episodio (el 20 % más largo, nunca menos de medio segundo).
+  // El clip solo puede empezar después de una y terminar antes de otra; si no alcanzan, se afloja de a poco.
+  const gaps = ph.slice(1).map((p, k) => p.s - ph[k].e).sort((a, b) => a - b);
+  const gq = q => gaps.length ? gaps[Math.floor(q * (gaps.length - 1))] : 0;
+  const levels = [Math.max(0.5, gq(0.8)), Math.max(0.4, gq(0.6)), 0];
+  const cands = [];
+  for (let i = 0; i < ph.length; i++) {
+    const before = i ? gap(i - 1) : 9;
+    let speech = 0, sum = 0, sq = 0, cnt = 0;
+    for (let j = i; j < ph.length; j++) {
+      if (j > i && ph[j].s - ph[j - 1].e > 2) break; // una pausa larga corta la idea
+      speech += ph[j].e - ph[j].s; sum += ph[j].sum; sq += ph[j].sq; cnt += ph[j].cnt;
+      const span = ph[j].e - ph[i].s, dur = cut ? speech : span;
+      if (dur > max) break;
+      if (dur < min) continue;
+      const mean = sum / cnt, std = Math.sqrt(Math.max(sq / cnt - mean ** 2, 0));
+      const score = 0.4 * speech / span            // habla continua, pocos silencios
+                  + 0.25 * Math.min(mean / loud, 1) // energía de la voz
+                  + 0.15 * Math.min(std / mean, 1)  // variación: énfasis, risas, cambios de tono
+                  + 0.1 * edge(i ? gap(i - 1) : 1.5)
+                  + 0.1 * edge(j < ph.length - 1 ? gap(j) : 1.5);
+      const after = j < ph.length - 1 ? gap(j) : 9;
+      cands.push({ i, j, score, level: levels.findIndex(G => before >= G && after >= G) });
+    }
+  }
+
+  // Elige los mejores sin que se pisen: primero los que cortan en pausas largas, después el resto
+  const pad = 0.15, picked = [];
+  cands.sort((a, b) => a.level - b.level || b.score - a.score);
+  for (const c of cands) {
+    if (picked.length >= n) break;
+    const a = ph[c.i].s, b = ph[c.j].e;
+    if (picked.some(p => a < ph[p.j].e && b > ph[p.i].s) || overlaps(a, b, exclude)) continue;
+    picked.push(c);
+  }
+  return picked.sort((a, b) => a.i - b.i).map(c => {
+    const segs = [];
+    for (let k = c.i; k <= c.j; k++) {
+      const a = Math.max(ph[k].s - pad, 0), b = Math.min(ph[k].e + pad, duration), l = segs.at(-1);
+      if (cut && l && a - l[1] > 0.1) segs.push([a, b]);
+      else if (l) l[1] = b;
+      else segs.push([a, b]);
+    }
+    segs[0][0] = Math.max(segs[0][0] - 0.1, 0);
+    segs.at(-1)[1] = Math.min(segs.at(-1)[1] + 0.3, duration);
+    return { start: segs[0][0], end: segs.at(-1)[1], parts: segs, score: Math.round(c.score * 100) };
+  });
+}
+
+// Al buscar, los clips anteriores salen de la tira (así se ve que está trabajando).
+// Si se cancela o no encuentra nada, vuelven. Los resúmenes se quedan.
+let searching = false;
+$('best').onclick = () => guard(async () => {
+  const old = clips, oldSel = sel, keep = old.filter(c => c.reel);
+  searching = true; player.pause(); clips = keep; sel = -1; clipsGen++; render();
+  let ok = false;
+  try { ok = await searchClips(keep); }
+  finally {
+    searching = false;
+    if (!ok) { clips = old; sel = oldSel; clipsGen++; render(); if (clips[sel]) select(sel, false); }
+    else render();
+  }
+});
+async function searchClips(keep) {
+  const [min, max] = $('dur').value.split('-').map(Number), n = +$('n').value, cut = $('cutSil').checked, sens = $('sens').value / 100;
+  let found, tokensMsg = '';
+  busyUI(true);
+  try {
+    if (mode() === 'ia') {
+      found = await byContent(n, min, max, cut, sens, seen);
+      tokensMsg = $('status').textContent.startsWith('DeepSeek usó') ? ' ' + $('status').textContent : '';
+    } else {
+      say('Escuchando el audio del video… puede tardar un poco en videos largos.');
+      found = findMoments(await loudness(), { min, max, n, sens, cut, exclude: seen });
+      if (found.length && $('whisper').checked) {
+        // si la transcripción falla, igual quedan los clips elegidos por la voz
+        try { await refineClips(found, min, max, cut); }
+        catch (e) { tokensMsg = ` No se pudieron ajustar a oraciones completas: ${e.message}`; }
+      }
+    }
+  } finally { busyUI(false); }
+  if (cancel) { say('Búsqueda cancelada: volvieron los clips anteriores.'); return false; }
+  if (!found.length) { say(seen.length ? 'No quedan clips nuevos con esta duración. Probá otra duración o tocá "Volver a los mejores".' : 'No encontré tramos de habla de esa duración. Probá con otra duración o bajá la sensibilidad.'); return false; }
+  const v = await hiddenVideo();
+  for (const c of found) { await seek(v, Math.min(c.start + 1, c.end)); c.thumb = snap(v); }
+  free(v);
+  // modo por contenido: los subtítulos de los clips elegidos, con la calidad elegida
+  const need = found.filter(c => !fromTranscript(c.start, c.end, modelId()));
+  if (need.length && mode() === 'ia') {
+    busyUI(true);
+    try {
+      const all = await inParallel(need, c => transcribeClip(c), 'Subtítulos de los clips elegidos:');
+      if (!cancel) need.forEach((c, i) => { lines = lines.filter(l => !clipLines(c).includes(l)); addLines(all[i]); });
+    } catch (e) { tokensMsg += ` Los subtítulos no se pudieron crear: ${e.message}`; }
+    finally { busyUI(false); }
+  }
+  clips = found.concat(keep); clipsGen++;
+  seen.push(...found.map(c => [c.start, c.end])); bestLabel();
+  select(0);
+  const fixed = lines.length ? await autoFix(found) : '';
+  say(`Listo: ${found.length === 1 ? 'un clip' : found.length + ' clips'} en la tira, ordenados por tiempo.${tokensMsg}${fixed}`);
+  return true;
+}
+
+// ---------- Resumen del episodio: varios momentos que juntos cuentan de qué se trató ----------
+$('reelMake').onclick = () => guard(async () => {
+  if (!$('dsKey').value.trim()) return say('El resumen necesita tu clave de DeepSeek: cargala en Ajustes, arriba a la derecha.');
+  const target = +$('reelLen').value, cut = $('cutSil').checked;
+  let c, tokens = 0, segs = [];
+  busyUI(true);
+  try {
+    if (!lastPh.length) findMoments(await loudness(), { min: 15, max: 30, n: 1, sens: $('sens').value / 100, cut }); // frases, para quitar silencios
+    const sents = sentencesOf(await ensureTranscript());
+    if (cancel) return say('Resumen cancelado.');
+    if (sents.length < 6) throw new Error('El video es muy corto o no se entendió lo que se dice.');
+    say('DeepSeek está armando el resumen…');
+    const r = await callDeepSeek([
+      { role: 'system', content: 'Sos editor de Reels de un podcast en español. Armás resúmenes en video que cuentan de qué se trató un episodio en pocos segundos.' },
+      { role: 'user', content: `Armá un resumen en video de unos ${target} segundos de este episodio, eligiendo de 4 a 8 tramos de oraciones seguidas, en el orden en que aparecen. Que juntos cuenten la idea principal: un arranque que enganche, lo más importante del medio y un cierre claro. Cada tramo empieza al inicio de una oración y termina al final de otra, y se entiende al pegarlo con el anterior. Respondé solo con JSON así: {"titulo":"de 2 a 5 palabras","tramos":[{"desde":número de oración,"hasta":número de oración}]}\n\nOraciones del episodio (número, minuto, duración y texto):\n${sents.map((x, i) => `${i} [${fmt(x.a)}] (${Math.round(x.b - x.a)} s) ${x.text}`).join('\n')}` }
+    ]);
+    tokens = r.tokens || 0;
+    for (const x of Array.isArray(r.data.tramos) ? r.data.tramos : []) {
+      const d = Math.round(x.desde), h = Math.round(x.hasta);
+      if (!(d >= 0 && h < sents.length && d <= h)) continue;
+      const a = Math.max(0, sents[d].a - 0.1), b = Math.min(duration, sents[h].b + 0.25);
+      if (!segs.some(([p, q]) => a < q && b > p)) segs.push([a, b]);
+    }
+    segs.sort((x, y) => x[0] - y[0]);
+    // si se pasa mucho del largo pedido, saca los tramos más largos del medio
+    const len = () => segs.reduce((t, [a, b]) => t + b - a, 0);
+    while (segs.length > 3 && len() > target * 1.4) {
+      const mid = segs.slice(1, -1), i = 1 + mid.indexOf(mid.reduce((m, s) => s[1] - s[0] > m[1] - m[0] ? s : m));
+      segs.splice(i, 1);
+    }
+    if (segs.length < 2) throw new Error('DeepSeek no devolvió un resumen válido. Probá de nuevo.');
+    const ps = segs.flatMap(([a, b]) => partsFor(a, b, cut));
+    c = { start: ps[0][0], end: ps.at(-1)[1], parts: ps, title: String(r.data.titulo || 'Resumen').replace(/["«»]/g, '').trim().slice(0, 40), reel: true };
+    say('Creando los subtítulos del resumen…');
+    const ch = clipChunks(c, modelId()) || await transcribeClip(c);
+    if (cancel) return say('Resumen cancelado.');
+    lines = lines.filter(l => !clipLines(c).includes(l));
+    addLines(ch);
+  } finally { busyUI(false); }
+  const v = await hiddenVideo();
+  await seek(v, Math.min(c.start + 1, c.end)); c.thumb = snap(v); free(v);
+  clips.push(c); clipsGen++;
+  select(clips.length - 1);
+  const fixed = await autoFix([c]);
+  say(`Listo: resumen de ${Math.round(clipLen(c))} s con ${segs.length} momentos, al final de la tira.${tokens ? ` DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens.` : ''}${fixed}`);
+});
+
+// ---------- Seguir a quien habla (lectura de labios con MediaPipe de Google) ----------
+const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+let landmarker;
+
+async function faceModel() {
+  if (landmarker) return landmarker;
+  say('Descargando el detector de caras (solo la primera vez)…');
+  try {
+    const { FilesetResolver, FaceLandmarker } = await import(MP + '/vision_bundle.mjs');
+    const fs = await FilesetResolver.forVisionTasks(MP + '/wasm');
+    const make = delegate => FaceLandmarker.createFromOptions(fs, {
+      baseOptions: { modelAssetPath: FACE_MODEL, delegate }, runningMode: 'IMAGE', numFaces: 4
+    });
+    landmarker = await make('GPU').catch(() => make('CPU'));
+    return landmarker;
+  } catch {
+    throw new Error('No se pudo descargar el detector de caras. Revisá la conexión a internet.');
+  }
+}
+
+// En un plano abierto las caras son chicas y el detector no las ve: por eso se analiza
+// el cuadro en 3 partes cuadradas que se superponen (con un video vertical alcanza con una)
+const tile = Object.assign(document.createElement('canvas'), { width: 512, height: 512 });
+function detectFaces(fm, v) {
+  const faces = [], add = (lm, tx, ts) => {
+    const x = (tx + lm[1].x * ts) / vw;
+    if (faces.some(f => Math.abs(f.x - x) < 0.05)) return; // la misma cara vista en dos partes
+    faces.push({ x, y: lm[1].y, fh: Math.abs(lm[152].y - lm[10].y) || 1e-3, open: Math.abs(lm[14].y - lm[13].y) });
+  };
+  if (vw <= vh) { fm.detect(v).faceLandmarks.forEach(lm => add(lm, 0, vw)); return faces; }
+  const n = Math.ceil(vw / vh) + 1;
+  for (let i = 0; i < n; i++) {
+    const tx = i * (vw - vh) / (n - 1);
+    tile.getContext('2d').drawImage(v, tx, 0, vh, vh, 0, 0, 512, 512);
+    fm.detect(tile).faceLandmarks.forEach(lm => add(lm, tx, vh));
+  }
+  return faces;
+}
+
+// Arma una posición del recorte centrada en una persona (o en dos, con Dividido)
+function shot(t, who, people) {
+  const k = { t: +t.toFixed(2) };
+  setLayout(k, people.length > 1 ? 'dividido' : 'vertical');
+  k.boxes.forEach((b, i) => {
+    const a = asp(LAYOUTS[k.layout].slots[i]), p = people[i];
+    if (people.length > 1) b.h = p.fh * 3.2; // cabeza y hombros
+    clamp(b, a);
+    b.x = p.x - boxW(b, a) / 2;
+    b.y = p.y - b.h * 0.4;                   // la cara queda en el tercio de arriba
+    clamp(b, a);
+  });
+  k.who = who;
+  return k;
+}
+
+const follow = () => guard(async () => {
+  const gen = clipsGen;
+  const fm = await faceModel();
+  say('Escuchando el audio…');
+  const rms = await loudness(), { thr } = voiceThr(rms, $('sens').value / 100);
+  const voiced = t => rms[Math.floor(t / HOP)] > thr;
+  const ranges = (clips.length ? clips.flatMap(c => c.reel ? parts(c) : [[c.start, c.end]]) : [[0, duration]]).sort((a, b) => a[0] - b[0]);
+  const v = await hiddenVideo(), tracks = [], samples = [];
+  busyUI(true);
+
+  // 1. Cada 0,2 s: busca las caras, las sigue por su posición y mide cuánto abre la boca cada una
+  try {
+    await scan(v, ranges, 0.2, 3, (t, first, a) => {
+        const seen = {};
+        for (const { x, y, fh, open } of detectFaces(fm, v)) {
+          let tr = tracks.filter(k => !(k.id in seen)).sort((p, q) => Math.abs(p.x - x) - Math.abs(q.x - x))[0];
+          if (!tr || Math.abs(tr.x - x) > 0.12) tracks.push(tr = { id: tracks.length, x, y, fh, n: 0 });
+          tr.n++; tr.x += (x - tr.x) / tr.n; tr.y += (y - tr.y) / tr.n; tr.fh += (fh - tr.fh) / tr.n;
+          seen[tr.id] = open / fh;
+        }
+        samples.push({ t, seen, first, a });
+    }, 'Mirando quién habla');
+  } finally {
+    free(v);
+    busyUI(false);
+  }
+  if (cancel) return say('Análisis cancelado.');
+
+  if (!samples.length) throw new Error('No se pudo leer el video.');
+  const people = tracks.filter(k => k.n > samples.length * 0.1); // descarta caras que aparecen poco
+  if (!people.length) throw new Error('No encontré caras en el video.');
+  const most = [...people].sort((p, q) => q.n - p.n)[0];
+
+  // 2. Movimiento de labios: cuánto varía la apertura de la boca en ~1,5 s.
+  //    Tolera que una cara no se detecte en algunas imágenes (pasa con las caras de perfil).
+  let r = -1;
+  samples.forEach(x => { if (x.first) r++; x.r = r; });
+  const act = (i, id) => {
+    const xs = [];
+    for (let j = Math.max(i - 3, 0); j <= Math.min(i + 3, samples.length - 1); j++) {
+      const o = samples[j].seen[id];
+      if (samples[j].r === samples[i].r && o != null) xs.push(o);
+    }
+    if (xs.length < 2) return 0;
+    const m = xs.reduce((a, b) => a + b) / xs.length;
+    return Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length);
+  };
+
+  // 3. Decide el plano: quien mueve más los labios mientras hay voz; si son dos parejos, Dividido.
+  //    Cada plano dura al menos 2 s y el cambio se confirma después de 0,6 s, para que no salte con cada "ajá".
+  const out = [];
+  let cur, want0, since = 0, last = 0;
+  samples.forEach((s, i) => {
+    const r = people.map(k => ({ k, a: act(i, k.id) })).sort((p, q) => q.a - p.a);
+    let want = s.first ? undefined : cur, who = want;
+    if (voiced(s.t) && r[0].a > 0.008) {
+      const both = r[1] && r[1].a > 0.7 * r[0].a;
+      want = both ? 'ambos' : r[0].k.id;
+    }
+    const pick = w => w === 'ambos' ? [r[0].k, r[1].k].sort((p, q) => p.x - q.x) : [people.find(k => k.id === w)];
+    if (s.first) {
+      cur = want0 = want ?? most.id; since = last = s.t;
+      return out.push(shot(s.a, cur, pick(cur))); // el primer plano arranca justo al inicio del clip
+    }
+    if (want !== want0) { want0 = want; since = s.t; }
+    if (want !== cur && s.t - since >= 0.6 && s.t - last >= 2) {
+      cur = want; last = Math.max(since, last + 2);
+      out.push(shot(last, cur, pick(cur)));
+    }
+  });
+
+  out.sort((a, b) => a.t - b.t);
+  if (out[0].t < 0.5) out[0].t = 0;
+  else out.unshift({ ...out[0], t: 0, boxes: out[0].boxes.map(b => ({ ...b })) });
+  const made = autoTakes(out, people);
+  keys = out;
+  $('fmt').value = 'vertical';
+  $('fmt').onchange();
+  followedGen = gen;
+  try { // miniaturas de las tomas nuevas, cada una en un momento donde se usa
+    const tv = await hiddenVideo();
+    for (const tk of made) { await seek(tv, keys.find(k => k.take === tk.id).t + 0.3); tk.thumb = takeThumb(tk, tv); }
+    free(tv); renderTakes();
+  } catch {}
+  say(`Listo: ${out.length} planos entre ${people.length} personas. Revisá cada clip en la línea de tiempo de abajo del video.`);
+});
+$('follow').onclick = follow;
+
+// Al seguir a quien habla, cada persona (y "Los dos") queda guardada como toma, para retocarla o usarla a mano.
+// Los planos con el mismo encuadre quedan unidos a su toma; si la cámara se movió, ese plano queda suelto.
+function autoTakes(ks, people) {
+  const gone = new Set(takes.filter(t => t.auto).map(t => t.id));
+  keys.forEach(k => { if (gone.has(k.take)) delete k.take; });
+  takes = takes.filter(t => !t.auto);
+  const order = [...people].sort((p, q) => p.x - q.x).map(p => p.id);
+  const mid = (b, lay, i) => [b.x + boxW(b, asp(LAYOUTS[lay].slots[i])) / 2, b.y + b.h / 2];
+  const near = (a, b, lay) => a.every((x, i) => { const [p, q] = [mid(x, lay, i), mid(b[i], lay, i)]; return Math.hypot(p[0] - q[0], p[1] - q[1]) < 0.07; });
+  const made = [];
+  for (const k of ks) {
+    let tk = made.find(t => t.who === k.who && t.layout === k.layout && near(k.boxes, t.boxes, k.layout));
+    if (!tk && !made.some(t => t.who === k.who && t.layout === k.layout)) {
+      const name = k.who === 'ambos' ? 'Los dos' : `Persona ${order.indexOf(k.who) + 1}`;
+      tk = { id: Date.now().toString(36) + made.length, name, layout: k.layout, boxes: k.boxes.map(b => ({ ...b })), auto: true, who: k.who };
+      made.push(tk);
+    }
+    if (tk) k.take = tk.id;
+  }
+  made.sort((a, b) => (a.who === 'ambos') - (b.who === 'ambos') || a.name.localeCompare(b.name, 'es')); // Persona 1, Persona 2… y al final Los dos
+  takes = takes.concat(made);
+  return made;
+}
+
+// ---------- Transcripción (Whisper en la compu) ----------
+// Se carga igual que el detector de caras. El modelo se descarga una vez y queda guardado en el navegador.
+const TF = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1';
+let asr, asrId;
+async function asrModel() {
+  const id = $('asrQ').value === 'small' ? 'onnx-community/whisper-small' : 'onnx-community/whisper-base';
+  if (asr && asrId === id) return asr;
+  asr = null; asrId = id;
+  say('Preparando el transcriptor…');
+  let mod;
+  try { mod = await import(TF); }
+  catch (e) { throw new Error(`No se pudo descargar el transcriptor (${e.message}). Revisá la conexión a internet.`); }
+  const { pipeline, env } = mod;
+  try { await caches.keys(); } catch { env.useBrowserCache = false; } // al abrir el archivo desde la compu puede no haber caché
+  const small = id.endsWith('small');
+  const load = device => pipeline('automatic-speech-recognition', id, {
+    device, dtype: device === 'webgpu' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8',
+    progress_callback: p => { if (p.status === 'progress' && /\.onnx$/.test(p.file || '')) say(`Descargando el modelo de voz (solo la primera vez)… ${Math.round(p.progress || 0)} %`); }
+  });
+  try {
+    try { asr = await load(navigator.gpu && !small ? 'webgpu' : 'wasm'); } // el modelo grande va por el procesador: descarga menos
+    catch { asr = await load('wasm'); } // si la placa de video no sirve, usa el procesador
+  } catch (e) { throw new Error(`No se pudo cargar el modelo de voz (${e.message}).`); }
+  return asr;
+}
+async function transcribeMain(audio) {
+  const m = await asrModel();
+  await new Promise(r => setTimeout(r, 30)); // deja que se vea el progreso antes de ponerse a trabajar
+  try {
+    const out = await m(audio, { language: 'spanish', task: 'transcribe', return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
+    return out.chunks || [];
+  } catch (e) { throw new Error(`No se pudo transcribir el audio (${e.message}).`); }
+}
+
+// Transcripción en segundo plano: corre en un proceso aparte del navegador, así la página no se congela.
+// (Al abrir la app como archivo, el proceso tiene que ser "clásico" y cargar la librería adentro: el otro tipo no carga.)
+const ASR_WORKER = `
+let asr, asrId;
+const getAsr = data => {
+  if (asrId !== data.id) { const old = asr; asrId = data.id; asr = (async () => {
+      try { await (await old)?.dispose?.(); } catch {} // libera la memoria del modelo anterior
+      const m = await import(data.tf);
+      try { await caches.keys(); } catch { m.env.useBrowserCache = false; }
+      const small = data.id.endsWith('small');
+      const load = device => m.pipeline('automatic-speech-recognition', data.id, {
+        device, dtype: device === 'webgpu' ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8',
+        progress_callback: p => { if (p.status === 'progress' && /\\.onnx$/.test(p.file || '')) postMessage({ type: 'load', progress: p.progress }); }
+      });
+      try { return await load(self.navigator.gpu && !small && data.gpu ? 'webgpu' : 'wasm'); }
+      catch { return await load('wasm'); }
+    })();
+    asr.catch(() => { asrId = null; }); // si falló, el próximo pedido lo intenta de nuevo
+  }
+  return asr;
+};
+self.onmessage = async ({ data }) => {
+  try {
+    const run = await getAsr(data);
+    if (data.warm) return postMessage({ type: 'ready' });
+    // hasta 30 s va de una vez; más largo, en ventanas de 30 s que se pisan un poco
+    const opts = { language: 'spanish', task: 'transcribe', return_timestamps: true };
+    if (data.audio.length > 30 * 16000) Object.assign(opts, { chunk_length_s: 30, stride_length_s: 5 });
+    const out = await run(data.audio, opts);
+    postMessage({ type: 'done', chunks: out.chunks || [] });
+  } catch (e) { postMessage({ type: 'error', message: String((e && e.message) || e) }); }
+};`;
+// Varios transcriptores a la vez: al abrir la app como archivo, cada uno usa un solo núcleo del procesador,
+// así que repartir el audio entre varios lo hace varias veces más rápido.
+const ROUGH = 'onnx-community/whisper-base'; // lectura rápida del episodio entero, solo para elegir clips
+const modelId = () => $('asrQ').value === 'small' ? 'onnx-community/whisper-small' : ROUGH;
+let workers = [], jobs = [], workerBroken = false;
+// Como mucho dos a la vez (uno con el modelo de calidad alta), así la compu sigue respondiendo
+function poolMax(id) {
+  const cores = (navigator.hardwareConcurrency || 4) - 2, lowMem = (navigator.deviceMemory || 8) <= 4;
+  return Math.max(1, Math.min(id.endsWith('small') || lowMem ? 1 : 2, cores));
+}
+function pump() {
+  if (cancel) { jobs.splice(0).forEach(j => j.res([])); return; } // cancelado: lo que estaba en espera no se hace
+  while (jobs.length) {
+    const job = jobs[0], running = workers.filter(x => x.job && x.job.id === job.id).length;
+    let slot = workers.find(x => !x.job);
+    if (!slot && workers.length < poolMax(job.id)) {
+      try { slot = { w: new Worker(URL.createObjectURL(new Blob([ASR_WORKER], { type: 'text/javascript' }))) }; workers.push(slot); }
+      catch { workerBroken = true; }
+    }
+    if (workerBroken) { jobs.splice(0).forEach(j => j.warm ? j.res([]) : transcribeMain(j.audio).then(j.res, j.rej)); return; }
+    if (!slot || running >= poolMax(job.id)) return;
+    run(slot, jobs.shift());
+  }
+}
+// Si un transcriptor se cuelga o se cae, se cierra y su parte se reintenta en uno nuevo (nunca en la página: la congelaría)
+function retry(slot, job) {
+  clearTimeout(slot.timer);
+  try { slot.w.terminate(); } catch {}
+  workers = workers.filter(x => x !== slot);
+  if (job.warm) job.res([]);
+  else if ((job.tries = (job.tries || 0) + 1) <= 2) jobs.unshift(job);
+  else job.rej(new Error('El transcriptor dejó de responder. Cerrá otras pestañas y programas y probá de nuevo'));
+  pump();
+}
+function run(slot, job) {
+  slot.job = job;
+  // vigilancia: si no termina en un tiempo razonable (o no avanza la descarga del modelo), se reintenta
+  const secs = job.audio ? job.audio.length / 16000 : 0, watch = () => { clearTimeout(slot.timer); slot.timer = setTimeout(() => retry(slot, job), (90 + secs * 5) * 1000); };
+  watch();
+  const done = () => {
+    clearTimeout(slot.timer);
+    slot.job = null; pump();
+    if (!jobs.length) workers.slice(1).filter(x => !x.job).forEach(x => { x.w.terminate(); workers = workers.filter(y => y !== x); }); // libera memoria: queda uno solo listo
+  };
+  slot.w.onmessage = ({ data }) => {
+    if (data.type === 'load') { watch(); say(`${job.warm ? 'Preparando' : 'Descargando'} el modelo de voz (solo la primera vez)… ${Math.round(data.progress || 0)} %`); }
+    else if (data.type === 'ready') { done(); job.res([]); }
+    else if (data.type === 'done') { done(); job.res(data.chunks); }
+    else { done(); job.rej(new Error(`No se pudo transcribir el audio (${data.message}).`)); }
+  };
+  slot.w.onerror = e => { e.preventDefault(); retry(slot, job); };
+  const gpu = false; // solo el procesador: la placa de video, en algunas compus, colgaba el transcriptor o la pantalla
+  if (job.warm) return slot.w.postMessage({ warm: true, id: job.id, tf: TF, gpu });
+  const copy = job.audio.slice(); // se manda una copia: la original sigue disponible por si hay que reintentar
+  slot.w.postMessage({ audio: copy, id: job.id, tf: TF, gpu }, [copy.buffer]);
+}
+function transcribeRaw(audio, id = modelId()) {
+  return new Promise((res, rej) => { jobs.push({ audio, id, res, rej }); pump(); });
+}
+// Prepara el transcriptor en segundo plano mientras elegís y encuadrás: cuando haga falta, ya está listo.
+// Solo si lo vas a usar (tenés clave de DeepSeek) o si el modelo ya está descargado, para no bajar de más.
+async function warmAsr() {
+  const id = $('dsKey').value.trim() && !transcript ? ROUGH : modelId();
+  let cached = false;
+  try { cached = (await (await caches.open('transformers-cache')).keys()).some(r => r.url.includes(id)); } catch {}
+  if (!cached && !$('dsKey').value.trim()) return;
+  jobs.push({ warm: true, id, res() {}, rej() {} }); pump();
+}
+
+// Hace fn con cada elemento a la vez (los transcriptores se reparten el trabajo), mostrando el avance
+async function inParallel(items, fn, label, unit = '', scale = 1) {
+  let done = 0;
+  const t0 = performance.now(), tick = () => {
+    const el = Math.round((performance.now() - t0) / 1000);
+    $('prog').value = done / items.length;
+    say(`${label} ${Math.floor(done * scale)} de ${Math.ceil(items.length * scale)}${unit}.${eta(t0, done, items.length)} Trabajando hace ${Math.floor(el / 60)}:${String(el % 60).padStart(2, '0')}.`);
+  };
+  tick();
+  const beat = setInterval(() => { if (!cancel) tick(); }, 2000); // el reloj corre aunque una parte tarde: así se ve que sigue
+  try { return await Promise.all(items.map(async x => { const r = await fn(x); done++; if (!cancel) tick(); return r; })); }
+  finally { clearInterval(beat); }
+}
+
+// Cuánto falta, según lo que tardó lo ya hecho
+function eta(t0, done, total) {
+  if (!done || done >= total) return '';
+  const s = (performance.now() - t0) / 1000 / done * (total - done);
+  return s < 20 ? ' Ya casi.' : ` Faltan unos ${s < 90 ? Math.round(s / 10) * 10 + ' segundos' : Math.round(s / 60) + ' minutos'}.`;
+}
+
+// Transcribe el tramo [a, b] y devuelve frases con tiempos absolutos
+async function transcribe(a, b, id = modelId()) {
+  const pcm = await pcm16(), piece = pcm.subarray(Math.floor(a * 16000), Math.floor(b * 16000));
+  const audio = piece instanceof Int16Array ? Float32Array.from(piece, v => v / 32768) : piece.slice();
+  const chunks = await transcribeRaw(audio, id);
+  return cleanChunks(chunks.map(c => ({ a: a + c.timestamp[0], b: a + (c.timestamp[1] ?? b - a), text: c.text.trim() })));
+}
+
+// Whisper a veces inventa frases en los silencios o se traba repitiendo: eso se saca solo
+const JUNK = /(subt[ií]tulos? (realizados|hechos|por)|amara\.org|gracias por (ver|mirar)|suscr[ií]bete|dale like|www\.|\.com\b)/i;
+function cleanChunks(chunks) {
+  const out = [];
+  for (const c of chunks) {
+    let t = c.text.replace(/\s+/g, ' ').trim();
+    if (!t || JUNK.test(t) || /^[\p{P}\s♪]+$/u.test(t)) continue;      // vacíos, música o frases inventadas
+    t = t.replace(/(\p{L}+)(\s+\1\b){2,}/giu, '$1');                    // "no no no no" → "no"
+    const prev = out.at(-1);
+    if (prev && prev.text.toLowerCase() === t.toLowerCase()) { prev.b = c.b; continue; } // frase repetida
+    out.push({ ...c, text: t });
+  }
+  return out;
+}
+
+// Junta los pedazos que da Whisper en oraciones completas (terminan en . ? ! o …)
+function sentencesOf(chunks) {
+  const out = [];
+  let cur = null;
+  for (const c of chunks) {
+    cur = cur ? { a: cur.a, b: c.b, text: cur.text + ' ' + c.text } : { ...c };
+    if (/[.!?…]["»”']?$/.test(c.text) || cur.b - cur.a > 25) { out.push(cur); cur = null; }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+// Tiempo de cada palabra: el tramo se reparte según las sílabas, contando solo los momentos en que el audio tiene voz
+let thrFor = null, thrVal = 0;
+const vthr = () => thrFor === rmsCache ? thrVal : (thrFor = rmsCache, thrVal = voiceThr(rmsCache, 0.15).thr);
+const syl = (w, pauses) => Math.max(1, (w.match(/[aeiouáéíóúü]+/gi) || []).length) + (pauses ? (/[.!?…]$/.test(w) ? 1 : /[,;:]$/.test(w) ? 0.5 : 0) : 0);
+function wordTimes(a, b, words) {
+  const i0 = Math.round(a / HOP), n = Math.max(0, Math.round((b - a) / HOP));
+  let voiced = null, nv = 0;
+  if (rmsCache && n > 2) {
+    const thr = vthr();
+    voiced = Array.from({ length: n }, (_, j) => (rmsCache[i0 + j] ?? 0) > thr);
+    nv = voiced.filter(Boolean).length;
+    if (nv < n * 0.3) voiced = null; // casi sin voz detectada: mejor repartir parejo
+  }
+  const at = f => { // fracción del tiempo con voz → segundo real
+    if (!voiced) return a + (b - a) * f;
+    let need = f * nv;
+    for (let j = 0; j < n; j++) if (voiced[j]) { if (need <= 1) return Math.min(b, a + (j + need) * HOP); need--; }
+    return b;
+  };
+  const ws = words.map(w => syl(w, !voiced)), tot = ws.reduce((x, y) => x + y, 0) || 1;
+  let acc = 0;
+  return ws.map(w => { const st = at(acc / tot); acc += w; return [st, at(acc / tot)]; });
+}
+
+// Subtítulos: líneas cortas de hasta 3 palabras, cada una con el tiempo de sus palabras
+let lines = [];
+function addLines(chunks) {
+  const fresh = [];
+  for (const c of chunks) {
+    const words = c.text.split(/\s+/).filter(Boolean), tm = wordTimes(c.a, c.b, words);
+    for (let i = 0, j = 0; i < words.length; i++) {
+      const text = words.slice(j, i + 1).join(' '), last = i === words.length - 1;
+      if (!last && i - j < 2 && text.length <= 18) continue;
+      // la línea sigue en pantalla hasta la próxima, salvo que haya una pausa larga
+      const b = last ? c.b : tm[i + 1][0] - tm[i][1] < 0.6 ? tm[i + 1][0] : tm[i][1] + 0.2;
+      fresh.push({ a: tm[j][0], b, text });
+      j = i + 1;
+    }
+  }
+  // si dos tramos transcriptos se pisan, quedan las líneas que ya estaban
+  lines = lines.concat(fresh.filter(f => !lines.some(l => f.a < l.b - 0.05 && f.b > l.a + 0.05))).sort((x, y) => x.a - y.a);
+  dirty = true;
+}
+
+// ---------- Subtítulos y títulos animados ----------
+const FONTS = ['400 60px Anton', 'italic 700 60px "Playfair Display"', '900 60px Montserrat'];
+const fontsReady = () => Promise.all(FONTS.map(f => document.fonts.load(f).catch(() => {})));
+fontsReady().then(() => { dirty = true; });
+const ease = p => 1 - (1 - Math.min(Math.max(p, 0), 1)) ** 3;                 // arranca rápido y frena suave
+const pop = p => { p = Math.min(Math.max(p, 0), 1); return 1 + 2.2 * (p - 1) ** 3 + 1.2 * (p - 1) ** 2; }; // pasa un poco y vuelve
+
+// Color de la palabra destacada (dorado = degradé)
+const COLORS = { dorado: null, amarillo: '#ffd400', blanco: '#ffffff', celeste: '#3de0ff', naranja: '#ff7a1a', verde: '#39e07a', rojo: '#ff3b3b', rosa: '#ff4fa3', violeta: '#9b6bff' };
+const hiColor = () => COLORS[$('subColor').value] ?? null;
+
+// Una línea chica en itálica arriba y una palabra enorme dorada con brillo, como en las plantillas virales
+function twoTier(g, small, big, y, fsBig, p, alpha = 1, track = false, after = '', col = hiColor()) {
+  const W = g.canvas.width;
+  g.save();
+  g.globalAlpha = alpha * Math.min(1, p * 2);
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  if (small) {
+    const fs = fsBig * 0.44, sy = y - fsBig * 0.98 + (1 - ease(p)) * fs; // entra desde abajo
+    g.font = `italic 700 ${fs}px "Playfair Display", Georgia, serif`;
+    g.lineJoin = 'round'; g.lineWidth = fs * 0.16; g.strokeStyle = 'rgba(0,0,0,.75)';
+    g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = fs * 0.4;
+    g.strokeText(small, W / 2, sy, W * 0.9);
+    g.shadowBlur = 0; g.fillStyle = '#fff'; g.fillText(small, W / 2, sy, W * 0.9);
+  }
+  if (after) { // lo que viene después de la palabra grande, abajo, para que se lea en orden
+    const fs = fsBig * 0.44, ay = y + fs * 1.15 - (1 - ease(p)) * fs;
+    g.font = `italic 700 ${fs}px "Playfair Display", Georgia, serif`;
+    g.lineJoin = 'round'; g.lineWidth = fs * 0.16; g.strokeStyle = 'rgba(0,0,0,.75)';
+    g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = fs * 0.4;
+    g.strokeText(after, W / 2, ay, W * 0.9);
+    g.shadowBlur = 0; g.fillStyle = '#fff'; g.fillText(after, W / 2, ay, W * 0.9);
+  }
+  let size = fsBig;
+  g.font = `${size}px Anton, Impact, sans-serif`;
+  if (track && 'letterSpacing' in g) g.letterSpacing = `${Math.round((1 - ease(p)) * size * 0.25)}px`; // las letras se juntan al entrar
+  while (g.measureText(big).width > W * 0.9 && size > 20) { size *= 0.92; g.font = `${size}px Anton, Impact, sans-serif`; }
+  const s = 1 + (1 - ease(p)) * 0.3;
+  g.translate(W / 2, y); g.scale(s, s);
+  const grad = g.createLinearGradient(0, -size * 0.85, 0, 0);
+  grad.addColorStop(0, '#fff7d1'); grad.addColorStop(0.45, '#ffd54a'); grad.addColorStop(1, '#e39b00');
+  g.shadowColor = col ? col + 'cc' : 'rgba(255,190,40,.8)'; g.shadowBlur = size * 0.28;
+  g.fillStyle = col || grad; g.fillText(big, 0, 0);
+  g.shadowBlur = 0; g.lineWidth = Math.max(2, size * 0.018); g.strokeStyle = 'rgba(110,60,0,.55)'; g.strokeText(big, 0, 0);
+  g.restore();
+}
+
+function caption(g, t, k) {
+  if (!$('subsOn').checked || !lines.length) return;
+  const l = lines.find(x => t >= x.a && t <= x.b + 0.1);
+  if (!l) return;
+  const W = g.canvas.width, H = g.canvas.height, style = $('subStyle').value;
+  const pos = +$('subY').value / 100, z = +$('subSize').value / 100;
+  // en Dividido y Trío, si no moviste la posición, va en la unión de las imágenes
+  const y = H * (pos === 0.74 && (k.layout === 'dividido' || k.layout === 'trio') ? 0.5 : pos);
+  const words = String(l.text || '').split(/\s+/).filter(Boolean);
+  if (!words.length) return; // línea vacía (por ejemplo, borrada a mano): no hay nada que mostrar
+  const starts = wordTimes(l.a, l.b, words).map(x => x[0]);
+  const curW = Math.max(0, starts.findLastIndex(st => st <= t));
+  g.save();
+  g.translate(W / 2, y); g.scale(z, z); g.translate(-W / 2, -y); // tamaño elegido
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+
+  if (style === 'viral') {
+    // la palabra más larga va grande; el resto, chico arriba
+    let bi = words[l.key] ? l.key : words.reduce((m, w, i) => w.replace(/\W/g, '').length > words[m].replace(/\W/g, '').length ? i : m, 0);
+    const big = words[bi].replace(/[.,;:!?]+$/, '').toUpperCase();
+    twoTier(g, words.slice(0, bi).join(' '), big, y + W * 0.03, W * 0.17, (t - l.a) / 0.35, 1, false, words.slice(bi + 1).join(' '));
+    return g.restore();
+  }
+
+  if (style === 'karaoke') {
+    const fs = W * 0.075;
+    g.font = `900 ${fs}px Montserrat, "Segoe UI", sans-serif`;
+    const up = words.map(w => w.toUpperCase()), gap = fs * 0.28;
+    const ws = up.map(w => g.measureText(w).width), full = ws.reduce((a, b) => a + b, 0) + gap * (up.length - 1);
+    const fit = Math.min(1, (W * 0.9) / full), s = fit * (0.85 + 0.15 * pop((t - l.a) / 0.25));
+    g.translate(W / 2, y); g.scale(s, s);
+    let x = -full / 2;
+    up.forEach((w, i) => {
+      const cx = x + ws[i] / 2, on = i === curW, ws2 = on ? 1 + 0.12 * pop((t - starts[i]) / 0.18) : 1;
+      g.save(); g.translate(cx, 0); g.scale(ws2, ws2);
+      g.lineWidth = fs * 0.2; g.strokeStyle = '#000'; g.strokeText(w, 0, 0);
+      g.fillStyle = on || i === l.key ? (hiColor() || '#ffd400') : '#fff'; g.fillText(w, 0, 0);
+      g.restore();
+      x += ws[i] + gap;
+    });
+    return g.restore();
+  }
+
+  if (style === 'palabra') {
+    const w = words[curW].replace(/[.,;:]+$/, '').toUpperCase();
+    let fs = W * 0.15;
+    g.font = `${fs}px Anton, Impact, sans-serif`;
+    while (g.measureText(w).width > W * 0.88 && fs > 20) { fs *= 0.92; g.font = `${fs}px Anton, Impact, sans-serif`; }
+    const s = 0.6 + 0.4 * pop((t - starts[curW]) / 0.16);
+    g.translate(W / 2, y); g.scale(s, s);
+    g.lineWidth = fs * 0.14; g.strokeStyle = '#000'; g.strokeText(w, 0, 0);
+    g.fillStyle = (l.key != null ? curW === l.key : curW % 3 === 2) ? (hiColor() || '#ffd400') : '#fff'; g.fillText(w, 0, 0); // la palabra clave (o cada tanto una) en color
+    return g.restore();
+  }
+
+  const fs = Math.round(W * 0.07); // clásico
+  g.font = `800 ${fs}px "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif`;
+  g.lineWidth = fs * 0.24; g.strokeStyle = '#000'; g.strokeText(l.text, W / 2, y, W * 0.9);
+  g.fillStyle = '#fff'; g.fillText(l.text, W / 2, y, W * 0.9);
+  g.restore();
+}
+
+// Título del clip en los primeros 3 segundos, con el formato y el color elegidos
+const titleColor = () => $('titleColor').value === 'igual' ? hiColor() : COLORS[$('titleColor').value] ?? null;
+const isLight = hex => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150; };
+// Parte el texto en renglones que entren en el ancho
+function wrapWords(g, words, max) {
+  const rows = [[]];
+  for (const w of words) { const r = rows.at(-1); if (r.length && g.measureText([...r, w].join(' ')).width > max) rows.push([w]); else r.push(w); }
+  return rows.map(r => r.join(' '));
+}
+function clipTitle(g, t) {
+  if (!$('titleOn').checked) return;
+  const c = clips.find(x => t >= x.start - 0.01 && t < x.end);
+  if (!c?.title?.trim()) return;
+  // con gancho, el título sale sobre el gancho (en pausa se ve al principio, para acomodarlo)
+  let age;
+  if (!c.hook) age = t - parts(c)[0][0];
+  else if (exporting ? exportHook : hookUntil != null) age = t - c.hook[0];
+  else if (!exporting && player.paused) age = t - parts(c)[0][0];
+  else return;
+  if (age < 0 || age > 3.2) return;
+  const W = g.canvas.width, H = g.canvas.height, z = +$('titleSize').value / 100, y = H * $('titleY').value / 100;
+  const p = age / 0.6, alpha = age > 2.7 ? (3.2 - age) / 0.5 : 1, col = titleColor(), style = $('titleStyle').value;
+  const words = c.title.trim().split(/\s+/);
+
+  if (style === 'viral') {
+    const big = words.pop().toUpperCase();
+    return twoTier(g, words.join(' '), big, y, W * 0.2 * z, p, alpha, true, '', col);
+  }
+  g.save();
+  g.globalAlpha = alpha * Math.min(1, p * 2);
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+
+  if (style === 'caja') { // cada renglón en una caja de color, como en TikTok
+    const fs = W * 0.075 * z, bg = col || '#ffd400', fg = isLight(bg) ? '#111' : '#fff';
+    g.font = `900 ${fs}px Montserrat, "Segoe UI", sans-serif`;
+    const rows = wrapWords(g, words, W * 0.78), lh = fs * 1.45, s = 0.7 + 0.3 * pop(p);
+    g.translate(W / 2, y); g.scale(s, s);
+    rows.forEach((r, i) => {
+      const ry = (i - (rows.length - 1) / 2) * lh, w = g.measureText(r).width + fs * 0.9;
+      g.fillStyle = bg; g.beginPath(); g.roundRect(-w / 2, ry - lh * 0.46, w, lh * 0.92, fs * 0.25); g.fill();
+      g.fillStyle = fg; g.fillText(r, 0, ry + fs * 0.04);
+    });
+  } else if (style === 'bloque') { // todo en mayúsculas grandes, renglón por renglón
+    const fs = W * 0.13 * z;
+    g.font = `${fs}px Anton, Impact, sans-serif`;
+    const rows = wrapWords(g, words.map(w => w.toUpperCase()), W * 0.88), lh = fs * 1.02;
+    rows.forEach((r, i) => {
+      const q = ease((age - i * 0.12) / 0.45), ry = y + (i - (rows.length - 1) / 2) * lh + (1 - q) * fs * 0.4;
+      g.globalAlpha = alpha * Math.max(0, Math.min(1, q * 1.5));
+      g.lineWidth = fs * 0.12; g.strokeStyle = '#000'; g.strokeText(r, W / 2, ry, W * 0.92);
+      g.fillStyle = col || '#ffd400'; g.fillText(r, W / 2, ry, W * 0.92);
+    });
+  } else { // simple: blanco limpio con una línea de color abajo
+    const fs = W * 0.07 * z;
+    g.font = `800 ${fs}px Montserrat, "Segoe UI", sans-serif`;
+    const rows = wrapWords(g, words, W * 0.82), lh = fs * 1.25, dy = (1 - ease(p)) * fs * 0.5;
+    g.shadowColor = 'rgba(0,0,0,.85)'; g.shadowBlur = fs * 0.5;
+    rows.forEach((r, i) => { g.fillStyle = '#fff'; g.fillText(r, W / 2, y + (i - (rows.length - 1) / 2) * lh + dy); });
+    g.shadowBlur = 0;
+    const bw = W * 0.22 * ease(p), by = y + (rows.length / 2) * lh + fs * 0.25;
+    g.fillStyle = col || '#ffd400'; g.fillRect(W / 2 - bw / 2, by, bw, fs * 0.14);
+  }
+  g.restore();
+}
+
+// Silencios a quitar dentro de [a, b], según las frases detectadas en el audio
+function partsFor(a, b, cut) {
+  if (!cut || !lastPh.length) return [[a, b]];
+  const segs = [];
+  for (const p of lastPh) {
+    if (p.e < a || p.s > b) continue;
+    const s0 = Math.max(p.s - 0.15, a), e0 = Math.min(p.e + 0.15, b), l = segs.at(-1);
+    if (l && s0 - l[1] <= 0.1) l[1] = e0; else segs.push([s0, e0]);
+  }
+  if (!segs.length) return [[a, b]];
+  segs[0][0] = a; segs.at(-1)[1] = b;
+  return segs;
+}
+
+// Modo rápido: transcribe solo alrededor de cada clip y mueve los bordes al principio y al final de una oración
+async function refineClips(found, min, max, cut) {
+  const all = await inParallel(found, c => {
+    const a0 = Math.max(0, c.start - 10), b0 = Math.min(duration, c.end + 10);
+    return fromTranscript(a0, b0, modelId()) || transcribe(a0, b0);
+  }, 'Transcribiendo los clips:');
+  for (const [i, c] of found.entries()) {
+    if (cancel) return;
+    const chunks = all[i];
+    addLines(chunks);
+    const sents = sentencesOf(chunks);
+    if (!sents.length) continue;
+    const near = (list, key, t) => list.reduce((p, q) => Math.abs(q[key] - t) < Math.abs(p[key] - t) ? q : p);
+    const st = near(sents, 'a', c.start);
+    const ends = sents.filter(x => x.b - st.a >= min * 0.8 && x.b - st.a <= max * 1.25);
+    if (!ends.length) continue;
+    const en = near(ends, 'b', c.end);
+    c.start = Math.max(0, st.a - 0.1);
+    c.end = Math.min(duration, en.b + 0.3);
+    c.parts = partsFor(c.start, c.end, cut);
+    delete c.orig;
+  }
+}
+
+// Crear subtítulos para los clips que todavía no los tienen (por ejemplo, los armados a mano)
+$('mkSubs').onclick = () => guard(async () => {
+  const todo = clips.filter(c => !clipLines(c).length);
+  if (!clips.length) return say('Primero armá algún clip en el paso Elegir clips.');
+  if (!todo.length) return say('Tus clips ya tienen subtítulos.');
+  busyUI(true);
+  try {
+    try { await loudness(); } catch {} // para el tiempo de cada palabra; sin esto se reparte parejo
+    const all = await inParallel(todo, c => clipChunks(c, modelId()) || transcribeClip(c), 'Creando subtítulos de los clips:');
+    if (!cancel) all.forEach(addLines);
+  } finally { busyUI(false); }
+  if (cancel) return say('Subtítulos cancelados.');
+  const fixed = await autoFix(todo);
+  $('subsOn').checked = true; dirty = true; renderSubs();
+  say(`Listo: subtítulos creados.${fixed}`);
+});
+
+const clipLines = c => !c ? [] : c.reel ? lines.filter(l => parts(c).some(([a, b]) => l.a < b && l.b > a)) : lines.filter(l => l.a < c.end && l.b > c.start);
+// Lo dicho en un clip: de la transcripción guardada (si es de la calidad pedida) o transcribiendo (el resumen, tramo por tramo)
+const clipChunks = (c, need) => c.reel ? (transcript && fromTranscript(0, 0, need) ? parts(c).flatMap(([a, b]) => fromTranscript(a, b, need)) : null) : fromTranscript(c.start, c.end, need);
+// (el resumen se transcribe por tramo entero, sin cortarlo en los silencios: así Whisper tiene contexto)
+const spans = c => parts(c).reduce((out, [a, b]) => { const l = out.at(-1); if (l && a - l[1] < 1.5) l[1] = b; else out.push([a, b]); return out; }, []);
+const transcribeClip = async c => c.reel ? (await Promise.all(spans(c).map(([a, b]) => transcribe(a, b)))).flat() : transcribe(c.start, c.end);
+// Si el episodio ya se transcribió entero, se usa eso (no se vuelve a transcribir)
+// (para subtítulos se pide la misma calidad elegida: la lectura rápida del episodio no alcanza)
+let transcriptQ = null;
+const fromTranscript = (a, b, need) => transcript && (!need || !transcriptQ || transcriptQ === need) ? transcript.filter(ch => ch.b > a && ch.a < b) : null;
+
+$('clipTitle').oninput = e => {
+  const c = clips[sel];
+  if (!c) return;
+  c.title = e.target.value; dirty = true;
+  $('cbTitle').textContent = c.title || `Clip ${sel + 1} de ${clips.length}`;
+};
+$('titleOn').onchange = () => { dirty = true; };
+$('logoFile').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) return say('Elegí una imagen. Un PNG con fondo transparente queda mejor.');
+  const im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 400 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    const url = c.toDataURL('image/png');
+    try { localStorage.setItem('clipcut.logo', url); } catch {}
+    URL.revokeObjectURL(im.src);
+    loadLogo(url); $('logoOn').checked = true;
+    say('Logo cargado. Queda guardado para los próximos videos.');
+  };
+  im.onerror = () => say('No se pudo leer esa imagen.');
+  im.src = URL.createObjectURL(f);
+};
+try { $('logoOn').checked = localStorage.getItem('clipcut.logoOn') !== 'no'; } catch {}
+$('logoOn').onchange = () => { try { localStorage.setItem('clipcut.logoOn', $('logoOn').checked ? 'si' : 'no'); } catch {} dirty = true; };
+try { $('endOn').checked = localStorage.getItem('clipcut.endOn') !== 'no'; } catch {}
+$('endOn').onchange = () => { try { localStorage.setItem('clipcut.endOn', $('endOn').checked ? 'si' : 'no'); } catch {} dirty = true; };
+$('endPlay').onclick = () => {
+  const c = clips[sel];
+  if (!c) return say('Elegí un clip en la tira.');
+  if (!$('endOn').checked) { $('endOn').checked = true; $('endOn').onchange(); }
+  player.pause(); player.currentTime = Math.max(c.start, c.end - +$('endSec').value - 1.5);
+  player.play().catch(() => {});
+};
+// Ver el título: el clip desde el principio
+$('titlePlay').onclick = () => { const c = clips[sel]; if (!c) return say('Elegí un clip en la tira.'); if (!c.title?.trim()) say('Este clip no tiene título: escribilo en la pestaña Este clip.'); player.pause(); fromTop(c); player.play().catch(() => {}); };
+const avOut = () => { const v = +$('avSync').value; $('avSyncOut').textContent = v ? `${v > 0 ? 'atrasarlo' : 'adelantarlo'} ${Math.abs(v)} ms` : 'sin cambios'; };
+for (const id of ['subY', 'subSize', 'subColor', 'logoPos', 'logoSize', 'logoAlpha', 'zoom', 'endText', 'endSec', 'titleStyle', 'titleColor', 'titleY', 'titleSize', 'avSync']) {
+  try { const v = localStorage.getItem('clipcut.' + id); if (v) $(id).value = v; } catch {}
+  $(id).oninput = $(id).onchange = () => { try { localStorage.setItem('clipcut.' + id, $(id).value); } catch {} dirty = true; };
+}
+$('avSync').addEventListener('input', avOut); avOut();
+
+$('trSubs').onclick = () => guard(async () => {
+  const mine = clipLines(clips[sel]), lang = $('trLang').value;
+  if (!mine.length) return say('Primero creá los subtítulos de este clip.');
+  if (!lang) { mine.forEach(l => { if (l.src) { l.text = l.src; delete l.src; delete l.key; } }); dirty = true; renderSubs(); return say('Subtítulos en el idioma original.'); }
+  say(`DeepSeek está traduciendo al ${lang}…`);
+  const src = mine.map(l => l.src ?? l.text);
+  const { data, tokens } = await callDeepSeek([
+    { role: 'system', content: 'Traducís subtítulos de un podcast en español rioplatense, natural y breve, como se hablaría en redes.' },
+    { role: 'user', content: `Traducí al ${lang} estas líneas de subtítulo, en orden. Cada línea se traduce sola, corta, sin mover palabras de una línea a otra. Devolvé exactamente ${src.length} líneas. Respondé solo con JSON así: {"lineas":["...","..."]}\n\n${src.map((x, i) => `${i + 1}. ${x}`).join('\n')}` }
+  ]);
+  const out = data.lineas;
+  if (!Array.isArray(out) || out.length !== src.length) throw new Error('DeepSeek devolvió otra cantidad de líneas. Probá de nuevo.');
+  mine.forEach((l, i) => { l.src ??= l.text; if (typeof out[i] === 'string' && out[i].trim()) { l.text = out[i].trim().slice(0, 60); delete l.key; } });
+  dirty = true; renderSubs();
+  say(`Subtítulos traducidos al ${lang}${tokens ? `. DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens` : ''}.`);
+});
+try { $('subStyle').value = localStorage.getItem('clipcut.estilo') || 'viral'; } catch {}
+$('subStyle').onchange = () => { try { localStorage.setItem('clipcut.estilo', $('subStyle').value); } catch {} dirty = true; };
+
+// ---------- Marcas por cliente: logo, textos y zoom guardados con un nombre ----------
+const BRAND_IDS = ['subStyle', 'subY', 'subSize', 'subColor', 'subsOn', 'titleOn', 'titleStyle', 'titleColor', 'titleY', 'titleSize', 'logoOn', 'logoPos', 'logoSize', 'logoAlpha', 'zoom', 'endOn', 'endText', 'endSec'];
+const getBrands = () => { try { return JSON.parse(localStorage.getItem('clipcut.marcas') || '{}'); } catch { return {}; } };
+function brandList(pick) {
+  const names = Object.keys(getBrands()).sort((a, b) => a.localeCompare(b, 'es'));
+  if (!names.includes(pick)) pick = '';
+  for (const s of document.querySelectorAll('.brandSel')) {
+    s.replaceChildren(new Option(names.length ? 'Ninguna' : 'Todavía no guardaste marcas', ''), ...names.map(n => new Option(n, n)));
+    s.value = pick;
+  }
+  $('brandDel').hidden = !pick;
+  if (pick) $('brandName').value = pick;
+}
+function applyBrand(n) {
+  const b = getBrands()[n];
+  try { localStorage.setItem('clipcut.marca', b ? n : ''); } catch {}
+  if (b) {
+    for (const id of BRAND_IDS) {
+      if (!(id in b)) continue;
+      const el = $(id);
+      if (el.type === 'checkbox') el.checked = b[id]; else el.value = b[id];
+      el.dispatchEvent(new Event('change')); // así se guarda como siempre
+    }
+    logoImg = null;
+    try { b.logo ? localStorage.setItem('clipcut.logo', b.logo) : localStorage.removeItem('clipcut.logo'); } catch {}
+    if (b.logo) loadLogo(b.logo);
+    say(`Marca "${n}" aplicada.`);
+  }
+  brandList(n); dirty = true;
+}
+document.querySelectorAll('.brandSel').forEach(s => { s.onchange = () => applyBrand(s.value); });
+$('brandSave').onclick = () => {
+  const n = $('brandName').value.trim();
+  if (!n) { $('brandName').focus(); return say('Escribí el nombre del cliente, por ejemplo "Don Aldo".'); }
+  const all = getBrands(), b = {};
+  for (const id of BRAND_IDS) { const el = $(id); b[id] = el.type === 'checkbox' ? el.checked : el.value; }
+  try { b.logo = localStorage.getItem('clipcut.logo') || ''; } catch { b.logo = ''; }
+  const isNew = !all[n];
+  all[n] = b;
+  try { localStorage.setItem('clipcut.marcas', JSON.stringify(all)); localStorage.setItem('clipcut.marca', n); }
+  catch { return say('No hay lugar en el navegador para guardar la marca. Probá con un logo más liviano.'); }
+  brandList(n);
+  say(`Marca "${n}" ${isNew ? 'guardada' : 'actualizada'}. Elegila al empezar con cada video.`);
+};
+$('brandDel').onclick = () => {
+  const n = document.querySelector('.brandSel').value, all = getBrands();
+  if (!n || !all[n]) return;
+  delete all[n];
+  try { localStorage.setItem('clipcut.marcas', JSON.stringify(all)); localStorage.setItem('clipcut.marca', ''); } catch {}
+  $('brandName').value = ''; brandList('');
+  say(`Marca "${n}" borrada. Lo que está puesto ahora queda igual.`);
+};
+try { brandList(localStorage.getItem('clipcut.marca') || ''); } catch { brandList(''); }
+
+$('sugTitle').onclick = () => guard(async () => {
+  const c = clips[sel];
+  if (!c) return say('Elegí un clip en la tira.');
+  const txt = clipLines(c).map(l => l.text).join(' ');
+  if (!txt) return say('Primero creá los subtítulos de este clip, así DeepSeek sabe de qué habla.');
+  say('DeepSeek está pensando un título…');
+  const { data, tokens } = await callDeepSeek([
+    { role: 'system', content: 'Escribís títulos gancho para Reels de un podcast en español rioplatense.' },
+    { role: 'user', content: `Escribí un título gancho de 2 a 5 palabras para este clip. La última palabra es la más fuerte, porque va enorme. Sin emojis ni comillas. Respondé solo con JSON así: {"titulo":"..."}\n\n${txt}` }
+  ]);
+  c.title = String(data.titulo || '').replace(/["«»]/g, '').trim().slice(0, 40);
+  $('clipTitle').value = c.title; dirty = true;
+  renderTimeline(); player.currentTime = parts(c)[0][0];
+  say(`Título listo${tokens ? `. DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens` : ''}.`);
+});
+
+// ---------- Gancho: la frase más fuerte del clip, al principio ----------
+async function findHook(c) {
+  const ls = clipLines(c).filter(l => l.a >= c.start + 3 && l.b <= c.end);
+  let h = null, tokens = 0;
+  if (ls.length > 2 && $('dsKey').value.trim()) {
+    const r = await callDeepSeek([
+      { role: 'system', content: 'Editás Reels de un podcast en español rioplatense y sabés qué frase engancha en los primeros segundos.' },
+      { role: 'user', content: `Estas son las líneas de subtítulo de un clip, con cuánto dura cada una. Elegí el tramo de 1 a 3 líneas seguidas que mejor funcione como gancho al principio del Reel: que genere curiosidad o impacto, que se entienda solo y que dure entre 2 y 4 segundos en total. Respondé solo con JSON así: {"desde":N,"hasta":N}\n\n${ls.map((l, i) => `${i + 1}. (${(l.b - l.a).toFixed(1)} s) ${l.text}`).join('\n')}` }
+    ]);
+    tokens = r.tokens || 0;
+    const d = ls[r.data.desde - 1], e = ls[r.data.hasta - 1];
+    if (d && e && e.b > d.a) h = [d.a - 0.05, Math.min(e.b + 0.1, d.a + 4.5)];
+  }
+  if (!h) { // sin DeepSeek: los 3 segundos con más energía en la voz
+    const rms = await loudness(), W = Math.round(3 / HOP);
+    let best = -1, at = null;
+    for (let i = Math.round((c.start + 3) / HOP); i + W <= Math.round(c.end / HOP); i++) {
+      let s = 0;
+      for (let j = i; j < i + W; j++) s += rms[j];
+      if (s > best) { best = s; at = i * HOP; }
+    }
+    if (at != null) h = [at, at + 3];
+  }
+  if (!h || h[1] - h[0] < 1) return { ok: false, tokens };
+  c.hook = [+Math.max(c.start, h[0]).toFixed(2), +Math.min(c.end, h[1]).toFixed(2)];
+  return { ok: true, tokens };
+}
+function renderHook() {
+  const c = clips[sel];
+  $('hookRow').hidden = !c?.hook;
+  if (c?.hook) $('hookInfo').textContent = `Gancho de ${(c.hook[1] - c.hook[0]).toFixed(1)} s, de ${fmt(c.hook[0])}`;
+}
+async function addHooks(list) {
+  if (!list.length) return say('Elegí un clip en la tira.');
+  busyUI(true);
+  let n = 0, tokens = 0;
+  try {
+    for (const [i, c] of list.entries()) {
+      if (cancel) break;
+      say(`Buscando el gancho${list.length > 1 ? ` del clip ${i + 1} de ${list.length}` : ''}…`);
+      const r = await findHook(c);
+      n += r.ok; tokens += r.tokens;
+    }
+  } finally { busyUI(false); }
+  render(); renderHook(); dirty = true;
+  say(n ? `Listo: ${n === 1 ? 'gancho agregado' : n + ' ganchos agregados'}. Tocá Ver para revisarlo.${tokens ? ` DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens.` : ''}`
+        : 'No encontré un buen gancho: el clip es muy corto o no tiene subtítulos.');
+}
+$('hookAdd').onclick = () => guard(() => addHooks(clips[sel] ? [clips[sel]] : []));
+$('hookAll').onclick = () => guard(() => addHooks(clips.filter(c => !c.whole)));
+$('hookPlay').onclick = () => { if (clips[sel]) preview(clips[sel]); };
+$('hookDel').onclick = () => { const c = clips[sel]; if (!c) return; delete c.hook; render(); renderHook(); dirty = true; say('Gancho quitado.'); };
+
+// ---------- Texto para publicar ----------
+$('postMake').onclick = () => guard(async () => {
+  const c = clips[sel];
+  if (!c) return say('Elegí un clip en la tira.');
+  const txt = clipLines(c).map(l => l.text).join(' ');
+  if (!txt) return say('Primero creá los subtítulos de este clip (paso Textos), así DeepSeek sabe de qué habla.');
+  const marca = document.querySelector('.brandSel').value;
+  say('DeepSeek está escribiendo el texto…');
+  const { data, tokens } = await callDeepSeek([
+    { role: 'system', content: 'Escribís textos para publicar Reels en Instagram, en español rioplatense, cercanos y sin exagerar.' },
+    { role: 'user', content: `Escribí el texto para publicar este clip${marca ? ` de la cuenta "${marca}"` : ''}${c.title ? `, titulado "${c.title}"` : ''}. Una descripción de 2 o 3 oraciones que invite a mirar hasta el final, una pregunta para que la gente comente, y de 5 a 8 hashtags en español que sirvan para este tema (sin espacios). Podés usar uno o dos emojis. Respondé solo con JSON así: {"descripcion":"...","pregunta":"...","hashtags":["#...","#..."]}\n\nLo que se dice en el clip:\n${txt}` }
+  ]);
+  const tags = (Array.isArray(data.hashtags) ? data.hashtags : []).map(h => '#' + String(h).replace(/^#+/, '').replace(/\s+/g, '')).filter(h => h.length > 1);
+  c.post = [String(data.descripcion || '').trim(), String(data.pregunta || '').trim(), tags.join(' ')].filter(Boolean).join('\n\n');
+  $('postText').value = c.post;
+  say(`Texto listo. Revisalo y tocá Copiar.${tokens ? ` DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens.` : ''}`);
+});
+$('postText').oninput = () => { if (clips[sel]) clips[sel].post = $('postText').value; };
+$('postCopy').onclick = async () => {
+  const t = $('postText').value.trim();
+  if (!t) return say('Primero escribí o generá el texto.');
+  try { await navigator.clipboard.writeText(t); }
+  catch { $('postText').select(); document.execCommand('copy'); } // al abrir la app como archivo, a veces el portapapeles nuevo no anda
+  say('Texto copiado. Pegalo al publicar el Reel.');
+};
+
+// Lista editable de los subtítulos del clip elegido
+function renderSubs() {
+  const mine = clipLines(clips[sel]);
+  $('subEdit').hidden = !mine.length;
+  $('subList').replaceChildren(...mine.map(l => {
+    const li = document.createElement('li');
+    const inp = Object.assign(document.createElement('input'), { type: 'text', value: l.text, maxLength: 60 });
+    inp.setAttribute('aria-label', `Subtítulo en ${fmt(l.a)}`);
+    inp.oninput = () => { l.text = inp.value; delete l.key; dirty = true; };
+    inp.onfocus = () => { playing = null; player.currentTime = l.a + 0.02; }; // muestra ese momento en la vista previa
+    li.append(Object.assign(document.createElement('span'), { textContent: fmt(l.a) }), inp);
+    return li;
+  }));
+}
+
+$('redoSubs').onclick = () => guard(async () => {
+  const c = clips[sel];
+  if (!c) return say('Elegí un clip en la tira.');
+  busyUI(true);
+  try {
+    say('Transcribiendo de nuevo este clip…');
+    const fresh = await transcribeClip(c);
+    lines = lines.filter(l => !clipLines(c).includes(l)); // saca los subtítulos viejos de este clip
+    addLines(fresh);
+  } finally { busyUI(false); }
+  renderSubs();
+  const fixed = await autoFix([c]);
+  renderSubs();
+  say(`Listo: este clip se volvió a transcribir.${fixed}`);
+});
+
+async function fixClip(c) {
+  const mine = clipLines(c);
+  if (!mine.length) return 0;
+  const { data, tokens } = await callDeepSeek([
+    { role: 'system', content: 'Corregís subtítulos generados automáticamente de un podcast en español rioplatense (Puerto Iguazú, Misiones, Argentina).' },
+    { role: 'user', content: `Estas son las líneas de subtítulo de un fragmento, en orden. Corregí solo las palabras mal entendidas, la ortografía y la puntuación, usando el contexto. No cambies el sentido, no agregues ni quites ideas y no muevas palabras de una línea a otra. Además, marcá entre asteriscos la palabra más fuerte o importante, como *esta*: una sola palabra por línea y solo en una de cada tres o cuatro líneas, donde de verdad haya algo para destacar. Devolvé exactamente ${mine.length} líneas, en el mismo orden. Respondé solo con JSON así: {"lineas":["...","..."]}\n\n${mine.map((l, i) => `${i + 1}. ${l.text}`).join('\n')}` }
+  ]);
+  const out = data.lineas;
+  if (!Array.isArray(out) || out.length !== mine.length) throw new Error('DeepSeek devolvió otra cantidad de líneas. Probá de nuevo.');
+  mine.forEach((l, i) => {
+    if (typeof out[i] !== 'string' || !out[i].trim()) return;
+    const words = out[i].trim().split(/\s+/), k = words.findIndex(w => /^\*.*\*[.,;:!?]*$/.test(w) && w.length > 2);
+    const clean = words.join(' ').replace(/\*/g, '').trim().slice(0, 60);
+    if (!clean) return; // DeepSeek la dejó vacía: queda como estaba
+    l.text = clean;
+    if (k >= 0 && k < l.text.split(/\s+/).length) l.key = k; else delete l.key;
+  });
+  dirty = true;
+  return tokens || 0;
+}
+
+$('fixSubs').onclick = () => guard(async () => {
+  if (!clipLines(clips[sel]).length) return say('Primero creá los subtítulos de este clip.');
+  say('DeepSeek está corrigiendo los subtítulos…');
+  const tokens = await fixClip(clips[sel]);
+  renderSubs();
+  say(`Subtítulos corregidos${tokens ? `. DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens` : ''}. Revisalos en la lista.`);
+});
+
+// Después de crear subtítulos, DeepSeek los corrige solo (si hay clave y la opción está activa). Si falla, quedan como estaban.
+async function autoFix(list) {
+  if (!$('autoFix').checked || !$('dsKey').value.trim()) return '';
+  let tokens = 0;
+  for (const [i, c] of list.entries()) {
+    if (cancel || !clipLines(c).length) continue;
+    say(`DeepSeek está corrigiendo los subtítulos… clip ${i + 1} de ${list.length}`);
+    try { tokens += await fixClip(c); }
+    catch (e) { renderSubs(); return ` Los subtítulos no se pudieron corregir: ${e.message}`; }
+  }
+  renderSubs();
+  return tokens ? ` Subtítulos corregidos por DeepSeek (${tokens.toLocaleString('es-AR')} tokens).` : '';
+}
+try { $('autoFix').checked = localStorage.getItem('clipcut.autofix') !== 'no'; } catch {}
+$('autoFix').onchange = () => { try { localStorage.setItem('clipcut.autofix', $('autoFix').checked ? 'si' : 'no'); } catch {} };
+
+// ---------- Elegir por contenido con DeepSeek ----------
+const KEY = 'clipcut.deepseek';
+try { $('dsKey').value = localStorage.getItem(KEY) || ''; } catch {}
+$('dsKey').oninput = e => {
+  try { localStorage.setItem(KEY, e.target.value.trim()); } catch {}
+  document.querySelector(`[name=mode][value=${e.target.value.trim() ? 'ia' : 'audio'}]`).checked = true; // con clave, elige por lo que se dice
+  $('wWrap').hidden = mode() === 'ia'; aiNote();
+};
+// Aviso en Elegir clips: cómo va a elegir, según haya clave o no
+function aiNote() {
+  const key = !!$('dsKey').value.trim(), n = $('aiNote');
+  n.classList.toggle('warn', !key);
+  n.replaceChildren(key ? (mode() === 'ia' ? 'DeepSeek elige por lo que se dice. La primera vez lee todo el episodio; después queda guardado.' : 'Elige por la energía de la voz (lo cambiás en Más opciones).')
+    : 'Sin clave de DeepSeek: elige por la energía de la voz y el resumen no está disponible. ');
+  if (!key) n.append(btn('Cargar la clave', () => $('settings').showModal()));
+}
+$('openSettings').onclick = () => $('settings').showModal();
+// Elegir clips: mejores momentos o resumen. Textos: este clip o estilo y marca.
+for (const [attr, map] of [['what', { clips: 'whatClips', reel: 'whatReel', hand: 'whatHand' }], ['t4', { clip: 't4clip', brand: 't4brand' }]]) {
+  const bs = document.querySelectorAll(`[data-${attr}]`);
+  bs.forEach(b => { b.onclick = () => {
+    bs.forEach(x => { x.setAttribute('aria-pressed', x === b); $(map[x.dataset[attr]]).hidden = x !== b; });
+    if (attr === 'what') $('aiNote').hidden = b.dataset.what === 'hand';
+    if (b.dataset.what === 'hand') enterHand();
+  }; });
+}
+const mode = () => document.querySelector('[name=mode]:checked').value;
+document.querySelectorAll('[name=mode]').forEach(r => {
+  r.onchange = () => { $('wWrap').hidden = mode() === 'ia'; aiNote(); };
+});
+document.querySelector(`[name=mode][value=${$('dsKey').value.trim() ? 'ia' : 'audio'}]`).checked = true;
+$('wWrap').hidden = mode() === 'ia'; aiNote();
+document.querySelector('[name=mode]:checked').onchange();
+
+async function callDeepSeek(messages) {
+  const key = $('dsKey').value.trim();
+  if (!key) throw new Error('Cargá tu clave de DeepSeek en Ajustes, arriba a la derecha.');
+  let r;
+  try {
+    r = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+      body: JSON.stringify({ model: 'deepseek-chat', temperature: 0.2, response_format: { type: 'json_object' }, messages })
+    });
+  } catch { throw new Error('No se pudo conectar con DeepSeek. Revisá la conexión a internet.'); }
+  if (r.status === 401) throw new Error('La clave de DeepSeek no es válida. Revisala en Ajustes, arriba a la derecha.');
+  if (r.status === 402) throw new Error('Tu cuenta de DeepSeek no tiene saldo. Cargá saldo y probá de nuevo.');
+  if (!r.ok) throw new Error(`DeepSeek respondió con un error (${r.status}). Probá de nuevo en un rato.`);
+  const j = await r.json();
+  try { return { data: JSON.parse(j.choices[0].message.content), tokens: j.usage?.total_tokens }; }
+  catch { throw new Error('DeepSeek devolvió una respuesta que no se pudo leer. Probá de nuevo.'); }
+}
+
+async function askDeepSeek(sents, n, min, max, exclude = []) {
+  const key = $('dsKey').value.trim();
+  if (!key) throw new Error('Cargá tu clave de DeepSeek para elegir por contenido.');
+  const list = sents.map((x, i) => `${i} [${fmt(x.a)}-${fmt(x.b)}] ${x.text}`).join('\n');
+  const { data, tokens } = await callDeepSeek([
+    { role: 'system', content: 'Sos editor de clips para Reels y TikTok de un podcast en español. Elegís momentos que se entienden solos: una idea completa, con un comienzo que engancha y un cierre claro.' },
+    { role: 'user', content: `Elegí los ${n} mejores clips de entre ${min} y ${max} segundos. Cada clip empieza al inicio de una oración y termina al final de otra, y no se pisan entre sí. Respondé solo con JSON así: {"clips":[{"desde":número de oración,"hasta":número de oración,"titulo":"hasta 8 palabras"}]}\n\n${exclude.length ? `\n\nYa se usaron estos tramos: elegí momentos distintos, que no se pisen con ellos: ${exclude.map(([a, b]) => `${fmt(a)}-${fmt(b)}`).join(', ')}.` : ''}\n\nOraciones del episodio:\n${list}` }
+  ]);
+  const used = [];
+  const picks = (data.clips || [])
+    .map(c => ({ d: Math.round(c.desde), h: Math.round(c.hasta), title: String(c.titulo || '').slice(0, 80) }))
+    .filter(c => c.d >= 0 && c.h < sents.length && c.d <= c.h)
+    .filter(c => { const len = sents[c.h].b - sents[c.d].a; return len >= min * 0.6 && len <= max * 1.5; })
+    .filter(c => { const a = sents[c.d].a, b = sents[c.h].b; if (used.some(([x, y]) => a < y && b > x) || overlaps(a, b, exclude)) return false; used.push([a, b]); return true; })
+    .slice(0, n);
+  return { picks, tokens };
+}
+
+// El episodio entero, transcripto una vez y guardado: buscar otra vez no vuelve a transcribir.
+// Lectura rápida (modelo liviano, de a un minuto y varios a la vez): alcanza para entender de qué se habla.
+// Los subtítulos de los clips elegidos se hacen después con la calidad elegida.
+async function ensureTranscript() {
+  if (transcript) return transcript.slice();
+  say('Preparando el audio…');
+  const halves = Array.from({ length: Math.ceil(duration / 30) }, (_, i) => i * 30); // de a 30 s: es lo que Whisper procesa de una vez
+  const parts = await inParallel(halves, a => transcribe(a, Math.min(a + 30, duration), ROUGH), 'Leyendo el episodio:', ' minutos', 0.5);
+  if (cancel) return [];
+  const chunks = parts.flat();
+  transcript = chunks.slice(); transcriptQ = ROUGH;
+  if (modelId() === ROUGH) addLines(chunks);
+  return chunks;
+}
+
+async function byContent(n, min, max, cut, sens, exclude = []) {
+  if (!$('dsKey').value.trim()) throw new Error('Cargá tu clave de DeepSeek para elegir por contenido.');
+  findMoments(await loudness(), { min, max, n, sens, cut }); // detecta las frases para quitar silencios
+  const chunks = await ensureTranscript();
+  if (cancel) return [];
+  const sents = sentencesOf(chunks);
+  if (!sents.length) throw new Error('No se entendió ninguna frase en el audio.');
+  say('DeepSeek está eligiendo las mejores ideas…');
+  const { picks, tokens } = await askDeepSeek(sents, n, min, max, exclude);
+  if (!picks.length) throw new Error(exclude.length ? 'DeepSeek no encontró otros clips distintos. Probá otra duración o tocá "Volver a los mejores".' : 'DeepSeek no devolvió clips válidos. Probá de nuevo o usá el modo rápido.');
+  if (tokens) say(`DeepSeek usó ${tokens.toLocaleString('es-AR')} tokens.`);
+  return picks.sort((x, y) => x.d - y.d).map(p => {
+    const start = Math.max(0, sents[p.d].a - 0.1), end = Math.min(duration, sents[p.h].b + 0.3);
+    return { start, end, parts: partsFor(start, end, cut), title: p.title };
+  });
+}
+
+// ---------- Detección de escenas ----------
+// Compara cada fotograma (reducido a 32x18) con el anterior; si el cambio medio supera el umbral, hay corte.
+$('stop').onclick = () => { cancel = true; };
+$('detect').onclick = () => guard(async () => {
+  const v = await hiddenVideo();
+  const c = document.createElement('canvas'); c.width = 32; c.height = 18;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  const thumb = () => snap(v);
+
+  const thr = +$('thr').value, minScene = 1.5;
+  let prev, starts = [0], thumbs = [], lastCut = 0;
+  busyUI(true);
+
+  try {
+  await scan(v, [[0, duration]], 0.5, 16, (t, first) => {
+    ctx.drawImage(v, 0, 0, 32, 18);
+    const d = ctx.getImageData(0, 0, 32, 18).data;
+    if (first) thumbs.push(thumb());
+    if (prev) {
+      let s = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        s += Math.abs(d[i] - prev[i]) + Math.abs(d[i + 1] - prev[i + 1]) + Math.abs(d[i + 2] - prev[i + 2]);
+      }
+      if (s / (d.length * 0.75) > thr && t - lastCut >= minScene) {
+        starts.push(t); thumbs.push(thumb()); lastCut = t;
+      }
+    }
+    prev = d;
+  }, 'Buscando escenas');
+  } finally {
+    free(v);
+    busyUI(false);
+  }
+  if (cancel) return say('Análisis cancelado.');
+
+  scenes = starts.map((s, i) => ({ start: s, end: starts[i + 1] ?? duration, thumb: thumbs[i] }));
+  const max = +$('len').value;
+  clips = max ? group(max) : scenes.slice(); clipsGen++;
+  select(0);
+  say(`Listo: ${scenes.length} escenas, ${clips.length} clips.`);
+});
+
+// Junta escenas consecutivas hasta llegar a la duración máxima; recorta los clips que se pasan
+function group(max) {
+  const out = [], cap = c => ({ ...c, end: Math.min(c.end, c.start + max) });
+  let cur = null;
+  for (const s of scenes) {
+    if (cur && s.end - cur.start > max) { out.push(cap(cur)); cur = null; }
+    cur = cur ? { ...cur, end: s.end } : { ...s };
+  }
+  if (cur) out.push(cap(cur));
+  return out;
+}
+
+// ---------- Listado de clips ----------
+function render() {
+  ensureClipKeys();
+  sel = Math.min(sel, clips.length - 1);
+  $('strip').replaceChildren(...clips.map((c, i) => {
+    const li = document.createElement('li');
+    const f = document.createElement('button');
+    f.type = 'button'; f.className = 'frame';
+    f.setAttribute('aria-pressed', i === sel);
+    f.setAttribute('aria-label', `${c.reel ? 'Resumen' : 'Clip ' + (i + 1)}, ${Math.round(clipLen(c))} segundos${c.score ? `, puntaje ${c.score}` : ''}`);
+    f.onclick = () => select(i);
+    const im = c.thumb ? Object.assign(new Image(), { src: c.thumb, alt: '' }) : Object.assign(document.createElement('div'), { className: 'ph' });
+    f.append(im,
+      Object.assign(document.createElement('b'), { textContent: c.reel ? 'Resumen' : i + 1 }),
+      Object.assign(document.createElement('span'), { textContent: `${Math.round(clipLen(c))} s` }));
+    if (c.score) f.append(Object.assign(document.createElement('em'), { textContent: c.score, title: 'Puntaje' }));
+    const x = btn('×', () => { clips.splice(i, 1); render(); }, `Quitar clip ${i + 1}`);
+    x.className = 'drop-x';
+    li.append(f, x);
+    return li;
+  }));
+  if (searching) $('strip').prepend(Object.assign(document.createElement('li'), { className: 'strip-empty', textContent: 'Buscando clips nuevos… aparecen acá cuando estén listos. Si cancelás, vuelven los anteriores.' }));
+  else if (!clips.length) $('strip').innerHTML = '<li class="strip-empty">Tus clips van a aparecer acá.</li>';
+  $('found').textContent = clips.length ? `${clips.length === 1 ? 'Un clip' : clips.length + ' clips'} en la tira. Tocá uno para verlo y recortarlo.` : '';
+  const c = clips[sel];
+  $('selInfo').hidden = !c;
+  if (c) {
+    $('selInfo').innerHTML = '<img alt=""><div><strong></strong><small></small></div>';
+    $('selInfo').querySelector('img').src = c.thumb || '';
+    $('selInfo').querySelector('strong').textContent = c.title || `Clip ${sel + 1} de ${clips.length}`;
+    $('selInfo').querySelector('small').textContent = `Dura ${clipLen(c).toFixed(1)} s`;
+  }
+  $('dlOne').disabled = !c;
+  $('all').disabled = !clips.length;
+  renderTimeline();
+}
+
+// Reproduce las partes del clip una tras otra, saltando los silencios
+// Reproduce las partes del clip una tras otra, saltando los silencios (lo controla el bucle de la vista previa)
+let playing = null;
+function preview(c) {
+  const ps = parts(c);
+  fromTop(c);
+  player.play().then(() => { playing = { ps, k: 0 }; }).catch(() => {});
+}
+player.addEventListener('pause', () => { playing = null; hookUntil = null; });
+
+// ---------- Exportación ----------
+// MP4 con H.264 y AAC es lo que aceptan WhatsApp e Instagram (Chrome y Edge actualizados lo graban)
+const MIMES = ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4;codecs=avc1,opus',
+               'video/webm;codecs=vp9,opus', 'video/webm'];
+// Se dibuja cada fotograma con el encuadre en un lienzo y se graba en tiempo real con MediaRecorder.
+async function exportRealtime(c, i) {
+  const cv = document.createElement('canvas');
+  if (!window.MediaRecorder || !cv.captureStream) {
+    throw new Error('Tu navegador no permite exportar. Usá Chrome o Edge actualizados.');
+  }
+  player.pause(); // libera la compu para codificar
+  await fontsReady();
+  const ac = new AudioContext();
+  // Dos copias del video que se turnan: mientras una reproduce un tramo, la otra ya espera en el siguiente.
+  // Así la grabación nunca se pausa y el audio no se desfasa del video al quitar silencios.
+  const vids = [await hiddenVideo(), await hiddenVideo()];
+  try {
+    const light = $('outQ').value === 'light', big = light ? 1280 : 1920;
+    const k = Math.min(1, big / Math.max(vids[0].videoWidth, vids[0].videoHeight));
+    [cv.width, cv.height] = outDims(vids[0].videoWidth, vids[0].videoHeight);
+    const g = cv.getContext('2d');
+    let src = vids[0];
+    const manual = !!window.CanvasCaptureMediaStreamTrack?.prototype.requestFrame;
+    const vtrack = cv.captureStream(manual ? 0 : 30).getVideoTracks()[0];
+    const frame = () => { draw(g, src, activeAt(src.currentTime)); if (manual) vtrack.requestFrame(); };
+
+    // El audio va por AudioContext para grabarlo sin que suene en los parlantes
+    const dest = ac.createMediaStreamDestination();
+    for (const v of vids) { v.muted = false; ac.createMediaElementSource(v).connect(dest); }
+    await ac.resume();
+
+    const ps = playParts(c);
+    await seek(vids[0], ps[0][0]);
+    let ready = ps[1] ? seek(vids[1], ps[1][0]) : null;
+    frame();
+
+    const stream = new MediaStream([vtrack, ...dest.stream.getAudioTracks()]);
+    const mime = MIMES.find(m => MediaRecorder.isTypeSupported(m));
+    if (!mime) throw new Error('No hay un formato de grabación compatible.');
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: light ? 5e6 : 8e6 });
+    const chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    const stopped = once(rec, 'stop');
+
+    const total = clipLen(c);
+    let done = 0;
+    rec.start();
+    for (const [k, [s, e]] of ps.entries()) {
+      if (cancel) break;
+      if (k) await ready; // normalmente ya está listo
+      src = vids[k % 2]; exportHook = !!c.hook && k === 0;
+      await src.play();
+      // mientras suena este tramo, la otra copia se adelanta al siguiente
+      ready = ps[k + 1] && k ? seek(vids[(k + 1) % 2], ps[k + 1][0]) : ready;
+      await new Promise(r => {
+        // cada vez que el video tiene una imagen nueva lista (si el navegador lo permite); si no, al ritmo de la pantalla
+        const next = () => src.requestVideoFrameCallback ? src.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
+        src.onended = () => r();
+        const tick = async () => {
+          if (document.hidden) { // al cambiar de pestaña el navegador deja de dibujar: se pausa y sigue al volver
+            src.pause(); rec.pause();
+            say('Exportación en pausa: volvé a esta pestaña para seguir.');
+            await once(document, 'visibilitychange');
+            rec.resume(); await src.play();
+          }
+          frame();
+          const p = Math.min((done + src.currentTime - s) / total, 1);
+          $('prog').value = p;
+          say(`Exportando ${c.whole ? 'el episodio completo' : `clip ${i + 1} de ${clips.length}`}… ${Math.round(p * 100)} %`);
+          (cancel || src.currentTime >= e || src.ended) ? r() : next();
+        };
+        tick();
+      });
+      src.pause(); src.onended = null;
+      done += e - s;
+    }
+    rec.stop(); await stopped;
+    if (cancel) return say('Exportación cancelada.');
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(chunks, { type: mime.split(';')[0] }));
+    a.download = `${name}-${c.whole ? 'completo' : c.reel ? 'resumen' + (i + 1) : 'clip' + (i + 1)}${vertical() ? '-9x16' : ''}.${mime.includes('mp4') ? 'mp4' : 'webm'}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    say(`${c.whole ? 'Episodio completo descargado' : c.reel ? 'Resumen descargado' : `Clip ${i + 1} descargado`}` + (mime.includes('mp4') ? '.' : ' en WebM: tu navegador no graba MP4. Actualizá Chrome o Edge para poder mandarlo por WhatsApp.'));
+  } finally {
+    vids.forEach(free); ac.close();
+  }
+}
+
+// ---------- Exportación cuadro a cuadro (WebCodecs) ----------
+// Lee el video imagen por imagen, dibuja el encuadre y lo codifica: más rápido que en tiempo real, sin trabas ni desfase.
+const MB = 'https://cdn.jsdelivr.net/npm/mediabunny@1.60.0/dist/bundles/mediabunny.min.mjs';
+let mbLib;
+const mediabunny = async () => mbLib ??= await import(MB);
+
+function outDims(sw, sh) {
+  const light = $('outQ').value === 'light';
+  if (vertical()) return light ? OUT.map(x => Math.round(x * 2 / 3 / 2) * 2) : OUT.slice();
+  const k = Math.min(1, (light ? 1280 : 1920) / Math.max(sw, sh));
+  return [Math.round(sw * k / 2) * 2, Math.round(sh * k / 2) * 2];
+}
+
+// Pasa un pedazo de audio a la frecuencia y canales que acepta AAC (por ejemplo, de 32 kHz o 5.1 a 48 kHz estéreo)
+function toAac(M, a, rate, ch) {
+  const n = a.numberOfFrames, sc = a.numberOfChannels, sr = a.sampleRate, m = Math.max(1, Math.round(n * rate / sr));
+  const src = Array.from({ length: sc }, (_, c) => { const d = new Float32Array(n); a.copyTo(d, { planeIndex: c, format: 'f32-planar' }); return d; });
+  const out = new Float32Array(m * ch);
+  for (let c = 0; c < ch; c++) {
+    // mezcla: si hay más canales que los que salen, se reparten entre izquierda y derecha
+    const mine = sc <= ch ? [src[Math.min(c, sc - 1)]] : src.filter((_, k) => k % ch === c);
+    for (let i = 0; i < m; i++) {
+      const x = i * sr / rate, j = Math.min(n - 1, Math.floor(x)), f = x - j, k = Math.min(n - 1, j + 1);
+      let v = 0;
+      for (const d of mine) v += d[j] + (d[k] - d[j]) * f;
+      out[c * m + i] = v / mine.length;
+    }
+  }
+  return new M.AudioSample({ data: out, format: 'f32-planar', numberOfChannels: ch, sampleRate: rate, timestamp: a.timestamp });
+}
+
+async function exportFast(c, i) {
+  if (!window.VideoEncoder) return null;
+  const M = await mediabunny();
+  const input = new M.Input({ source: new M.BlobSource(file), formats: M.ALL_FORMATS });
+  const vt = await input.getPrimaryVideoTrack(), at = await input.getPrimaryAudioTrack();
+  if (!vt) return null;
+  const cv = document.createElement('canvas');
+  [cv.width, cv.height] = outDims(vw, vh);
+  const g = cv.getContext('2d');
+  // MP4 con H.264 y AAC si el navegador puede (es lo que acepta WhatsApp); si no, lo mejor que haya
+  const vCodec = await M.getFirstEncodableVideoCodec(['avc', 'vp9', 'vp8'], { width: cv.width, height: cv.height });
+  if (!vCodec) return null;
+  const mp4 = vCodec === 'avc';
+  const srcRate = at ? at.sampleRate : 48000, srcCh = at ? at.numberOfChannels : 2;
+  const rate = [44100, 48000].includes(srcRate) ? srcRate : 48000, ch = Math.min(2, srcCh); // lo que acepta AAC
+  const aCodec = at ? await M.getFirstEncodableAudioCodec(mp4 ? ['aac', 'opus'] : ['opus', 'aac'], { sampleRate: rate, numberOfChannels: ch }) : null;
+  const convert = rate !== srcRate || ch !== srcCh;
+  const shift = +$('avSync').value / 1000; // ajuste a mano de la sincronización (en segundos; negativo = el audio antes)
+  const output = new M.Output({ format: mp4 ? new M.Mp4OutputFormat({ fastStart: 'in-memory' }) : new M.WebMOutputFormat(), target: new M.BufferTarget() });
+  const vsrc = new M.CanvasSource(cv, { codec: vCodec, bitrate: cv.width >= 1080 ? 9e6 : 5e6 });
+  output.addVideoTrack(vsrc, { frameRate: 30 });
+  let asrc = null;
+  if (aCodec) { asrc = new M.AudioSampleSource({ codec: aCodec, bitrate: 160e3 }); output.addAudioTrack(asrc); }
+  await output.start();
+  const vsink = new M.VideoSampleSink(vt), asink = asrc ? new M.AudioSampleSink(at) : null;
+  const total = clipLen(c);
+  // Video a 30 cuadros por segundo exactos, desde 0 y sin cuadros repetidos: así WhatsApp, al volver a comprimirlo,
+  // no corre el audio (con tiempos irregulares o un arranque corrido, su compresor desfasaba la voz)
+  const FPS = 30;
+  let out = 0, shown = -1, tick = 0;
+  for (const [pi, [s, e]] of playParts(c).entries()) {
+    if (cancel) break;
+    exportHook = !!c.hook && pi === 0;
+    const end = out + (e - s);
+    let prev = null;
+    const emit = async upTo => { // dibuja los cuadros de salida que caen antes de upTo con la imagen de prev
+      while (prev && tick / FPS < upTo - 1e-6 && tick / FPS < end - 1e-6) {
+        const ot = tick / FPS, st = s + ot - out;
+        draw(g, prev.toCanvasImageSource(), activeAt(st), st);
+        await vsrc.add(ot, 1 / FPS);
+        tick++;
+      }
+    };
+    for await (const smp of vsink.samples(s, e)) {
+      if (cancel) { smp.close(); break; }
+      await emit(out + Math.max(0, smp.timestamp - s)); // hasta donde empieza este cuadro, se repite el anterior
+      prev?.close(); prev = smp;
+      const p = Math.min(tick / FPS / total, 1);
+      if (p - shown > 0.02) { shown = p; $('prog').value = p; say(`Exportando ${c.whole ? 'el episodio completo' : `clip ${i + 1} de ${clips.length}`}… ${Math.round(p * 100)} %`); }
+    }
+    if (!cancel) await emit(end);
+    prev?.close();
+    if (asink) for await (const a of asink.samples(s, e)) {
+      if (cancel) { a.close(); break; }
+      const sr = a.sampleRate, st = a.timestamp;
+      const f0 = st < s ? Math.round((s - st) * sr) : 0, f1 = Math.min(a.numberOfFrames, Math.round((e - st) * sr));
+      let g0 = f0, ts = out + Math.max(0, st + f0 / sr - s) + shift;
+      if (ts < 0) { g0 += Math.ceil(-ts * sr); ts = 0; } // con el ajuste, lo que quedaría antes del inicio se corta
+      if (f1 > g0) {
+        let piece = g0 > 0 || f1 < a.numberOfFrames ? a.trim(g0, f1) : a.clone();
+        if (convert) { const conv = toAac(M, piece, rate, ch); piece.close(); piece = conv; }
+        piece.setTimestamp(ts);
+        await asrc.add(piece);
+        piece.close();
+      }
+      a.close();
+    }
+    out += e - s;
+  }
+  if (cancel) { await output.cancel(); return { cancelled: true }; }
+  await output.finalize();
+  return { blob: new Blob([output.target.buffer], { type: output.format.mimeType }), ext: output.format.fileExtension, mp4: mp4 && aCodec === 'aac' };
+}
+
+// Exporta con el método rápido y, si el navegador no lo permite, con el anterior
+async function exportClip(c, i) {
+  player.pause();
+  await fontsReady();
+  if (!rmsCache && ($('zoom').value !== 'no' || lines.length)) { say('Midiendo el audio…'); try { await loudness(); } catch {} }
+  let r = null;
+  exporting = true;
+  let why = 'este navegador no tiene el codificador de video';
+  try {
+    try { r = await exportFast(c, i); }
+    catch (e) { console.warn('Exportación rápida no disponible:', e); why = e.message || String(e); r = null; }
+    if (r?.cancelled) return say('Exportación cancelada.');
+    if (!r) {
+      say(`No se pudo usar la exportación rápida (${why}). Se graba en tiempo real: dejá la pestaña abierta y la compu tranquila.`);
+      await exportRealtime(c, i);
+      return say($('status').textContent + ` Se grabó en tiempo real porque la rápida falló (${why}): si el audio sale corrido, mandame este mensaje.`);
+    }
+  } finally { exporting = exportHook = false; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(r.blob);
+  a.download = `${name}-${c.whole ? 'completo' : c.reel ? 'resumen' + (i + 1) : 'clip' + (i + 1)}${vertical() ? (OUT[0] === OUT[1] ? '-1x1' : '-9x16') : ''}${r.ext}`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  say(`${c.whole ? 'Episodio completo descargado' : c.reel ? 'Resumen descargado' : `Clip ${i + 1} descargado`}` + (r.mp4 ? ' en MP4.' : ` en ${r.ext.slice(1).toUpperCase()}: este navegador no puede armar MP4 con audio AAC. Para WhatsApp usá Chrome o Edge actualizados.`));
+}
+
+const exportOne = (c, i) => guard(async () => { busyUI(true); try { await exportClip(c, i); } finally { busyUI(false); } });
+
+$('dlOne').onclick = () => exportOne(clips[sel], sel);
+function srtFor(c) {
+  const ps = parts(c);
+  const toOut = t => { let acc = 0; for (const [s, e] of ps) { if (t < s) return acc; if (t <= e) return acc + t - s; acc += e - s; } return acc; };
+  const ts = x => { const ms = Math.round(x * 1000), p = (n, l = 2) => String(n).padStart(l, '0');
+    return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`; };
+  const h = c.hook, hl = h ? h[1] - h[0] : 0;
+  const hookLines = h ? clipLines(c).filter(l => l.b > h[0] && l.a < h[1]).map(l => [Math.max(l.a, h[0]) - h[0], Math.min(l.b, h[1]) - h[0], l.text]) : [];
+  return hookLines.concat(clipLines(c).map(l => [hl + toOut(Math.max(l.a, c.start)), hl + toOut(Math.min(l.b, c.end)), l.text]))
+    .filter(([a, b]) => b - a > 0.05)
+    .map(([a, b, x], i) => `${i + 1}\n${ts(a)} --> ${ts(b)}\n${x}\n`).join('\n');
+}
+$('srt').onclick = () => {
+  const c = clips[sel];
+  if (!c) return say('Elegí un clip en la tira.');
+  const txt = srtFor(c);
+  if (!txt) return say('Este clip todavía no tiene subtítulos. Crealos en el paso Textos.');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain;charset=utf-8' }));
+  a.download = `${name}-clip${sel + 1}.srt`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  say('Subtítulos descargados en .srt.');
+};
+$('whole').onclick = () => exportOne({ start: 0, end: duration, whole: true }, 0);
+$('all').onclick = () => guard(async () => {
+  busyUI(true);
+  try { for (let i = 0; i < clips.length && !cancel; i++) await exportClip(clips[i], i); }
+  finally { busyUI(false); }
+  if (!cancel) say('Todos los clips descargados. Si el navegador pregunta, permití descargar varios archivos.');
+});
+
+// ---------- Clip seleccionado: recortar y revisar los planos ----------
+let win = [0, 1]; // tramo del video que muestra la línea de tiempo
+const pct = t => (t - win[0]) / (win[1] - win[0]) * 100 + '%';
+const span = (el, a, b) => Object.assign(el.style, { left: pct(a), width: (b - a) / (win[1] - win[0]) * 100 + '%' });
+
+function select(i, jump = true) {
+  sel = i;
+  const c = clips[i];
+  if (c) {
+    const pad = Math.max(3, (c.end - c.start) * 0.15);
+    win = [Math.max(0, c.start - pad), Math.min(duration, c.end + pad)];
+    if (jump) { playing = null; player.currentTime = c.start; }
+  }
+  render();
+  if (keys.length) sync(true); // actualiza la lista de planos del clip elegido
+  renderSubs(); renderHook();
+  $('clipTitle').value = clips[sel]?.title || '';
+  $('postText').value = clips[sel]?.post || '';
+}
+
+function renderTimeline() {
+  const c = clips[sel];
+  $('clipbar').hidden = !c || step === 1;
+  if (!c) return;
+  // (los puntos de cambio de plano se agregan al final)
+  $('cbTitle').textContent = c.title || `Clip ${sel + 1} de ${clips.length}`;
+  $('cbMeta').textContent = `${c.title ? `Clip ${sel + 1} de ${clips.length}. ` : ''}De ${fmt(c.start)} a ${fmt(c.end)}, dura ${clipLen(c).toFixed(1)} s`;
+  $('prevClip').disabled = sel === 0;
+  $('nextClip').disabled = sel === clips.length - 1;
+  span($('tlClip'), c.start, c.end);
+  const ps = parts(c);
+  $('tlGaps').replaceChildren(...ps.slice(1).map((p, k) => { const d = document.createElement('div'); d.className = 'tl-gap'; span(d, ps[k][1], p[0]); return d; }));
+  $('tlShots').replaceChildren(...keys.map((k, i) => [k, Math.max(k.t, c.start), Math.min(keys[i + 1]?.t ?? duration, c.end)])
+    .filter(([, a, b]) => b - a > 0.01)
+    .map(([k, a, b]) => {
+      const who = typeof k.who === 'number' ? `, persona ${k.who + 1}` : '';
+      const name = takeOf(k)?.name || LAYOUTS[k.layout].name + who, el = btn(name, () => { playing = null; player.currentTime = a + 0.05; }, `Plano ${name} desde ${fmt(a)}`);
+      el.className = 'shot ' + k.layout + (k.who % 2 ? ' alt' : ''); el.title = `${name}, de ${fmt(a)} a ${fmt(b)}`;
+      span(el, a, b);
+      return el;
+    }));
+  for (const [id, t] of [['hStart', c.start], ['hEnd', c.end]]) {
+    const h = $(id);
+    h.style.left = pct(t);
+    h.setAttribute('aria-valuemin', 0); h.setAttribute('aria-valuemax', duration.toFixed(1));
+    h.setAttribute('aria-valuenow', t.toFixed(1)); h.setAttribute('aria-valuetext', fmt(t));
+  }
+  // un punto por cada cambio de plano dentro del clip, del color del diseño que empieza ahí
+  keys.forEach((k, i) => {
+    if (k.t <= c.start + 0.01 || k.t >= c.end) return;
+    const d = document.createElement('button');
+    d.type = 'button'; d.className = 'kdot ' + k.layout; d.dataset.i = i;
+    d.setAttribute('role', 'slider');
+    d.setAttribute('aria-label', `Cambio a ${LAYOUTS[k.layout].name}. Arrastralo o usá las flechas para moverlo`);
+    d.setAttribute('aria-valuetext', fmt(k.t));
+    d.style.left = pct(k.t);
+    $('tlShots').append(d);
+  });
+  $('tlHead').style.left = pct(player.currentTime);
+  $('tlFrom').textContent = fmt(win[0]);
+  $('tlTo').textContent = fmt(win[1]);
+}
+
+// Mover un cambio de plano, sin pasar al anterior ni al siguiente
+function moveKey(i, t) {
+  const k = keys[i], c = clips[sel];
+  const lo = Math.max(c.start + 0.3, (keys[i - 1]?.t ?? 0) + 0.3), hi = Math.min(c.end - 0.3, (keys[i + 1]?.t ?? duration) - 0.3);
+  k.t = +Math.min(Math.max(t, lo), hi).toFixed(2);
+  player.currentTime = k.t; // muestra cómo arranca el plano
+  return k;
+}
+$('tlShots').onpointerdown = e => {
+  const d = e.target.closest('.kdot');
+  if (!d) return;
+  e.preventDefault();
+  const i = +d.dataset.i, r = $('tlShots').getBoundingClientRect();
+  d.setPointerCapture(e.pointerId);
+  d.onpointermove = m => { d.style.left = pct(moveKey(i, win[0] + (m.clientX - r.left) / r.width * (win[1] - win[0])).t); };
+  d.onpointerup = d.onpointercancel = () => { d.onpointermove = null; sync(true); };
+};
+$('tlShots').onkeydown = e => {
+  const d = e.target.closest('.kdot'), s = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+  if (!d || !s) return;
+  e.preventDefault();
+  const i = +d.dataset.i;
+  moveKey(i, keys[i].t + s * (e.shiftKey ? 1 : 0.1));
+  sync(true);
+  $('tlShots').querySelector(`.kdot[data-i="${i}"]`)?.focus();
+};
+$('addKey2').onclick = () => $('addKey').click();
+
+// Al recortar, los silencios que se quitaban se mantienen dentro del nuevo inicio y final
+function trim(c) {
+  const o = c.orig || (c.orig = parts(c).map(p => [...p]));
+  let ps = o.map(([a, b]) => [Math.max(a, c.start), Math.min(b, c.end)]).filter(([a, b]) => b - a > 0.05);
+  if (!ps.length) ps = [[c.start, c.end]];
+  ps[0][0] = c.start; ps.at(-1)[1] = c.end;
+  c.parts = ps;
+}
+
+function setEdge(edge, t) {
+  const c = clips[sel];
+  if (!c) return;
+  if (edge === 'start') {
+    const own = keys.find(k => Math.abs(k.t - c.start) < 0.02), old = c.start;
+    c.start = +Math.min(Math.max(t, 0), c.end - 1).toFixed(2);
+    // antes: el plano del clip se estira hasta el nuevo inicio; después: el clip arranca con el plano que había ahí
+    if (own && c.start < old) own.t = c.start;
+    else if (own && c.start > old) {
+      const passed = keys.filter(k => k !== own && k.t > old && k.t <= c.start + 0.01);
+      if (passed.length) { // pasó por encima de cambios de plano: queda el último, ahora al inicio del clip
+        keys = keys.filter(k => k !== own && !passed.slice(0, -1).includes(k));
+        passed.at(-1).t = c.start;
+      } else own.t = c.start;
+      cur = null;
+    }
+  }
+  else c.end = +Math.max(Math.min(t, duration), c.start + 1).toFixed(2);
+  trim(c);
+  playing = null;
+  player.currentTime = c[edge];
+  renderTimeline();
+}
+
+for (const [id, edge] of [['hStart', 'start'], ['hEnd', 'end']]) {
+  const h = $(id);
+  h.onpointerdown = e => {
+    e.stopPropagation();
+    h.setPointerCapture(e.pointerId);
+    const r = $('tlTrack').getBoundingClientRect();
+    h.onpointermove = m => setEdge(edge, win[0] + (m.clientX - r.left) / r.width * (win[1] - win[0]));
+    h.onpointerup = h.onpointercancel = () => { h.onpointermove = null; select(sel, false); };
+  };
+  h.onclick = e => e.stopPropagation();
+  h.onkeydown = e => {
+    const d = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    setEdge(edge, clips[sel][edge] + d * (e.shiftKey ? 1 : 0.1));
+  };
+  h.onkeyup = e => { if (e.key.startsWith('Arrow')) { render(); h.focus(); } };
+}
+$('tlTrack').onclick = e => {
+  const r = $('tlTrack').getBoundingClientRect();
+  playing = null;
+  player.currentTime = win[0] + (e.clientX - r.left) / r.width * (win[1] - win[0]);
+};
+$('trimS').onclick = () => { setEdge('start', player.currentTime); select(sel, false); };
+$('trimE').onclick = () => { setEdge('end', player.currentTime); select(sel, false); };
+$('prevClip').onclick = () => select(sel - 1);
+$('nextClip').onclick = () => select(sel + 1);
+$('playClip').onclick = () => preview(clips[sel]);
+
+// ---------- Pasos (pestañas) ----------
+const tabs = [...document.querySelectorAll('[role=tab]')];
+function go(n) {
+  step = n;
+  tabs.forEach((t, i) => {
+    const on = i + 1 === n;
+    t.setAttribute('aria-selected', on);
+    t.classList.toggle('done', i + 1 < n);
+    t.tabIndex = on ? 0 : -1;
+    $('p' + (i + 1)).hidden = !on;
+  });
+  $('work').hidden = n === 1;
+  $('work').dataset.step = n;
+  $(n >= 4 ? 'pvSlotFinal' : 'pvSlot3').append($('pvWrap')); // en Textos y Descargar la vista final pasa a ser la grande
+  if (n >= 4 && clips[sel]) { playing = null; player.currentTime = clips[sel].start; }
+  if (n > 1 && sel < 0 && clips.length) select(0, false);
+  if (keys.length) sync(true);
+  renderTimeline();
+  scrollTo({ top: 0 });
+}
+tabs.forEach((t, i) => {
+  t.onclick = () => go(i + 1);
+  t.onkeydown = e => {
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!d) return;
+    let j = i;
+    do j = (j + d + tabs.length) % tabs.length; while (tabs[j].disabled);
+    tabs[j].focus(); go(j + 1);
+  };
+});
+document.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => { go(+b.dataset.go); tabs[b.dataset.go - 1].focus(); }; });
+
+// Dibujito de cada diseño en su botón
+document.querySelectorAll('[data-layout]').forEach(x => {
+  const sl = LAYOUTS[x.dataset.layout].slots;
+  const r = sl.length ? sl : [[0, 0.32, 1, 0.36]];
+  x.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 9 16" aria-hidden="true"><rect x=".4" y=".4" width="8.2" height="15.2" rx="1.2" fill="none"/>${
+    r.map(s => `<rect x="${s[0] * 9 + 1}" y="${s[1] * 16 + 1}" width="${s[2] * 9 - 2}" height="${s[3] * 16 - 2}" rx=".6"/>`).join('')}</svg>`);
+});
+
+function outInfo() {
+  const mp4 = MIMES.slice(0, 3).some(m => MediaRecorder.isTypeSupported?.(m));
+  $('outInfo').className = 'note' + (mp4 ? '' : ' warn');
+  $('outInfo').textContent = `Sale ${$('fmt').value === 'cuadrado' ? 'cuadrado' : vertical() ? 'en vertical' : 'en el formato original'}, ${outDims(vw, vh).join('×')}` + (mp4
+    ? ', en MP4: listo para WhatsApp e Instagram.'
+    : ', en WebM, porque este navegador no graba MP4. Para mandarlo por WhatsApp usá Chrome o Edge actualizados.');
+}
+</script>
+</body>
+</html>
