@@ -1,10 +1,10 @@
-// ClipCut: puente entre la app y DeepSeek. La clave de DeepSeek vive acá como secreto (DEEPSEEK_API_KEY)
+// ClipCreate: puente entre la app y DeepSeek. La clave de DeepSeek vive acá como secreto (DEEPSEEK_API_KEY)
 // y nunca llega al navegador. Solo atiende a usuarios que entraron con su cuenta, y anota cuánto usa cada uno.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-video',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (body: unknown, status = 200) =>
@@ -23,6 +23,13 @@ Deno.serve(async (req) => {
   const jwt = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
   const { data: { user } } = await admin.auth.getUser(jwt);
   if (!user) return json({ error: 'Iniciá sesión' }, 401);
+
+  // Plan: cada video nuevo cuenta (gratis 2 en total, básico 10 y pro 40 por mes); el mismo video no cuenta dos veces
+  const huella = req.headers.get('x-video') ?? '';
+  if (!/^[\w.-]{4,80}$/.test(huella)) return json({ error: 'Falta identificar el video' }, 400);
+  const { data: cupo, error: cupoErr } = await admin.rpc('usar_video', { uid: user.id, h: huella });
+  if (cupoErr) return json({ error: 'No se pudo revisar el plan' }, 500);
+  if (cupo === 'limite') return json({ error: 'limite' }, 402);
 
   // Pedido: solo mensajes de texto, con un tamaño razonable
   let body: { messages?: unknown };
