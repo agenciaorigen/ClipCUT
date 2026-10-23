@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v3.1 — misma identidad que ClipCreate (naranja), enlaces Inicio y Volver a los clips; v3.0: editor multipista en el navegador. v3.0: biblioteca propia, color con LUTs, edición por texto, silencios, Clips inteligentes, reencuadre, fotogramas clave, velocidad, marca, multicámara y cola de exportación. -->
+<!-- ClipCreate Editor v4.0 — diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -11,203 +11,317 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#050506; --panel:#0d0d0f; --panel2:#141417; --line:#222226; --text:#f4f4f5; --muted:#8e8e98;
-  --accent:#ff5a1f; --on-accent:#ffffff; --glow:#ff5a1f66; --video:#2b2b2e; --audio:#1f3a2c; --textclip:#3d2a1a;
-  --tlh:300px;
+  /* sala de edición: grafito neutro, el naranja solo para lo activo */
+  --chrome:#141416; --panel:#19191c; --panel2:#212125; --well:#0d0d0f; --line:#2a2a30; --line2:#35353c;
+  --text:#ececef; --muted:#8b8b95; --faint:#5d5d66;
+  --accent:#ff5a1f; --accent2:#ff7a45; --on-accent:#ffffff; --glow:#ff5a1f55;
+  --c-video:#3d5f93; --c-audio:#2f7d5a; --c-text:#7c4fb8; --c-sub:#5a4fb0;
+  --tlh:300px; --r:5px;
   font-family:"Plus Jakarta Sans",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--chrome);color:var(--text);font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased;overflow:hidden}
 [hidden]{display:none!important}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 button,input,select,textarea{font:inherit;color:inherit}
-button,select,input[type=text],input[type=number],textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;min-height:2.25rem;padding:.35rem .7rem}
-button{cursor:pointer;font-weight:600;white-space:nowrap}
-button:hover:not(:disabled){border-color:#444;background:#222}
+button,select,input[type=text],input[type=number],textarea{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);min-height:2rem;padding:.25rem .6rem}
+button{cursor:pointer;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:.35rem}
+button:hover:not(:disabled){border-color:var(--line2);background:#2a2a2f}
 button:disabled{opacity:.35;cursor:not-allowed}
-.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.go{box-shadow:0 6px 18px -8px var(--glow)}
-.go:hover:not(:disabled){background:#ff6a33;border-color:#ff6a33;color:var(--on-accent)}
-.ico{min-width:2.25rem;padding:.35rem .5rem}
-input[type=range]{accent-color:var(--accent);width:100%}
-input[type=checkbox]{accent-color:var(--accent);width:1.05rem;height:1.05rem;margin:0}
-input[type=color]{width:100%;height:2.25rem;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:2px}
-label{display:grid;gap:.25rem;font-size:.8rem;color:var(--muted)}
-label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.85rem}
-label output{float:right;color:var(--text);font-variant-numeric:tabular-nums}
-textarea{width:100%;resize:vertical;min-height:4.5rem}
+select{padding-right:1.4rem}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none}
+.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:0 4px 14px -6px var(--glow)}
+.go:hover:not(:disabled){background:var(--accent2);border-color:var(--accent2)}
+.ico{min-width:2rem;padding:.25rem}
+.ghost{background:none;border-color:transparent}
+.ghost:hover:not(:disabled){background:#ffffff10;border-color:transparent}
+.ghost[aria-pressed=true]{background:#ff5a1f22;color:var(--accent2)}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+input[type=range]{accent-color:var(--accent);width:100%;height:1.2rem;margin:0}
+input[type=checkbox]{accent-color:var(--accent);width:.95rem;height:.95rem;margin:0}
+input[type=color]{width:100%;height:2rem;border:1px solid var(--line);border-radius:var(--r);background:var(--panel2);padding:2px}
+label{display:grid;gap:.2rem;font-size:.78rem;color:var(--muted)}
+label.check{display:flex;align-items:center;gap:.5rem;color:var(--text);font-size:.8rem}
+label output{color:var(--text);font-variant-numeric:tabular-nums}
+textarea{width:100%;resize:vertical;min-height:4rem}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.hint{color:var(--muted);font-size:.78rem;margin:.2rem 0}
+.hint{color:var(--muted);font-size:.75rem;margin:.15rem 0;line-height:1.45}
+.row{display:flex;gap:.35rem;flex-wrap:wrap}
+.row>*{flex:1}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
 
-/* Barra superior */
-.top{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:.45rem;font-weight:800;letter-spacing:-.02em;margin-right:.25rem}
-.brand b{color:var(--muted);font-weight:600}
-.brand a.home{color:var(--text);padding:0;background:none}
-#pname{max-width:14rem;background:transparent;border-color:transparent;font-weight:600}
-#pname:hover,#pname:focus{border-color:var(--line);background:var(--panel2)}
+/* ---------- Estructura ---------- */
+.app{display:grid;height:100vh;grid-template-columns:64px 264px minmax(0,1fr) 300px;grid-template-rows:42px minmax(0,1fr) 6px var(--tlh) 26px;
+  grid-template-areas:"top top top top" "rail left view insp" "split split split split" "tl tl tl tl" "stat stat stat stat"}
+.top{grid-area:top;display:flex;align-items:center;gap:.35rem;padding:0 .6rem;background:var(--chrome);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:.45rem;font-weight:800;letter-spacing:-.02em;margin-right:.4rem;font-size:.9rem}
+.brand a{color:var(--text);text-decoration:none}
+.brand span{color:var(--faint);font-weight:500}
+#pname{width:15rem;max-width:30vw;background:transparent;border-color:transparent;font-weight:600}
+#pname:hover{border-color:var(--line)}
+.top .sep{width:1px;height:20px;background:var(--line);margin:0 .25rem}
 .top .grow{flex:1}
-#saved{color:var(--muted);font-size:.78rem;min-width:5rem}
-.top a{color:var(--muted);text-decoration:none;font-weight:600;padding:.35rem .5rem;border-radius:8px}
-.top a:hover{color:var(--text);background:var(--panel2)}
-#status{margin:0;padding:.3rem .75rem;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--line);min-height:1.9rem}
+.top a.lnk{color:var(--muted);text-decoration:none;font-weight:600;padding:.3rem .55rem;border-radius:var(--r);display:inline-flex;align-items:center;gap:.35rem}
+.top a.lnk:hover{color:var(--text);background:#ffffff0d}
 
-/* Distribución */
-.ed{display:grid;grid-template-columns:270px minmax(0,1fr) 290px;grid-template-rows:minmax(0,1fr) var(--tlh);grid-template-areas:"left stage right" "tl tl tl";height:calc(100vh - 5.4rem);min-height:520px}
-.panel{background:var(--panel);overflow:auto;min-height:0}
-#left{grid-area:left;border-right:1px solid var(--line)}
-#right{grid-area:right;border-left:1px solid var(--line);padding:.75rem}
-#stageWrap{grid-area:stage;display:grid;place-items:center;padding:.75rem;min-height:0;min-width:0;position:relative}
-#stage{display:block;background:#000;box-shadow:0 0 0 1px var(--line)}
-.tlbox{grid-area:tl;border-top:1px solid var(--line);display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;background:var(--panel)}
-@media (max-width:900px){
-  .ed{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;grid-template-areas:"stage" "tl" "right" "left";height:auto}
-  #tl{min-height:190px;max-height:300px}
-  #stageWrap{height:56vh}
-  #left,#right{border:0;border-top:1px solid var(--line)}
-}
+.rail{grid-area:rail;background:var(--chrome);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:.4rem 0;gap:.2rem}
+.rail [role=tab]{width:56px;min-height:48px;flex-direction:column;gap:.2rem;font-size:.6rem;font-weight:600;color:var(--muted);background:none;border:0;border-radius:8px;padding:.3rem 0}
+.rail [role=tab] svg.i{width:19px;height:19px}
+.rail [role=tab]:hover{background:#ffffff0d;color:var(--text)}
+.rail [role=tab][aria-selected=true]{color:var(--text);background:#ff5a1f1f;box-shadow:inset 2px 0 0 var(--accent)}
 
-/* Panel izquierdo */
-.tabs{display:flex;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
-.tabs [role=tab]{flex:1;min-width:0;padding:.35rem .25rem;font-size:.8rem;border:0;border-radius:0;background:none;color:var(--muted);border-bottom:2px solid transparent}
-#left{overflow-x:hidden}
-.tabs [role=tab][aria-selected=true]{color:var(--text);border-bottom-color:var(--accent)}
-.tabp{padding:.75rem;display:grid;gap:.6rem;align-content:start;grid-template-columns:minmax(0,1fr)}
+#left{grid-area:left;background:var(--panel);border-right:1px solid var(--line);overflow:hidden auto;min-height:0}
+.phead{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:.4rem;height:36px;padding:0 .4rem 0 .75rem;background:var(--panel);border-bottom:1px solid var(--line);font-weight:700;font-size:.82rem}
+.phead .grow{flex:1}
+.tabp{padding:.65rem .7rem;display:grid;gap:.55rem;align-content:start;grid-template-columns:minmax(0,1fr)}
 .tabp>*,.tabp label{min-width:0}
 .tabp select{width:100%;min-width:0}
-#drop{border:1.5px dashed #3a3a3a;border-radius:10px;padding:1rem;text-align:center;color:var(--muted)}
-#drop.over,body.dragging #drop{border-color:var(--accent);color:var(--text)}
-details{border-top:1px solid var(--line);padding:.5rem 0}
-details summary{cursor:pointer;font-weight:700;padding:.2rem 0}
-details[open] summary{margin-bottom:.5rem}
-.lib{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
-.lib div{display:flex;gap:.25rem}
-.lib button{flex:1;min-width:0;font-size:.75rem;padding:.3rem .4rem;overflow:hidden;text-overflow:ellipsis}
-.lib button.ico{flex:0 0 2rem;min-width:2rem}
-.gfx{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}
-.gfx button{aspect-ratio:1;padding:.3rem;display:grid;place-items:center;background:#000}
+
+.view{grid-area:view;display:grid;grid-template-rows:minmax(0,1fr) auto;background:var(--well);min-width:0;min-height:0}
+#stageWrap{display:grid;place-items:center;padding:.9rem;min-height:0;min-width:0;position:relative}
+#stage{display:block;background:#000;box-shadow:0 0 0 1px #ffffff14,0 18px 50px -20px #000}
+.badge{position:absolute;left:.75rem;top:.6rem;font-size:.7rem;color:var(--muted);background:#00000080;padding:.1rem .45rem;border-radius:4px;font-variant-numeric:tabular-nums}
+.transport{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem;padding:.4rem .7rem;border-top:1px solid var(--line);background:var(--panel)}
+.transport .tc{display:flex;align-items:baseline;gap:.5rem;font-variant-numeric:tabular-nums;font-size:1.15rem;font-weight:700;letter-spacing:.01em}
+.transport .tc span{font-size:.8rem;color:var(--muted);font-weight:500}
+.transport .mid{display:flex;align-items:center;gap:.15rem}
+.transport .end{display:flex;justify-content:flex-end;gap:.15rem}
+#play{width:2.6rem;height:2.6rem;border-radius:50%;background:var(--text);color:#111;border:0;margin:0 .3rem}
+#play:hover{background:#fff}
+#play svg.i{width:18px;height:18px;fill:currentColor;stroke:none}
+
+#right{grid-area:insp;background:var(--panel);border-left:1px solid var(--line);overflow:hidden auto;min-height:0}
+#props{display:grid}
+#props>h2{position:sticky;top:0;z-index:2;margin:0;height:36px;display:flex;align-items:center;padding:0 .75rem;font-size:.82rem;background:var(--panel);border-bottom:1px solid var(--line)}
+#props>p.hint,#props>.row,#props>label,#props>div,#props>p{margin-left:.75rem;margin-right:.75rem}
+#props>.row{margin-top:.45rem}
+#props>.row:last-child{margin-bottom:.8rem}
+#props details.sec{border-bottom:1px solid var(--line)}
+#props details.sec>summary{list-style:none;display:flex;align-items:center;gap:.4rem;padding:.55rem .75rem;cursor:pointer;font-weight:700;font-size:.78rem;color:#d8d8dd}
+#props details.sec>summary::-webkit-details-marker{display:none}
+#props details.sec>summary::before{content:"";width:6px;height:6px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(-45deg);transition:transform .12s;margin-right:.15rem}
+#props details.sec[open]>summary::before{transform:rotate(45deg)}
+#props details.sec>.body{display:grid;gap:.45rem;padding:0 .75rem .75rem}
+#props label{grid-template-columns:5.6rem minmax(0,1fr) 3.1rem;align-items:center;column-gap:.5rem;font-size:.75rem}
+#props label>input:not([type=checkbox]),#props label>select,#props label>textarea{grid-column:2 / 4;width:100%;min-width:0}
+#props label>input[type=range]{grid-column:2;grid-row:1}
+#props label>output{grid-column:3;grid-row:1;text-align:right;font-size:.72rem}
+#props label:has(textarea){grid-template-columns:1fr}
+#props label:has(textarea)>textarea{grid-column:1}
+#props label.check{display:flex}
+#props .two{grid-template-columns:1fr}
+#props select,#props input:not([type=checkbox]),#props textarea{min-height:1.85rem}
+.kfrow{display:grid;grid-template-columns:minmax(0,1fr) 1.7rem;gap:.3rem;align-items:center}
+.kfrow button{min-height:1.6rem;min-width:1.6rem;padding:0;color:var(--faint);background:none;border-color:transparent;font-size:.75rem}
+.kfrow button:hover:not(:disabled){color:var(--text)}
+.kfrow button[aria-pressed=true]{color:var(--accent)}
+
+/* divisor y línea de tiempo */
+#split2{grid-area:split;cursor:row-resize;background:var(--chrome);border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:relative}
+#split2::after{content:"";position:absolute;left:50%;top:1px;width:36px;height:2px;margin-left:-18px;border-radius:2px;background:var(--line2)}
+#split2:hover,#split2:focus-visible{background:#ff5a1f33}
+.tlbox{grid-area:tl;display:grid;grid-template-rows:36px minmax(0,1fr);min-height:0;background:var(--panel)}
+.tlbar{display:flex;align-items:center;gap:.2rem;padding:0 .5rem;border-bottom:1px solid var(--line)}
+.tlbar .sep{width:1px;height:18px;background:var(--line);margin:0 .3rem}
+.tlbar .grow{flex:1}
+.tlbar label{display:flex;align-items:center;gap:.3rem}
+.tlbar label input{width:8rem}
+#tl{overflow:auto;position:relative;min-height:0;user-select:none;touch-action:pan-y;background:var(--well)}
+#tl.blade .lane,#tl.blade .clip{cursor:crosshair}
+#tlIn{display:grid;grid-template-columns:150px auto;position:relative;min-width:100%}
+.corner,.th{position:sticky;left:0;z-index:3;background:var(--panel)}
+.corner{top:0;z-index:5;height:24px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+#ruler{position:sticky;top:0;z-index:4;height:24px;background:var(--panel);border-bottom:1px solid var(--line);cursor:ew-resize;
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--tick,10px) - 1px),#ffffff14 calc(var(--tick,10px) - 1px) var(--tick,10px));background-size:100% 6px;background-repeat:no-repeat;background-position:0 100%}
+#ruler span{position:absolute;top:0;height:100%;border-left:1px solid #ffffff40;padding-left:4px;font-size:.66rem;color:var(--muted);line-height:20px;font-variant-numeric:tabular-nums}
+#ruler i{position:absolute;bottom:0;height:5px;background:#ff4d4dcc;pointer-events:none}
+.th{display:flex;align-items:center;gap:.1rem;padding:0 .25rem 0 .55rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:.74rem;font-weight:600}
+.th::before{content:"";width:3px;height:60%;border-radius:2px;margin-right:.45rem;background:var(--kc)}
+.th.k-video{--kc:var(--c-video)} .th.k-audio{--kc:var(--c-audio)} .th.k-text{--kc:var(--c-text)}
+.th span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th button{min-height:1.5rem;min-width:1.5rem;padding:0;border:0;background:none;color:var(--faint);font-size:.75rem}
+.th button:hover:not(:disabled){color:var(--text);background:#ffffff10}
+.th button[aria-pressed=true]{color:var(--accent)}
+.lane{position:relative;border-bottom:1px solid #ffffff0a;height:56px}
+.lane.k-audio{height:48px}
+.lane.k-text{height:32px}
+.lane.over{background:#ff5a1f14}
+.clip{position:absolute;top:3px;bottom:3px;border-radius:4px;background:var(--kc);overflow:hidden;cursor:grab;font-size:.7rem;
+  box-shadow:inset 0 1px 0 #ffffff30,inset 0 0 0 1px #00000060}
+.clip.k-video{--kc:var(--c-video)} .clip.k-audio{--kc:var(--c-audio)} .clip.k-text{--kc:var(--c-text)} .clip.sub{--kc:var(--c-sub)}
+.clip canvas{position:absolute;left:0;top:0;height:100%;pointer-events:none}
+.clip span{position:absolute;left:8px;top:2px;max-width:calc(100% - 16px);padding:0 4px;border-radius:3px;background:#00000080;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;font-weight:600;line-height:1.35}
+.clip.k-text span{top:50%;transform:translateY(-50%);background:none;padding:0}
+.clip.muted{opacity:.5}
+.clip.tr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:linear-gradient(90deg,#ffffff70,transparent);z-index:1}
+.clip.voz::after{content:"";position:absolute;right:10px;bottom:4px;width:6px;height:6px;border-radius:50%;background:#7dffb2;box-shadow:0 0 6px #7dffb2;z-index:1}
+.clip.sel{box-shadow:inset 0 0 0 2px var(--accent),0 0 0 1px #000}
+.clip .h{position:absolute;top:0;bottom:0;width:7px;cursor:ew-resize;z-index:2}
+.clip .h.l{left:0}.clip .h.r{right:0}
+.clip.sel .h{background:var(--accent)}
+.clip:hover .h{background:#ffffff40}
+#head{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);pointer-events:none;z-index:6}
+#head::before{content:"";position:absolute;top:0;left:-6px;width:13px;height:14px;background:var(--accent);clip-path:polygon(0 0,100% 0,100% 55%,50% 100%,0 55%)}
+.kfm{position:absolute;bottom:3px;width:7px;height:7px;background:#fff;transform:rotate(45deg);margin-left:-3px;pointer-events:none;z-index:1;box-shadow:0 0 0 1px #000}
+
+/* barra de estado */
+.stat{grid-area:stat;display:flex;align-items:center;gap:.6rem;padding:0 .7rem;background:var(--chrome);border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);min-width:0}
+#status{margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#saved{white-space:nowrap}
+#meter{width:90px;height:6px;border-radius:3px;background:linear-gradient(90deg,#2ecc71 0 70%,#ffd400 70% 88%,#ff4d4d 88%);position:relative;overflow:hidden}
+#meter::after{content:"";position:absolute;inset:0;left:calc(var(--lv,0) * 100%);background:#2a2a2f}
+#peak{color:#ff4d4d;font-weight:800}
+
+/* panel izquierdo: contenidos */
+#drop{border:1px dashed var(--line2);border-radius:8px;padding:.9rem;text-align:center;color:var(--muted);display:grid;gap:.5rem;justify-items:center;font-size:.78rem}
+#drop.over,body.dragging #drop{border-color:var(--accent);color:var(--text);background:#ff5a1f0d}
+#left details{border-top:1px solid var(--line);padding:.4rem 0}
+#left details:first-of-type{border-top:0}
+#left details summary{cursor:pointer;font-weight:700;padding:.25rem 0;font-size:.8rem;list-style:none;display:flex;align-items:center;gap:.45rem}
+#left details summary::-webkit-details-marker{display:none}
+#left details summary::before{content:"";width:6px;height:6px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(-45deg);transition:transform .12s}
+#left details[open]>summary::before{transform:rotate(45deg)}
+#left details[open] summary{margin-bottom:.45rem}
+.lib{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.lib div{display:flex;gap:.2rem}
+.lib button{flex:1;min-width:0;font-size:.72rem;padding:.25rem .35rem;overflow:hidden;text-overflow:ellipsis;justify-content:flex-start}
+.lib button.ico{flex:0 0 1.8rem;min-width:1.8rem;justify-content:center}
+.gfx{display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem}
+.gfx button{aspect-ratio:1;padding:.3rem;background:var(--well)}
 .gfx img{max-width:100%;max-height:100%}
-#trText{max-height:45vh;overflow:auto;line-height:1.7;font-size:.86rem;background:var(--panel2);border-radius:8px;padding:.5rem .6rem;margin-top:.4rem}
+#trText{max-height:45vh;overflow:auto;line-height:1.75;font-size:.84rem;background:var(--well);border:1px solid var(--line);border-radius:6px;padding:.5rem .6rem;margin-top:.4rem}
 #trText span{cursor:pointer;border-radius:3px}
 #trText span:hover{background:#ff5a1f33}
 #trText span.on{background:var(--accent);color:var(--on-accent)}
-#aiList{list-style:none;margin:.5rem 0;padding:0;display:grid;gap:.45rem}
-#aiList li{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.5rem;display:grid;gap:.25rem;font-size:.8rem}
-#aiList b{font-size:.85rem}
+#aiList{list-style:none;margin:.5rem 0;padding:0;display:grid;gap:.4rem}
+#aiList li{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:.5rem;display:grid;gap:.25rem;font-size:.78rem}
 #aiList small{color:var(--muted)}
-#aiList p{margin:0;color:#cfcfcf;max-height:4.4em;overflow:hidden}
-.kfrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.3rem;align-items:end}
-.kfrow button{min-height:1.9rem;min-width:1.9rem;padding:0;color:var(--muted)}
-.kfrow button[aria-pressed=true]{color:var(--accent);border-color:var(--accent)}
-.kfm{position:absolute;top:2px;width:7px;height:7px;background:var(--accent);transform:rotate(45deg);margin-left:-3px;pointer-events:none}
-#ruler i{position:absolute;top:16px;height:8px;background:#ff4d4d88;pointer-events:none}
-#subList{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
-#subList li{display:grid;grid-template-columns:3.4rem 1fr;gap:.35rem;align-items:center}
-#subList button{min-height:2rem;padding:0 .3rem;font-size:.72rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-#subList input{min-height:2rem;padding:.2rem .5rem;width:100%;min-width:0}
+#aiList p{margin:0;color:#cfcfd4;max-height:4.4em;overflow:hidden}
+#subList{list-style:none;margin:0;padding:0;display:grid;gap:.25rem}
+#subList li{display:grid;grid-template-columns:3.6rem 1fr;gap:.3rem;align-items:center}
+#subList button{min-height:1.8rem;padding:0 .3rem;font-size:.7rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+#subList input{min-height:1.8rem;padding:.15rem .45rem;width:100%;min-width:0}
 #subList li.on button{color:var(--accent)}
-#meter{width:70px;height:8px;border-radius:4px;background:linear-gradient(90deg,#2ecc71 0 70%,#ffd400 70% 88%,#ff4d4d 88%);position:relative;overflow:hidden}
-#meter::after{content:"";position:absolute;inset:0;left:calc(var(--lv,0) * 100%);background:#2a2a2a}
-#peak{color:#ff4d4d;font-size:.7rem;font-weight:800}
-#bin{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
-#bin li{display:grid;grid-template-columns:64px 1fr auto;gap:.5rem;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem;cursor:grab}
-#bin img,#bin .ph{width:64px;height:40px;object-fit:cover;border-radius:5px;background:#000;display:grid;place-items:center;font-size:1.1rem}
-#bin b{display:block;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#bin small{color:var(--muted);font-size:.72rem}
+#bin{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+#bin li{display:grid;grid-template-columns:72px 1fr auto;gap:.5rem;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:.3rem;cursor:grab}
+#bin li:hover{border-color:var(--line2)}
+#bin img,#bin .ph{width:72px;height:42px;object-fit:cover;border-radius:4px;background:#000;display:grid;place-items:center;font-size:1rem;color:var(--muted)}
+#bin b{display:block;font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bin small{color:var(--muted);font-size:.68rem}
 #bin .miss{color:#ff8080}
-.presets{display:grid;gap:.4rem}
-.presets button{text-align:left;padding:.6rem .75rem;min-height:2.75rem}
-.presets button span{display:block;font-weight:400;color:var(--muted);font-size:.75rem}
+.presets{display:grid;gap:.3rem}
+.presets button{justify-content:flex-start;flex-direction:column;align-items:flex-start;gap:0;text-align:left;padding:.45rem .6rem}
+.presets button span{display:block;font-weight:400;color:var(--muted);font-size:.7rem}
 
-/* Panel derecho */
-#props{display:grid;gap:.7rem}
-#props>*,#props label{min-width:0}
-#props select,#props input:not([type=checkbox]),#props textarea{width:100%;min-width:0}
-#props h2{font-size:.95rem;margin:0}
-#props h3{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:.6rem 0 0}
-.row{display:flex;gap:.4rem;flex-wrap:wrap}
-.row>*{flex:1}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-
-/* Línea de tiempo */
-.tlbar{display:flex;align-items:center;gap:.4rem;padding:.4rem .6rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
-#clock{font-variant-numeric:tabular-nums;font-weight:600;min-width:8.5rem}
-#clock span{color:var(--muted);font-weight:400}
-.tlbar .sep{width:1px;height:1.5rem;background:var(--line)}
-.tlbar label{display:flex;align-items:center;gap:.4rem;margin-left:auto}
-.tlbar label input{width:7rem}
-#tl{overflow:auto;position:relative;min-height:0;user-select:none;touch-action:pan-y}
-#tlIn{display:grid;grid-template-columns:140px auto;position:relative;min-width:100%}
-.corner,.th{position:sticky;left:0;z-index:3;background:var(--panel)}
-.corner{top:0;z-index:5;height:26px;border-bottom:1px solid var(--line)}
-#ruler{position:sticky;top:0;z-index:4;height:26px;background:var(--panel);border-bottom:1px solid var(--line);cursor:ew-resize}
-#ruler span{position:absolute;top:0;height:100%;border-left:1px solid #333;padding-left:3px;font-size:.68rem;color:var(--muted);line-height:26px;font-variant-numeric:tabular-nums}
-.th{display:flex;align-items:center;gap:.15rem;padding:0 .3rem 0 .5rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:.75rem;font-weight:600}
-.th span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.th button{min-height:1.6rem;min-width:1.4rem;padding:0;border:0;background:none;color:var(--muted);font-size:.8rem}
-.th button[aria-pressed=true]{color:var(--accent)}
-.lane{position:relative;border-bottom:1px solid var(--line);height:52px}
-.lane.k-text{height:38px}
-.lane.over{background:#ff5a1f14}
-.clip{position:absolute;top:4px;bottom:4px;border-radius:6px;background:var(--video) center/auto 100% repeat-x;border:1px solid #444;overflow:hidden;cursor:grab;font-size:.72rem;display:flex;align-items:flex-end;padding:0 10px}
-.clip.k-audio{background:var(--audio);border-color:#2f6047}
-.clip.k-text{background:var(--textclip);border-color:#6b5a14;align-items:center}
-.clip span{background:#000a;padding:0 4px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-.clip.muted{opacity:.55}
-.clip.tr::before{content:"";position:absolute;left:0;top:0;border-top:14px solid var(--accent);border-right:14px solid transparent;z-index:1}
-.clip.voz::after{content:"✨";position:absolute;right:12px;top:2px;font-size:.7rem}
-.clip.sel{border:2px solid var(--accent);box-shadow:0 0 0 1px #000}
-.clip .h{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;background:#fff2}
-.clip .h.l{left:0}.clip .h.r{right:0}
-.clip.sel .h{background:var(--accent)}
-#head{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;z-index:6}
-#head::before{content:"";position:absolute;top:0;left:-5px;border:6px solid transparent;border-top:8px solid var(--accent)}
-
-/* Diálogos */
-dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:1.25rem;width:min(460px,calc(100vw - 32px))}
-dialog::backdrop{background:#000b}
-dialog h2{margin:0 0 .75rem;font-size:1.15rem}
-dialog form{display:grid;gap:.7rem}
-#plist{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;max-height:50vh;overflow:auto}
-#plist li{display:grid;grid-template-columns:1fr auto auto;gap:.4rem;align-items:center;background:var(--panel2);border-radius:8px;padding:.4rem .5rem}
+/* diálogos */
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:10px;padding:1.1rem;width:min(460px,calc(100vw - 32px));box-shadow:0 30px 80px -20px #000}
+dialog::backdrop{background:#000000b0}
+dialog h2{margin:0 0 .75rem;font-size:1.05rem}
+dialog form{display:grid;gap:.65rem}
+dialog details summary{cursor:pointer;font-weight:600}
+#plist{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;max-height:50vh;overflow:auto}
+#plist li{display:grid;grid-template-columns:1fr auto auto;gap:.35rem;align-items:center;background:var(--panel2);border-radius:6px;padding:.4rem .5rem}
 #plist small{display:block;color:var(--muted)}
 #xProg{width:100%;accent-color:var(--accent)}
 #pool{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+
+/* pantallas chicas: todo en columna, con scroll */
+@media (max-width:980px){
+  body{overflow:auto}
+  .app{height:auto;grid-template-columns:1fr;grid-template-rows:auto auto auto auto auto auto auto;
+    grid-template-areas:"top" "rail" "view" "tl" "insp" "left" "stat"}
+  .top{flex-wrap:wrap;padding:.4rem .6rem;height:auto}
+  .rail{flex-direction:row;justify-content:center;border-right:0;border-bottom:1px solid var(--line)}
+  .rail [role=tab][aria-selected=true]{box-shadow:inset 0 -2px 0 var(--accent)}
+  #stageWrap{height:56vh}
+  .transport{grid-template-columns:1fr;justify-items:center;gap:.3rem}
+  .transport .tc{font-size:1rem}
+  .transport .end{display:none}
+  .app>*{min-width:0}
+  #split2{display:none}
+  .tlbox{height:320px}
+  .tlbar{flex-wrap:wrap;height:auto;padding:.3rem}
+  .tlbox{grid-template-rows:auto minmax(0,1fr)}
+  #left,#right{border:0;border-top:1px solid var(--line);max-height:none;overflow:visible}
+  #pname{width:auto;flex:1}
+}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-start" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6z"/></symbol>
+  <symbol id="i-end" viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6z"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M14.5 9.5L20 4M8.1 15.9l3.4-3.4"/></symbol>
+  <symbol id="i-select" viewBox="0 0 24 24"><path d="M5 3l14 7-6 1.5L10 18z"/></symbol>
+  <symbol id="i-blade" viewBox="0 0 24 24"><path d="M4 20l9-9M13 11l3-8 5 5-8 3"/></symbol>
+  <symbol id="i-magnet" viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 12 0V3"/><path d="M6 7h4M14 7h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-unlink" viewBox="0 0 24 24"><path d="M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 4 8M8 12h3M3 3l18 18"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+  <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 7v10M21 12h0"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-zin" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></symbol>
+  <symbol id="i-zout" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></symbol>
+  <symbol id="i-safe" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1" stroke-dasharray="2 2"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+  <symbol id="i-media" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4-2.5z"/></symbol>
+  <symbol id="i-lib" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 10.5a2 2 0 1 0 0 3M16 10.5a2 2 0 1 0 0 3"/></symbol>
+  <symbol id="i-ai" viewBox="0 0 24 24"><path d="M15 4V2M15 10V8M11 6H9M21 6h-2M18 3l-1 1M13 9l-1 1"/><path d="M3 21l11-11"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.7 8.6 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M22 9l-6 6M16 9l6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+</svg>
+<div class="app">
 <header class="top">
   <div class="brand">
-    <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><rect x="5" y="1" width="12" height="20" rx="3.5" fill="#ff5a1f"/><path d="M9.5 8v6l5-3z" fill="#fff"/></svg>
-    <a href="index.html" class="home" title="Inicio">ClipCreate</a> <b>Editor</b>
+    <svg viewBox="0 0 22 22" width="20" height="20" aria-hidden="true"><rect x="5" y="1" width="12" height="20" rx="3.5" fill="#ff5a1f"/><path d="M9.5 8v6l5-3z" fill="#fff"/></svg>
+    <a href="index.html" title="Inicio">ClipCreate</a> <span>Editor</span>
   </div>
+  <span class="sep"></span>
   <label class="sr-only" for="pname">Nombre del proyecto</label>
   <input id="pname" type="text" maxlength="80" autocomplete="off">
-  <button type="button" id="openProjs" aria-haspopup="dialog">Proyectos</button>
-  <button type="button" id="importBtn">Importar</button>
+  <button type="button" id="undo" class="ghost ico" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)"><svg class="i"><use href="#i-undo"/></svg></button>
+  <button type="button" id="redo" class="ghost ico" aria-label="Rehacer (Ctrl+Shift+Z)" title="Rehacer (Ctrl+Shift+Z)"><svg class="i"><use href="#i-redo"/></svg></button>
+  <span class="sep"></span>
+  <button type="button" id="openProjs" class="ghost" aria-haspopup="dialog"><svg class="i"><use href="#i-folder"/></svg>Proyectos</button>
+  <button type="button" id="importBtn" class="ghost"><svg class="i"><use href="#i-import"/></svg>Importar</button>
   <input id="file" type="file" multiple accept="video/*,audio/*,image/*" hidden>
-  <button type="button" id="undo" class="ico" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)">↶</button>
-  <button type="button" id="redo" class="ico" aria-label="Rehacer (Ctrl+Shift+Z)" title="Rehacer (Ctrl+Shift+Z)">↷</button>
-  <span id="saved" aria-live="polite"></span>
   <span class="grow"></span>
-  <a href="index.html?volver=1" id="backClips" hidden>← Volver a los clips</a>
-  <a href="index.html">Inicio</a>
-  <button type="button" id="openExp" class="go" aria-haspopup="dialog">Exportar</button>
+  <a href="index.html?volver=1" id="backClips" class="lnk" hidden><svg class="i"><use href="#i-back"/></svg>Volver a los clips</a>
+  <a href="index.html" class="lnk"><svg class="i"><use href="#i-home"/></svg>Inicio</a>
+  <button type="button" id="openExp" class="go" aria-haspopup="dialog"><svg class="i"><use href="#i-export"/></svg>Exportar</button>
 </header>
-<p id="status" role="status" aria-live="polite"></p>
 
-<main class="ed">
-  <aside id="left" class="panel" aria-label="Archivos y textos">
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" id="tabFiles" aria-selected="true" aria-controls="pFiles">Archivos</button>
-      <button type="button" role="tab" id="tabTexts" aria-selected="false" aria-controls="pTexts" tabindex="-1">Biblioteca</button>
-      <button type="button" role="tab" id="tabSubs" aria-selected="false" aria-controls="pSubs" tabindex="-1">Subtítulos</button>
-      <button type="button" role="tab" id="tabAI" aria-selected="false" aria-controls="pAI" tabindex="-1">IA</button>
-    </div>
+<nav class="rail" role="tablist" aria-label="Paneles" aria-orientation="vertical">
+  <button type="button" role="tab" id="tabFiles" aria-selected="true" aria-controls="pFiles" title="Medios"><svg class="i"><use href="#i-media"/></svg>Medios</button>
+  <button type="button" role="tab" id="tabTexts" aria-selected="false" aria-controls="pTexts" tabindex="-1" title="Biblioteca"><svg class="i"><use href="#i-lib"/></svg>Biblioteca</button>
+  <button type="button" role="tab" id="tabSubs" aria-selected="false" aria-controls="pSubs" tabindex="-1" title="Subtítulos"><svg class="i"><use href="#i-cc"/></svg>Subtítulos</button>
+  <button type="button" role="tab" id="tabAI" aria-selected="false" aria-controls="pAI" tabindex="-1" title="IA"><svg class="i"><use href="#i-ai"/></svg>IA</button>
+</nav>
+
+<aside id="left" aria-label="Panel">
+  <div id="leftHead" class="phead"><span id="leftTitle">Medios</span><span class="grow"></span><button type="button" id="importBtn2" class="ghost" title="Importar archivos"><svg class="i"><use href="#i-plus"/></svg>Importar</button></div>
     <section id="pFiles" class="tabp" role="tabpanel" aria-labelledby="tabFiles">
-      <div id="drop">Arrastrá acá videos, audios o imágenes<br><button type="button" id="importBtn2" style="margin-top:.5rem">Elegir archivos</button></div>
+      <div id="drop"><svg class="i" style="width:22px;height:22px"><use href="#i-import"/></svg>Arrastrá acá videos, audios o imágenes</div>
       <ul id="bin" aria-label="Archivos del proyecto"></ul>
       <p class="hint">Arrastrá un archivo a la línea de tiempo o tocá «+» para ponerlo donde está el cursor. Tus archivos no salen de esta compu: quedan guardados en este navegador.</p>
     </section>
@@ -273,38 +387,67 @@ dialog form{display:grid;gap:.7rem}
       <input type="file" id="subFile" accept=".srt,.vtt" hidden>
       <ol id="subList" aria-label="Subtítulos: tocá el tiempo para ir a ese momento"></ol>
     </section>
-  </aside>
+</aside>
 
-  <section id="stageWrap" aria-label="Vista previa">
+<section class="view" aria-label="Visor">
+  <div id="stageWrap">
     <canvas id="stage" width="360" height="640" aria-label="Vista previa del video"></canvas>
-  </section>
-
-  <aside id="right" class="panel" aria-label="Propiedades">
-    <div id="props"></div>
-  </aside>
-
-  <section class="tlbox" aria-label="Línea de tiempo">
-    <div class="tlbar">
-      <button type="button" id="play" class="ico" aria-label="Reproducir (Espacio)" title="Reproducir (Espacio)">▶</button>
-      <span id="clock">0:00.0 <span>/ 0:00.0</span></span>
-      <span id="meter" role="img" aria-label="Nivel de sonido"></span><span id="peak" hidden>PICO</span>
-      <span class="sep"></span>
-      <button type="button" id="split" title="Dividir en el cursor (S)">Dividir</button>
-      <button type="button" id="dup" title="Duplicar (Ctrl+D)">Duplicar</button>
-      <button type="button" id="del" title="Borrar (Supr)">Borrar</button>
-      <button type="button" id="detach" title="Pasar el audio del video a su propia pista">Separar audio</button>
-      <span class="sep"></span>
-      <button type="button" id="addV">+ Pista video</button>
-      <button type="button" id="addA">+ Pista audio</button>
-      <button type="button" id="addT">+ Pista texto</button>
-      <label>Zoom <input id="zoom" type="range" min="0" max="100" value="40" aria-label="Zoom de la línea de tiempo"></label>
-      <button type="button" id="fit" title="Ver todo">Ver todo</button>
+    <span class="badge" id="aspectBadge"></span>
+  </div>
+  <div class="transport">
+    <div class="tc" id="clock">00:00:00:00 <span>/ 00:00:00:00</span></div>
+    <div class="mid">
+      <button type="button" id="tStart" class="ghost ico" aria-label="Al principio (Inicio)" title="Al principio (Inicio)"><svg class="i"><use href="#i-start"/></svg></button>
+      <button type="button" id="tPrev" class="ghost ico" aria-label="Un cuadro atrás (←)" title="Un cuadro atrás (←)"><svg class="i"><use href="#i-prev"/></svg></button>
+      <button type="button" id="play" aria-label="Reproducir (Espacio)" title="Reproducir (Espacio)"><svg class="i"><use href="#i-play"/></svg></button>
+      <button type="button" id="tNext" class="ghost ico" aria-label="Un cuadro adelante (→)" title="Un cuadro adelante (→)"><svg class="i"><use href="#i-next"/></svg></button>
+      <button type="button" id="tEnd" class="ghost ico" aria-label="Al final (Fin)" title="Al final (Fin)"><svg class="i"><use href="#i-end"/></svg></button>
     </div>
-    <div id="tl" tabindex="-1">
-      <div id="tlIn"></div>
+    <div class="end">
+      <button type="button" id="tSafe" class="ghost ico" aria-pressed="true" aria-label="Zona segura" title="Mostrar la zona segura de Reels y TikTok"><svg class="i"><use href="#i-safe"/></svg></button>
+      <button type="button" id="tFull" class="ghost ico" aria-label="Pantalla completa" title="Pantalla completa"><svg class="i"><use href="#i-full"/></svg></button>
     </div>
-  </section>
-</main>
+  </div>
+</section>
+
+<aside id="right" aria-label="Inspector">
+  <div id="props"></div>
+</aside>
+
+<div id="split2" role="separator" aria-orientation="horizontal" aria-label="Alto de la línea de tiempo (flechas arriba y abajo)" tabindex="0"></div>
+
+<section class="tlbox" aria-label="Línea de tiempo">
+  <div class="tlbar">
+    <button type="button" id="toolSel" class="ghost ico" aria-pressed="true" aria-label="Selección (V)" title="Selección (V)"><svg class="i"><use href="#i-select"/></svg></button>
+    <button type="button" id="toolBlade" class="ghost ico" aria-pressed="false" aria-label="Cuchilla: cortar donde hacés clic (B)" title="Cuchilla: cortar donde hacés clic (B)"><svg class="i"><use href="#i-blade"/></svg></button>
+    <button type="button" id="snapBtn" class="ghost ico" aria-pressed="true" aria-label="Imán: pegar a bordes y cursor (N)" title="Imán: pegar a bordes y cursor (N)"><svg class="i"><use href="#i-magnet"/></svg></button>
+    <span class="sep"></span>
+    <button type="button" id="split" class="ghost" title="Dividir en el cursor (S)"><svg class="i"><use href="#i-cut"/></svg>Dividir</button>
+    <button type="button" id="dup" class="ghost ico" aria-label="Duplicar (Ctrl+D)" title="Duplicar (Ctrl+D)"><svg class="i"><use href="#i-copy"/></svg></button>
+    <button type="button" id="del" class="ghost ico" aria-label="Borrar (Supr)" title="Borrar (Supr)"><svg class="i"><use href="#i-trash"/></svg></button>
+    <button type="button" id="detach" class="ghost ico" aria-label="Separar el audio del video" title="Separar el audio del video"><svg class="i"><use href="#i-unlink"/></svg></button>
+    <span class="sep"></span>
+    <button type="button" id="addV" class="ghost ico" aria-label="Agregar pista de video" title="Agregar pista de video"><svg class="i"><use href="#i-film"/></svg></button>
+    <button type="button" id="addA" class="ghost ico" aria-label="Agregar pista de audio" title="Agregar pista de audio"><svg class="i"><use href="#i-wave"/></svg></button>
+    <button type="button" id="addT" class="ghost ico" aria-label="Agregar pista de texto" title="Agregar pista de texto"><svg class="i"><use href="#i-type"/></svg></button>
+    <span class="grow"></span>
+    <button type="button" id="zOut" class="ghost ico" aria-label="Alejar" title="Alejar (−)"><svg class="i"><use href="#i-zout"/></svg></button>
+    <label><span class="sr-only">Zoom de la línea de tiempo</span><input id="zoom" type="range" min="0" max="100" value="40"></label>
+    <button type="button" id="zIn" class="ghost ico" aria-label="Acercar" title="Acercar (+)"><svg class="i"><use href="#i-zin"/></svg></button>
+    <button type="button" id="fit" class="ghost ico" aria-label="Ver todo" title="Ver todo"><svg class="i"><use href="#i-fit"/></svg></button>
+  </div>
+  <div id="tl" tabindex="-1">
+    <div id="tlIn"></div>
+  </div>
+</section>
+
+<footer class="stat">
+  <p id="status" role="status" aria-live="polite"></p>
+  <span id="bgwork"></span>
+  <span id="saved" aria-live="polite"></span>
+  <span id="meter" role="img" aria-label="Nivel de sonido"></span><span id="peak" hidden>PICO</span>
+</footer>
+</div>
 <div id="pool" aria-hidden="true"></div>
 
 <dialog id="projs" aria-labelledby="projsT">
@@ -337,6 +480,7 @@ dialog form{display:grid;gap:.7rem}
     </details>
   </form>
 </dialog>
+
 
 <script type="module" src="editor.js"></script>
 </body>

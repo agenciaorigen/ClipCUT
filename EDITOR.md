@@ -1,4 +1,4 @@
-# ClipCreate Editor — v3.1 (Fases 1 a 4, una sola app con ClipCreate)
+# ClipCreate Editor — v4.0 (diseño profesional)
 
 Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
 
@@ -15,6 +15,19 @@ Editor de video multipista que corre entero en el navegador. Está en el mismo r
 | `smart.js` | Silencios, Clips inteligentes con DeepSeek, seguir a quien habla, sincronizar cámaras y velocidad sin cambiar el tono. |
 
 No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
+
+## Diseño profesional (v4.0)
+
+- **Pantalla de sala de edición**: barra superior fina, columna de íconos (Medios, Biblioteca, Subtítulos, IA), visor centrado, inspector a la derecha, línea de tiempo abajo y barra de estado.
+- **Visor con transporte**: código de tiempo HH:MM:SS:cuadros, ir al principio o al final, cuadro por cuadro, reproducir, zona segura y pantalla completa.
+- **Inspector por secciones plegables** (Encuadre, Color, Transición, Sonido, Voz, Velocidad…), con etiqueta, control y valor en una línea. Se acuerda cuáles cerraste.
+- **Línea de tiempo**:
+  - **Miniaturas** del video a lo largo de cada clip y **forma de onda** del audio, en los clips de audio y abajo en los de video. Se preparan solas en segundo plano la primera vez y quedan guardadas.
+  - Colores por tipo de pista: azul para video, verde para audio y violeta para textos y subtítulos.
+  - Regla con marcas finas y cursor con cabeza.
+- **Herramientas**: Selección (V), Cuchilla para cortar donde hacés clic (B) e Imán para pegar a bordes y cursor (N).
+- **Alto de la línea de tiempo ajustable**: arrastrás el divisor o usás las flechas, y queda guardado.
+- **En el celular** se acomoda en una sola columna.
 
 ## Una sola app (ClipCreate v9.0 + Editor v3.1)
 
@@ -83,7 +96,7 @@ No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica
 
 ## Atajos
 
-Espacio reproducir · S dividir · Supr borrar · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
+Espacio reproducir · V selección · B cuchilla · N imán · S dividir · Supr borrar · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
 
 ## Privacidad
 

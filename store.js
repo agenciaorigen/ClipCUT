@@ -1,14 +1,13 @@
-// ClipCreate — almacenamiento local v1.0: proyectos del editor y sus archivos en IndexedDB.
+// ClipCreate — almacenamiento local v1.1: proyectos del editor y sus archivos en IndexedDB.
 // Todo queda en este navegador: nada se sube a ningún servidor.
 const DB = 'clipcreate-editor';
 let dbp;
 const open = () => dbp ??= new Promise((res, rej) => {
-  const r = indexedDB.open(DB, 1);
-  r.onupgradeneeded = () => {
-    r.result.createObjectStore('projects', { keyPath: 'id' });
-    r.result.createObjectStore('media', { keyPath: 'id' });
+  const r = indexedDB.open(DB, 2);
+  r.onupgradeneeded = () => { // v2: miniaturas y forma de onda de cada archivo, aparte (así no se reescribe el video)
+    for (const n of ['projects', 'media', 'visuals']) if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n, { keyPath: 'id' });
   };
-  r.onsuccess = () => res(r.result);
+  r.onsuccess = () => { r.result.onversionchange = () => r.result.close(); res(r.result); }; // deja actualizar desde otra pestaña
   r.onerror = () => rej(r.error);
 });
 
