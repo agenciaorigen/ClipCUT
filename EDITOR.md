@@ -1,4 +1,4 @@
-# ClipCreate Editor — v3.0 (Fases 1 a 4)
+# ClipCreate Editor — v3.1 (Fases 1 a 4, una sola app con ClipCreate)
 
 Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
 
@@ -15,6 +15,17 @@ Editor de video multipista que corre entero en el navegador. Está en el mismo r
 | `smart.js` | Silencios, Clips inteligentes con DeepSeek, seguir a quien habla, sincronizar cámaras y velocidad sin cambiar el tono. |
 
 No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
+
+## Una sola app (ClipCreate v9.0 + Editor v3.1)
+
+- **Inicio con botones** en `index.html`: «Clips de un episodio» (el ClipCreate de siempre), «Un Reel o Short» (editor en 9:16), «Un video largo» (editor en 16:9) y «Mis proyectos».
+- **Misma identidad**: el editor usa el naranja, los colores y el logo de ClipCreate. Tocar «ClipCreate» arriba lleva al inicio.
+- **«Editar a fondo en el editor»** (en Descargar) abre el clip en la misma pestaña con todo lo armado en ClipCreate:
+  - el encuadre de cada parte, el zoom viral y el de disimular cortes (como fotogramas clave),
+  - las frases fuertes en blanco y negro, el color elegido, los subtítulos con su estilo, tamaño, altura y color,
+  - el título, el invitado, el logo, los whoosh, el sonido de estudio y la descripción para publicar.
+- **«← Volver a los clips»** en el editor vuelve a ClipCreate y recupera el episodio solo, sin elegir el archivo de nuevo. En el inicio también aparece «Seguir con «episodio»».
+- No pasan al editor (todavía): la portada, el cierre, la barra de progreso y los diseños Dividido, Trío, Spotlight y Centrado (en esos casos el clip llega con el encuadre centrado).
 
 ## Qué hace la Fase 1
 

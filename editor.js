@@ -1,4 +1,4 @@
-// ClipCreate Editor v2.0 — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v3.1 (misma app que ClipCreate: inicio común y «Volver a los clips») — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
@@ -109,6 +109,7 @@ async function openProject(id) {
   past.length = future.length = 0; sel = null; T = 0;
   try { localStorage.setItem('clipcreate.editor.ultimo', P.id); } catch {}
   history.replaceState(null, '', '?p=' + P.id);
+  $('backClips').hidden = P.from !== 'clipcreate';
   if (!p) await save();
   sizeStage(); fitZoom(); changed(); $('saved').textContent = 'Guardado';
   const lost = P.tracks.flatMap(t => t.clips).filter(c => c.media && !media.has(c.media)).length;
@@ -607,7 +608,7 @@ function lutOf(c) {
   return l;
 }
 // Fotogramas clave: x, y, zoom, rotación y opacidad pueden cambiar en el tiempo (tiempos desde el inicio del clip)
-const KF_KEYS = ['x', 'y', 'scale', 'rot', 'opacity'];
+const KF_KEYS = ['x', 'y', 'scale', 'rot', 'opacity', 'sat']; // sat: para el blanco y negro de las frases fuertes
 function valAt(c, k, tt) {
   const l = c.kf?.[k];
   if (!l?.length) return c[k];
@@ -633,7 +634,7 @@ function drawVisual(g, c, s, fx = {}, t = T) {
   const W = g.canvas.width, H = g.canvas.height, tt = t - c.start, v = k => valAt(c, k, tt);
   const kb = c.kb ? 1 + c.kb * clamp(tt / Math.max(len(c), 0.1), 0, 1) : 1; // zoom lento a lo largo del clip
   const k = (c.fit === 'contain' ? Math.min(W / s.w, H / s.h) : Math.max(W / s.w, H / s.h)) * v('scale') * kb * (fx.k || 1), w = s.w * k, h = s.h * k;
-  const alpha = v('opacity') * (fx.alpha ?? 1);
+  const alpha = v('opacity') * (fx.alpha ?? 1), cc = c.kf?.sat ? { ...c, sat: v('sat') } : c;
   g.save();
   if (fx.clip) { g.beginPath(); g.rect(...fx.clip); g.clip(); }
   if (c.bg === 'blur' && (w < W - 1 || h < H - 1)) { // fondo con la misma imagen desenfocada, en vez de bordes
@@ -646,12 +647,12 @@ function drawVisual(g, c, s, fx = {}, t = T) {
   const rot = v('rot') + (fx.rot || 0);
   if (rot) g.rotate(rot * Math.PI / 180);
   let paint = s.paint, graded = false;
-  if (!colorOff && needsGrade(c)) { // color con la placa de video (luces, sombras, LUT…); si no hay, filtros simples
+  if (!colorOff && needsGrade(cc)) { // color con la placa de video (luces, sombras, LUT…); si no hay, filtros simples
     const gw = Math.max(2, Math.min(s.w, Math.ceil(Math.abs(w)))), gh = Math.max(2, Math.round(gw * s.h / s.w));
-    const out = GL.grade((gg, ww, hh) => s.paint(gg, 0, 0, ww, hh), gw, gh, c, lutOf(c), c.lut);
+    const out = GL.grade((gg, ww, hh) => s.paint(gg, 0, 0, ww, hh), gw, gh, cc, lutOf(c), c.lut);
     if (out) { paint = (gg, x, y, ww, hh) => gg.drawImage(out, x, y, ww, hh); graded = true; }
   }
-  const f = ((!graded && !colorOff ? colorFilter(c) : '') + (fx.blur ? ` blur(${(fx.blur * W / 1080).toFixed(1)}px)` : '')).trim();
+  const f = ((!graded && !colorOff ? colorFilter(cc) : '') + (fx.blur ? ` blur(${(fx.blur * W / 1080).toFixed(1)}px)` : '')).trim();
   if (f) g.filter = f;
   paint(g, -w / 2, -h / 2, w, h);
   g.filter = 'none';
@@ -761,7 +762,7 @@ function drawSub(g, c, t) {
 function guides(g) { // zona segura de Reels/TikTok/Shorts: ahí no tapa la interfaz de la app
   if (!P.safe || P.aspect !== '9:16') return;
   const W = g.canvas.width, H = g.canvas.height;
-  g.save(); g.setLineDash([6, 6]); g.strokeStyle = '#ffd40099'; g.lineWidth = Math.max(1, W / 360);
+  g.save(); g.setLineDash([6, 6]); g.strokeStyle = '#ff5a1f99'; g.lineWidth = Math.max(1, W / 360);
   g.strokeRect(W * 0.06, H * 0.12, W * 0.8, H * 0.66);
   g.restore();
 }
@@ -890,7 +891,8 @@ function renderTimeline() {
       el.setAttribute('aria-label', `${NAMES[t.kind]}: ${label}, de ${fmt(c.start)} a ${fmt(end(c))}`);
       el.innerHTML = '<i class="h l" aria-hidden="true"></i><span></span><i class="h r" aria-hidden="true"></i>';
       el.querySelector('span').textContent = label;
-      if (c.kf) for (const tk of new Set(Object.values(c.kf).flat().map(([k]) => +k.toFixed(2)))) if (tk >= 0 && tk <= len(c)) { const d = document.createElement('b'); d.className = 'kfm'; d.style.left = tk * pps + 'px'; el.append(d); }
+      const kts = c.kf ? [...new Set(Object.values(c.kf).flat().map(([k]) => +k.toFixed(2)))] : [];
+      if (kts.length <= 16) for (const tk of kts) if (tk >= 0 && tk <= len(c)) { /* con muchos (zoom automático) no se marcan uno por uno */ const d = document.createElement('b'); d.className = 'kfm'; d.style.left = tk * pps + 'px'; el.append(d); }
       lane.append(el);
     }
     rows.push(th, lane);
@@ -1483,7 +1485,7 @@ function renderProps() {
       ${range('hl', 'Luces', -1, 1, 0.01, 'num')}${range('sh', 'Sombras', -1, 1, 0.01, 'num')}
       ${range('wh', 'Blancos', -1, 1, 0.01, 'num')}${range('bl', 'Negros', -1, 1, 0.01, 'num')}
       ${range('temp', 'Temperatura', -1, 1, 0.01, 'num')}${range('tint', 'Tinte', -1, 1, 0.01, 'num')}
-      ${range('sat', 'Saturación', -1, 1, 0.01, 'num')}${range('vib', 'Vibrance', -1, 1, 0.01, 'num')}
+      ${krange('sat', 'Saturación', -1, 1, 0.01, 'num')}${range('vib', 'Vibrance', -1, 1, 0.01, 'num')}
       ${range('hue', 'Matiz', -30, 30, 1, 'deg')}${range('vig', 'Viñeta', 0, 1, 0.01, 'pct')}
       ${range('grain', 'Grano de película', 0, 1, 0.01, 'pct')}
       ${GL.available() ? '' : '<p class="hint">Este navegador no tiene WebGL2: luces, sombras, blancos, negros, vibrance y LUTs no se aplican.</p>'}
@@ -2009,7 +2011,18 @@ const fontsReady = Promise.all(Object.values(FONTS).flatMap(f => [400, 600, 700,
 
 // ---------- Inicio: abre el proyecto pedido, o recupera el último ----------
 (async () => {
-  let id = new URLSearchParams(location.search).get('p');
+  const q = new URLSearchParams(location.search);
+  if (q.has('nuevo')) { // desde el inicio: Reel o Short (9:16) o video largo (16:9)
+    const asp = ASPECTS[q.get('nuevo')] ? q.get('nuevo') : '9:16';
+    await openProject(null);
+    P.aspect = asp; P.name = asp === '16:9' ? 'Video largo nuevo' : 'Reel nuevo'; P.safe = asp === '9:16';
+    await save(); sizeStage(); changed();
+    say('Proyecto nuevo. Importá tus videos (botón Importar o arrastralos a la página).');
+    requestAnimationFrame(loop);
+    return;
+  }
+  if (q.has('proyectos')) { q.delete('proyectos'); setTimeout(() => { renderProjects(); $('projs').showModal(); }, 300); }
+  let id = q.get('p');
   try { id ||= localStorage.getItem('clipcreate.editor.ultimo'); } catch {}
   if (!window.indexedDB) say('Este navegador no permite guardar proyectos: se pierden al cerrar la pestaña.');
   await openProject(id);

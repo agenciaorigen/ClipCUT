@@ -1,4 +1,4 @@
-// ClipCreate Editor — color profesional v1.0 con WebGL2: exposición, contraste, luces, sombras, blancos, negros,
+// ClipCreate Editor — color profesional v1.1 con WebGL2: exposición, contraste, luces, sombras, blancos, negros,
 // temperatura, tinte, matiz, saturación, vibrance y LUT 3D. Si el navegador no tiene WebGL2, devuelve null.
 const VS = `#version 300 es
 in vec2 p; out vec2 uv;
@@ -26,12 +26,13 @@ void main() {
   c += hl * 0.3 * smoothstep(0.45, 1.0, l) * l;                   // luces
   c = (c - 0.5) * (1.0 + co) + 0.5;
   l = lum(c);
-  c = mix(vec3(l), c, 1.0 + sa);
+  c = mix(vec3(l), c, 1.0 + max(sa, 0.0));
   float s = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
   c = mix(vec3(lum(c)), c, 1.0 + vi * (1.0 - clamp(s, 0.0, 1.0)));  // vibrance: sube lo apagado, cuida la piel
   if (hu != 0.0) c = hue(c, hu);
   c = clamp(c, 0.0, 1.0);
   if (mixL > 0.0) c = mix(c, texture(lut, c * ((size - 1.0) / size) + 0.5 / size).rgb, mixL);
+  c = mix(vec3(lum(c)), c, 1.0 + min(sa, 0.0)); // desaturar va al final: el blanco y negro queda gris aunque haya LUT
   o = vec4(c, t.a);
 }`;
 

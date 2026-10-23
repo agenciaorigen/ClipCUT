@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v3.0 — editor multipista en el navegador. v3.0: biblioteca propia, color con LUTs, edición por texto, silencios, Clips inteligentes, reencuadre, fotogramas clave, velocidad, marca, multicámara y cola de exportación. -->
+<!-- ClipCreate Editor v3.1 — misma identidad que ClipCreate (naranja), enlaces Inicio y Volver a los clips; v3.0: editor multipista en el navegador. v3.0: biblioteca propia, color con LUTs, edición por texto, silencios, Clips inteligentes, reencuadre, fotogramas clave, velocidad, marca, multicámara y cola de exportación. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -11,8 +11,8 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#0a0a0a; --panel:#121212; --panel2:#1a1a1a; --line:#272727; --text:#f5f5f5; --muted:#9a9a9a;
-  --accent:#ffd400; --on-accent:#0a0a0a; --video:#2b2b2b; --audio:#1f3a2c; --textclip:#3d3410;
+  --bg:#050506; --panel:#0d0d0f; --panel2:#141417; --line:#222226; --text:#f4f4f5; --muted:#8e8e98;
+  --accent:#ff5a1f; --on-accent:#ffffff; --glow:#ff5a1f66; --video:#2b2b2e; --audio:#1f3a2c; --textclip:#3d2a1a;
   --tlh:300px;
   font-family:"Plus Jakarta Sans",system-ui,sans-serif;
 }
@@ -28,7 +28,8 @@ button{cursor:pointer;font-weight:600;white-space:nowrap}
 button:hover:not(:disabled){border-color:#444;background:#222}
 button:disabled{opacity:.35;cursor:not-allowed}
 .go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.go:hover:not(:disabled){background:#ffe14d;border-color:#ffe14d;color:var(--on-accent)}
+.go{box-shadow:0 6px 18px -8px var(--glow)}
+.go:hover:not(:disabled){background:#ff6a33;border-color:#ff6a33;color:var(--on-accent)}
 .ico{min-width:2.25rem;padding:.35rem .5rem}
 input[type=range]{accent-color:var(--accent);width:100%}
 input[type=checkbox]{accent-color:var(--accent);width:1.05rem;height:1.05rem;margin:0}
@@ -43,7 +44,8 @@ textarea{width:100%;resize:vertical;min-height:4.5rem}
 /* Barra superior */
 .top{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:.45rem;font-weight:800;letter-spacing:-.02em;margin-right:.25rem}
-.brand b{color:var(--accent)}
+.brand b{color:var(--muted);font-weight:600}
+.brand a.home{color:var(--text);padding:0;background:none}
 #pname{max-width:14rem;background:transparent;border-color:transparent;font-weight:600}
 #pname:hover,#pname:focus{border-color:var(--line);background:var(--panel2)}
 .top .grow{flex:1}
@@ -89,7 +91,7 @@ details[open] summary{margin-bottom:.5rem}
 .gfx img{max-width:100%;max-height:100%}
 #trText{max-height:45vh;overflow:auto;line-height:1.7;font-size:.86rem;background:var(--panel2);border-radius:8px;padding:.5rem .6rem;margin-top:.4rem}
 #trText span{cursor:pointer;border-radius:3px}
-#trText span:hover{background:#ffd40033}
+#trText span:hover{background:#ff5a1f33}
 #trText span.on{background:var(--accent);color:var(--on-accent)}
 #aiList{list-style:none;margin:.5rem 0;padding:0;display:grid;gap:.45rem}
 #aiList li{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.5rem;display:grid;gap:.25rem;font-size:.8rem}
@@ -148,7 +150,7 @@ details[open] summary{margin-bottom:.5rem}
 .th button[aria-pressed=true]{color:var(--accent)}
 .lane{position:relative;border-bottom:1px solid var(--line);height:52px}
 .lane.k-text{height:38px}
-.lane.over{background:#ffd40012}
+.lane.over{background:#ff5a1f14}
 .clip{position:absolute;top:4px;bottom:4px;border-radius:6px;background:var(--video) center/auto 100% repeat-x;border:1px solid #444;overflow:hidden;cursor:grab;font-size:.72rem;display:flex;align-items:flex-end;padding:0 10px}
 .clip.k-audio{background:var(--audio);border-color:#2f6047}
 .clip.k-text{background:var(--textclip);border-color:#6b5a14;align-items:center}
@@ -178,8 +180,8 @@ dialog form{display:grid;gap:.7rem}
 <body>
 <header class="top">
   <div class="brand">
-    <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><rect x="5" y="1" width="12" height="20" rx="3.5" fill="#ffd400"/><path d="M9.5 8v6l5-3z" fill="#0a0a0a"/></svg>
-    ClipCreate <b>Editor</b>
+    <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><rect x="5" y="1" width="12" height="20" rx="3.5" fill="#ff5a1f"/><path d="M9.5 8v6l5-3z" fill="#fff"/></svg>
+    <a href="index.html" class="home" title="Inicio">ClipCreate</a> <b>Editor</b>
   </div>
   <label class="sr-only" for="pname">Nombre del proyecto</label>
   <input id="pname" type="text" maxlength="80" autocomplete="off">
@@ -190,7 +192,8 @@ dialog form{display:grid;gap:.7rem}
   <button type="button" id="redo" class="ico" aria-label="Rehacer (Ctrl+Shift+Z)" title="Rehacer (Ctrl+Shift+Z)">↷</button>
   <span id="saved" aria-live="polite"></span>
   <span class="grow"></span>
-  <a href="index.html">Clips inteligentes</a>
+  <a href="index.html?volver=1" id="backClips" hidden>← Volver a los clips</a>
+  <a href="index.html">Inicio</a>
   <button type="button" id="openExp" class="go" aria-haspopup="dialog">Exportar</button>
 </header>
 <p id="status" role="status" aria-live="polite"></p>
