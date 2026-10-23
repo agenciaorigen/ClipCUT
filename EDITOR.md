@@ -1,0 +1,120 @@
+# ClipCreate Editor — v3.0 (Fases 1 a 4)
+
+Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
+
+| Archivo | Qué es |
+|---|---|
+| `index.html` | ClipCreate (clips inteligentes). Desde v8.6 tiene el botón **Abrir en el editor** y el enlace **Editor** arriba. |
+| `editor.html` | La pantalla del editor (diseño y estilos). |
+| `editor.js` | Toda la lógica del editor. |
+| `store.js` | Guarda proyectos y archivos en el navegador (IndexedDB). Lo usan las dos páginas. |
+| `audio.js` | «Mejorar voz»: perfiles, análisis de nivel y ruido, la cadena de procesamiento. |
+| `subs.js` | Subtítulos: transcripción (servidor o compu), tiempos por palabra, SRT y VTT. |
+| `assets.js` | Biblioteca propia: efectos de sonido, música, gráficos y LUTs generados por ClipCreate. |
+| `gl.js` | Color profesional con la placa de video (WebGL2): luces, sombras, blancos, negros, vibrance y LUTs. |
+| `smart.js` | Silencios, Clips inteligentes con DeepSeek, seguir a quien habla, sincronizar cámaras y velocidad sin cambiar el tono. |
+
+No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
+
+## Qué hace la Fase 1
+
+- **Importar** videos, audios e imágenes (botón o arrastrando a la página). Si el formato no se puede abrir, avisa.
+- **Reproductor** con vista previa en tiempo real y zona segura de Reels/TikTok/Shorts.
+- **Línea de tiempo multipista**: pistas de video, audio y texto; mover clips (también entre pistas), recortar bordes, imán a los bordes y al cursor, zoom.
+- **Cortes**: dividir (S), duplicar (Ctrl+D), borrar (Supr), separar el audio del video.
+- **Encuadre por clip**: llenar/entero, zoom, posición, rotación, opacidad.
+- **Formatos**: 9:16, 16:9, 1:1 y 4:5.
+- **Textos**: título, subtítulo, nombre y cargo, etiqueta de redes, frase destacada; letra, grosor, tamaño, color, contorno y caja.
+- **Audio básico**: volumen (hasta 200 %), silenciar clip o pista, fundidos de entrada y salida.
+- **Deshacer/rehacer** (hasta 200 pasos), **autoguardado** y **recuperación**: al volver a abrir, aparece el último proyecto.
+- **Exportación real**: MP4 H.264 (o H.265, o WebM si el navegador no tiene H.264), 720p / 1080p / 4K, 24–60 cuadros, 3 calidades, tamaño estimado, progreso real y cancelar. También **solo audio en WAV**.
+- **Desde ClipCreate**: «Abrir en el editor» manda el clip con sus partes, el encuadre de cada parte, los subtítulos y el título.
+
+## Qué suma la Fase 2
+
+- **Mejorar voz** (un botón por clip, o «Mejorar todas las voces» en el proyecto): mide el nivel de la voz y el ruido de fondo de cada archivo y aplica una cadena de filtro de graves, sacar zumbido de 50 Hz, compuerta de ruido entre frases, ecualizador para voz (calidez, menos «voz de caja», presencia, aire, eses), nivel parejo, compresor y limitador.
+  - Perfiles **Podcast**, **Entrevista** y **Voz viral**, con controles a mano: reducción de ruido, claridad, nivelado y zumbido.
+  - **Escuchar original / mejorado** para comparar. Lo que se escucha es exactamente lo que sale en el video.
+  - Medidor de nivel con aviso de **PICO** cuando se satura; al exportar, avisa si hubo que suavizar picos.
+  - En la prueba: la voz quedó en −18 dB (el nivel de los Reels) y el ruido entre frases bajó casi 7 dB respecto de la voz.
+  - Límite honesto: baja el ruido *entre* frases y los zumbidos; no saca un ruido fuerte que está *encima* de la voz.
+- **Subtítulos automáticos** (pestaña Subtítulos):
+  - Con cuenta de ClipCreate se transcriben en el servidor (Groq, Whisper grande) con el tiempo real de cada palabra. Sin cuenta, en la compu con Whisper (no se sube nada; los tiempos de cada palabra son estimados).
+  - Usa el mismo plan que ClipCreate: el mismo video no cuenta dos veces.
+  - 8 estilos: palabra activa en amarillo, dinámico de redes, frases destacadas, podcast profesional, blanco con contorno, periodístico, documental y minimalista.
+  - Palabras por línea, tamaño, altura y mayúsculas para todos a la vez.
+  - Lista editable para corregir nombres y palabras; tocar el tiempo lleva a ese momento.
+  - Importar y exportar SRT y VTT (también desde Exportar).
+- **Transiciones** (entrada de cada clip, desde el anterior de la misma pista): disolución cruzada, fundido a negro, flash blanco, zoom, deslizar, barrido, desenfoque, giro y glitch. Duración, dirección e intensidad; «Usar en todos los cortes». En la línea de tiempo se marcan con un triángulo amarillo.
+- **Color por clip**: exposición, contraste, saturación, temperatura, matiz y viñeta; perfiles Podcast, Interiores, Luz cálida, Luz fría y Cinematográfico; botón para ver el original.
+- **Textos con animación de entrada**: aparecer, subir, pop y máquina de escribir.
+
+## Qué suma la v3.0 (Fases 3 y 4, más la biblioteca propia)
+
+- **Biblioteca propia**, todo generado por ClipCreate desde cero: no hay archivos de terceros, así que se puede usar en cualquier video, también comercial.
+  - **11 efectos de sonido**: whoosh, swoosh, pop, click, impacto, subida, ding, notificación, cámara, glitch y tecleo. Se escuchan con ▶ antes de agregarlos.
+  - **3 bases de música**: Pulso, Ambiente e Informativo. Entran con volumen bajo y bajando solas cuando alguien habla (ducking).
+  - **12 gráficos** con los colores de tu marca: flecha, círculo, subrayado, esquinas, «Suscribite», «Seguinos @», globo, destello, tilde, cruz, barra de nombre y marco.
+  - **9 LUTs**: teal & naranja, película cálida, atardecer, frío nórdico, vintage, moody, vivo, blanco y negro, noche azul. Se pueden bajar como `.cube` para usarlos en otros editores.
+  - Textos nuevos: emoji y pregunta al público.
+- **Marca del canal**: nombre, usuario, colores y logo. «Aplicar plantilla de programa» pone el logo, la placa de entrada, el nombre del invitado, el cierre con tu usuario y los subtítulos con tu color.
+- **Color profesional**: luces, sombras, blancos, negros, tinte y vibrance, LUTs propios o importados (`.cube`) con intensidad, y grano de película.
+- **Editar con el texto** (pestaña IA): seleccionás palabras de la transcripción y se cortan del video (todas las pistas se acomodan solas). Tocar una palabra lleva a ese momento.
+- **Quitar silencios**: busca los silencios de más de X segundos (solo en las voces, la música no cuenta), los marca en rojo y los saca dejando 0,15 s de aire.
+- **Clips inteligentes**: DeepSeek lee la transcripción y propone clips con título, texto de portada, descripción con hashtags, tipo y puntaje. Los mirás con «Ver», elegís y se crean como proyectos nuevos: en vertical, con el gancho al principio, el título arriba y siguiendo a quien habla.
+- **Seguir a quien habla** (reencuadre): detecta las caras, mira quién mueve la boca y mueve el encuadre con fotogramas clave (con un corte cuando cambia de persona).
+- **Fotogramas clave** (◆) para posición, zoom, rotación y opacidad, y **zoom lento** a lo largo del clip.
+- **Velocidad** de 0,25× a 4×: la voz mantiene su tono.
+- **Congelar cuadro** (Shift+F) y **copiar y pegar ajustes** entre clips (Ctrl+Alt+C / Ctrl+Alt+V).
+- **Fondo desenfocado** cuando la imagen no llena el cuadro.
+- **Multicámara**: sincroniza dos cámaras (o una cámara y un grabador) comparando el sonido. Para cambiar de cámara, dividís la pista de arriba y borrás los tramos.
+- **Cola de exportación**: exporta varios proyectos uno detrás del otro en la carpeta que elijas.
+
+## Atajos
+
+Espacio reproducir · S dividir · Supr borrar · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
+
+## Privacidad
+
+Los videos **no se suben a ningún lado**: se procesan en la compu. La única excepción es «Generar subtítulos» con cuenta de ClipCreate: ahí se manda solo el audio comprimido al servidor (Supabase y Groq) para transcribirlo, y la pestaña lo avisa. Sin cuenta, todo queda en la compu. Los archivos quedan guardados en este navegador. Borrar un proyecto (Proyectos → Borrar) borra también sus archivos del navegador; los originales de la compu no se tocan. Si se borran los datos del navegador, se pierden los proyectos.
+
+## Requisitos
+
+- Chrome o Edge actualizados en una compu (exportar usa WebCodecs). Safari y Firefox pueden editar pero quizás no exportar.
+- Lo ideal: 8 GB de RAM o más. Entrevistas de hasta ~40 min van bien; una hora o más funciona pero la exportación tarda (aprox. lo que dura el video, según la compu).
+- En Chrome/Edge el video exportado se escribe directo al disco (te pregunta dónde guardarlo), así no se llena la memoria con videos largos.
+
+## Dependencias y costos
+
+- **mediabunny 1.60.0** (la misma que ya usa ClipCreate), cargada desde jsDelivr: lee y arma los MP4. Gratis.
+- **Google Fonts**: Montserrat, Anton, Plus Jakarta Sans y Playfair Display. Gratis.
+- **Transformers.js 3.5.1 + Whisper** (los mismos de ClipCreate) para transcribir en la compu. Gratis; la primera vez descarga el modelo (~250 MB en calidad Buena, ~80 MB en Rápida) y queda guardado.
+- **Servidor de ClipCreate (Supabase + Groq)** solo para transcribir con cuenta: usa la función `transcribir` que ya existe, con los mismos límites del plan (4 horas de audio por día por usuario). El costo es el de Groq que ya tenés.
+- **DeepSeek** (Clips inteligentes): a través de la función `deepseek` que ya tenés en Supabase, o con tu clave. Con los mismos límites del plan.
+- **MediaPipe** (el mismo detector de caras de ClipCreate) para seguir a quien habla. Gratis; la primera vez descarga el modelo.
+- Todo lo demás (voz, color, LUTs, transiciones, silencios, multicámara, exportar) es gratis y corre en la compu.
+
+## Lo que viene (sin hacer todavía)
+
+- Curvas de color dibujadas a mano (hoy hay luces, sombras, blancos, negros y LUTs).
+- Identificar quién habla en los subtítulos (Groq no lo hace; el reencuadre sí detecta quién habla por la boca).
+- Cambio de cámara automático en multicámara (hoy se sincroniza solo y se corta a mano).
+- Curvas de velocidad (rampas): hoy la velocidad es fija por clip.
+
+## Cómo se probó
+
+**v3.0**: con videos reales en Chromium se probaron:
+- La biblioteca: sonidos, música y gráficos agregados y exportados.
+- La marca y la plantilla, y el color con LUT, luces, sombras, grano y fotogramas clave.
+- Congelar cuadro, copiar ajustes y velocidad 2×.
+- Cortar una frase desde la transcripción y quitar 7 silencios (y deshacerlo).
+- Clips inteligentes con una respuesta de DeepSeek simulada.
+- Multicámara: encontró el corrimiento exacto de 1,3 s entre dos cámaras.
+- Exportar y la cola (MP4 verificados con ffprobe).
+
+No se pudo probar desde acá: DeepSeek de verdad y el detector de caras (no llega a esos servidores). Usan el mismo código que ClipCreate, pero probalos con un video corto.
+
+
+**Fase 2**: Mejorar voz midiendo el WAV exportado antes y después; las 9 transiciones en la vista previa; estilos de subtítulos, reagrupar palabras, dividir subtítulos, exportar e importar SRT; exportar MP4 con todo junto. La transcripción con Whisper y con el servidor no se pudo correr desde el entorno de prueba (no llega a esos servidores): usa el mismo código que ya funciona en ClipCreate, pero conviene probarla primero con un episodio corto.
+
+**Fase 1**: con videos, audios e imágenes reales en Chromium: importar, dividir, deshacer/rehacer, textos, separar audio, mover entre pistas, reproducir, exportar (se verificó el MP4 con ffprobe: H.264, 720×1280, 30 cuadros, audio estéreo 48 kHz con la mezcla correcta en cada tramo), exportar WAV, recargar la página (recupera el proyecto) y «Abrir en el editor» desde ClipCreate.
