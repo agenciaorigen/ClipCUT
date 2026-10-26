@@ -1,4 +1,4 @@
-// ClipCreate Editor v5.4 (exportar en 1440p); v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
@@ -609,7 +609,7 @@ function syncMedia() {
     const pr = Math.round(spAt(c, clamp(T - c.start, 0, len(c))) * rate * 100) / 100;
     if (el.playbackRate !== pr) { el.playbackRate = pr; el.preservesPitch = !c.ramp; }
     const audible = T >= c.start && T < end(c) && playing && !t.muted && !c.mute, v = audible ? valAt(c, 'vol', T - c.start) * fadeGain(c, T - c.start) * (c.duck ? duckNow : 1) : 0;
-    if (el.cc) { route(el, c); el.cc.out.gain.setTargetAtTime(v, actx.currentTime, 0.012); el.muted = false; }
+    if (el.cc) { route(el, c); el.cc.out.gain.setTargetAtTime(v, actx.currentTime, 0.012); el.muted = false; if (el.volume !== 1) el.volume = 1; } // el volumen va por la mezcla: el del elemento queda al máximo (si quedó en 0 de antes, no se oía nada)
     else { el.muted = !audible; el.volume = clamp(v, 0, 1); }
     if (!on) { // a punto de entrar: se deja listo en el primer cuadro
       if (!el.paused) el.pause();
