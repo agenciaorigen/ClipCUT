@@ -1,4 +1,4 @@
-// ClipCreate Editor — herramientas inteligentes v1.1 (silencios sin pedacitos sueltos): silencios, Clips inteligentes (DeepSeek), reencuadre al
+// ClipCreate Editor — herramientas inteligentes v1.2 (plan de la cuenta para el editor); v1.1: silencios sin pedacitos sueltos; silencios, Clips inteligentes (DeepSeek), reencuadre al
 // hablante (MediaPipe), sincronizar cámaras por el audio y estirar el audio sin cambiar el tono.
 import { session } from './subs.js';
 const SERVER_URL = 'https://iodzwovvexubihbrqjho.supabase.co';
@@ -38,6 +38,15 @@ async function token() {
   s = { ...s, token: j.access_token, refresh: j.refresh_token, exp: Date.now() / 1000 + (j.expires_in || 3600) };
   try { localStorage.setItem('clipcut.sesion', JSON.stringify(s)); } catch {}
   return s.token;
+}
+// Plan de la cuenta: null si no entró con su cuenta; tira error si no hay conexión (así se usa lo último que se supo)
+export async function cuenta() {
+  if (!session()) return null;
+  const tk = await token();
+  const r = await fetch(`${SERVER_URL}/rest/v1/rpc/mi_cuenta`, { method: 'POST', headers: { apikey: SERVER_ANON, Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: '{}' });
+  if (r.status === 401) return null;
+  if (!r.ok) throw new Error('No se pudo leer el plan (' + r.status + ').');
+  return r.json();
 }
 async function deepseek(messages, videoId) {
   const tk = await token();

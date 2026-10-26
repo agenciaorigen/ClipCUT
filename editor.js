@@ -1,4 +1,4 @@
-// ClipCreate Editor v4.0 (diseño profesional: transporte, herramientas, miniaturas y forma de onda) — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v5.0 (página de Color, herramientas pro, placa final, barra de progreso y planes); v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
@@ -19,6 +19,7 @@ const NAMES = { video: 'Video', audio: 'Audio', text: 'Texto' };
 const DEF = {
   video: { vol: 1, mute: false, fadeIn: 0, fadeOut: 0, voz: null, speed: 1, x: 0, y: 0, scale: 1, rot: 0, opacity: 1, fit: 'cover', bg: 'color', kb: 0, kf: null,
     exp: 0, con: 0, sat: 0, temp: 0, tint: 0, hue: 0, vib: 0, hl: 0, sh: 0, wh: 0, bl: 0, vig: 0, grain: 0, lut: '', lutMix: 1,
+    cw: null, curves: null, crop: null, box: null, ramp: null,
     tr: 'none', trD: 0.5, trDir: 'izq', trK: 1 },
   audio: { vol: 1, mute: false, fadeIn: 0, fadeOut: 0, voz: null, speed: 1, duck: false },
   text: { in: 0, text: 'Texto', font: 'montserrat', weight: 800, size: 0.06, color: '#ffffff', stroke: true, box: 'none', boxColor: '#000000', x: 0, y: 0.25, anim: 'ninguna' }
@@ -35,14 +36,22 @@ const tc = s => { // código de tiempo HH:MM:SS:CC (cuadros a 30 por segundo)
 };
 const fmt = s => { s = Math.max(0, s); return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`; };
 const once = (el, ev) => new Promise(r => el.addEventListener(ev, r, { once: true }));
-const sp = c => c.speed || 1;
+// Velocidad: fija, o una rampa que va de ramp.a a ramp.b a lo largo del clip (sp = la velocidad promedio)
+const sp = c => c.ramp ? (c.ramp.a + c.ramp.b) / 2 : c.speed || 1;
 const len = c => (c.out - c.in) / sp(c);
-const srcAt = (c, t) => c.in + (t - c.start) * sp(c); // segundo del archivo que se ve en el segundo t del proyecto
+const spAt = (c, tt) => c.ramp ? c.ramp.a + (c.ramp.b - c.ramp.a) * Math.min(1, Math.max(0, tt / len(c))) : sp(c);
+const srcAt = (c, t) => { // segundo del archivo que se ve en el segundo t del proyecto
+  const tt = t - c.start;
+  return c.ramp ? c.in + c.ramp.a * tt + (c.ramp.b - c.ramp.a) * tt * tt / (2 * len(c)) : c.in + tt * sp(c);
+};
 const end = c => c.start + len(c);
 
 let P = null;               // proyecto abierto
 const media = new Map();    // id → registro del archivo + url
 let T = 0, playing = false, t0 = 0, p0 = 0, sel = null, pps = 40, dirty = true;
+const multi = new Set();    // selección de varios clips (Shift/Ctrl+clic o arrastrando un recuadro)
+const picked = () => (multi.size ? [...multi] : sel ? [sel] : []).map(find).filter(Boolean);
+const isSel = id => sel === id || multi.has(id);
 const past = [], future = [];
 
 // ---------- Proyecto ----------
@@ -79,7 +88,7 @@ async function save() {
 addEventListener('beforeunload', () => { if (saveT) save(); });
 
 // ---------- Deshacer / rehacer ----------
-const snap = () => JSON.stringify({ name: P.name, aspect: P.aspect, bg: P.bg, safe: P.safe, sub: P.sub, tracks: P.tracks });
+const snap = () => JSON.stringify({ name: P.name, aspect: P.aspect, bg: P.bg, safe: P.safe, sub: P.sub, tracks: P.tracks, markers: P.markers || [], progress: P.progress || null, endCard: P.endCard || null });
 function remember(before) {
   if (snap() === before) return false;
   past.push(before); if (past.length > 200) past.shift();
@@ -87,7 +96,7 @@ function remember(before) {
   return true;
 }
 function edit(fn) { const s = snap(); fn(); if (remember(s)) changed(); }
-function restore(s) { Object.assign(P, JSON.parse(s)); if (sel && !find(sel)) sel = null; changed(); sizeStage(); }
+function restore(s) { Object.assign(P, JSON.parse(s)); if (sel && !find(sel)) sel = null; for (const id of multi) if (!find(id)) multi.delete(id); changed(); sizeStage(); }
 const undo = () => { if (!past.length) return; future.push(snap()); restore(past.pop()); say('Deshecho.'); };
 const redo = () => { if (!future.length) return; past.push(snap()); restore(future.pop()); say('Rehecho.'); };
 function changed() {
@@ -96,6 +105,7 @@ function changed() {
   $('undo').disabled = !past.length; $('redo').disabled = !future.length;
   $('tSafe').setAttribute('aria-pressed', !!P.safe); $('tSafe').disabled = P.aspect !== '9:16';
   $('pname').value = P.name;
+  if (page === 'color') { if (!vClips().length) setPage('edit'); else renderColor(); }
 }
 
 // ---------- Abrir proyectos ----------
@@ -111,7 +121,7 @@ async function openProject(id) {
   for (const mid of P.media) {
     try { const m = await S.get('media', mid); if (m) media.set(mid, { ...m, url: URL.createObjectURL(m.blob) }); } catch {}
   }
-  past.length = future.length = 0; sel = null; T = 0;
+  past.length = future.length = 0; sel = null; multi.clear(); T = 0; P.markers ??= []; P.io ??= {};
   try { localStorage.setItem('clipcreate.editor.ultimo', P.id); } catch {}
   history.replaceState(null, '', '?p=' + P.id);
   $('backClips').hidden = P.from !== 'clipcreate';
@@ -229,6 +239,7 @@ function split() {
   edit(() => {
     for (const { c, t } of hits) {
       const cut = srcAt(c, T), b = { ...c, id: S.uid(), start: T, in: cut, fadeIn: 0, tr: 'none', kf: shiftKf(c.kf, T - c.start) };
+      if (c.ramp) { const s1 = spAt(c, T - c.start); b.ramp = { a: s1, b: c.ramp.b }; c.ramp = { a: c.ramp.a, b: s1 }; }
       if (c.sub) { // las palabras se reparten entre los dos pedazos
         const w = wordsOf(c), tm = timesOf(c);
         if (w.length < 2) continue;
@@ -244,10 +255,61 @@ function split() {
     }
   });
 }
-function remove() {
-  if (!sel) return say('Elegí un clip para borrarlo.');
-  edit(() => { const f = find(sel); f.t.clips = f.t.clips.filter(c => c !== f.c); sel = null; });
+// Borrar (con ripple: cierra el hueco que deja en su pista)
+function remove(ripple = false) {
+  const l = picked();
+  if (!l.length) return say('Elegí un clip para borrarlo.');
+  edit(() => {
+    for (const { c, t } of l) {
+      t.clips = t.clips.filter(x => x !== c);
+      if (ripple) { const e = end(c), d = len(c); for (const o of t.clips) if (o.start >= e - 1e-6) o.start -= d; }
+    }
+    sel = null; multi.clear();
+  });
+  if (ripple) say(l.length > 1 ? `${l.length} clips borrados y huecos cerrados.` : 'Clip borrado y hueco cerrado.');
 }
+const ripple = () => remove(true);
+// Partir todas las pistas en el cursor (como la cuchilla con Shift)
+function splitAll() { sel = null; multi.clear(); split(); }
+// Marcas de entrada y salida (I / O): Extraer saca el tramo y cierra el hueco; Levantar lo saca y deja el hueco
+const ioOk = () => P.io?.i != null && P.io?.o != null && P.io.o - P.io.i > 0.02;
+function mark(k) {
+  P.io = { ...P.io, [k]: T };
+  if (P.io.i != null && P.io.o != null && P.io.o < P.io.i) P.io = k === 'i' ? { i: T } : { o: T };
+  saveSoon(); renderTimeline();
+  say(k === 'i' ? `Entrada marcada en ${tc(T)}.` : `Salida marcada en ${tc(T)}.`);
+}
+function clearIO() { P.io = {}; saveSoon(); renderTimeline(); say('Marcas de entrada y salida borradas.'); }
+function extract() {
+  if (!ioOk()) return say('Marcá la entrada (I) y la salida (O) primero.');
+  const { i, o } = P.io;
+  edit(() => { cutRange(i, o); sel = null; multi.clear(); });
+  P.io = {}; seek(i); renderTimeline();
+  say(`Tramo extraído (${fmt(o - i)}): lo que seguía se corrió.`);
+}
+function lift() {
+  if (!ioOk()) return say('Marcá la entrada (I) y la salida (O) primero.');
+  const { i, o } = P.io;
+  edit(() => { cutRange(i, o, false); sel = null; multi.clear(); });
+  P.io = {}; renderTimeline();
+  say(`Tramo levantado (${fmt(o - i)}): quedó el hueco.`);
+}
+// Marcadores (M): notas en la regla para volver a un momento
+const MCOL = ['#ff5a1f', '#3fa7ff', '#3ddc84', '#ffd400', '#c86bff'];
+function toggleMarker() {
+  edit(() => {
+    P.markers ??= [];
+    const i = P.markers.findIndex(m => Math.abs(m.t - T) < 0.05);
+    if (i >= 0) P.markers.splice(i, 1);
+    else { P.markers.push({ t: T, label: '', color: MCOL[P.markers.length % MCOL.length] }); P.markers.sort((a, b) => a.t - b.t); }
+  });
+}
+function jump(list, dir) {
+  const pts = [...new Set(list.map(x => +x.toFixed(3)))].sort((a, b) => a - b);
+  const to = dir > 0 ? pts.find(x => x > T + 0.01) : pts.reverse().find(x => x < T - 0.01);
+  if (to != null) seek(to);
+}
+const editPts = () => P.tracks.flatMap(t => t.clips.flatMap(c => [c.start, end(c)]));
 function duplicate() {
   const f = sel && find(sel);
   if (!f) return say('Elegí un clip para duplicarlo.');
@@ -270,20 +332,25 @@ function detach() {
 const timed = c => !!c.media && media.get(c.media)?.type !== 'image';
 function trimTail(c, t) { // deja el clip hasta el segundo t del proyecto
   if (c.sub) { const tm = timesOf(c), w = wordsOf(c), k = Math.max(1, tm.filter(([x]) => x < t - c.start).length); c.text = w.slice(0, k).join(' '); c.words = tm.slice(0, k); }
+  const s1 = c.ramp && spAt(c, t - c.start);
   c.out = timed(c) ? srcAt(c, t) : c.in + (t - c.start); c.fadeOut = 0;
+  if (c.ramp) c.ramp = { a: c.ramp.a, b: s1 };
   return c;
 }
 function trimHead(c, t) { // deja el clip desde el segundo t del proyecto
   const dt = t - c.start;
   if (c.sub) { const tm = timesOf(c), w = wordsOf(c); let k = tm.findIndex(([x]) => x >= dt); if (k < 0) k = w.length - 1; c.text = w.slice(k).join(' '); c.words = tm.slice(k).map(([x, y]) => [Math.max(0, x - dt), y - dt]); }
+  const s0 = c.ramp && spAt(c, dt);
   if (timed(c)) c.in = srcAt(c, t); else c.out -= dt;
+  if (c.ramp) c.ramp = { a: s0, b: c.ramp.b };
   c.kf = shiftKf(c.kf, dt); c.start = t; c.fadeIn = 0;
   return c;
 }
 // Saca el tramo [a, b] de todas las pistas y corre lo que sigue para cerrar el hueco
-function cutRange(a, b) {
-  const d = b - a;
-  if (d <= 0) return;
+function cutRange(a, b, close = true) {
+  const d = close ? b - a : 0;
+  if (b - a <= 0) return;
+  if (d && P.markers?.length) P.markers = P.markers.filter(m => m.t <= a || m.t >= b).map(m => m.t >= b ? { ...m, t: m.t - d } : m);
   for (const t of P.tracks) {
     const out = [];
     for (const c of t.clips) {
@@ -291,9 +358,9 @@ function cutRange(a, b) {
       if (e <= a + 1e-6) out.push(c);
       else if (c.start >= b - 1e-6) { c.start -= d; out.push(c); }
       else if (c.start >= a - 1e-6 && e <= b + 1e-6) continue;
-      else if (c.start < a && e > b) { const tl = trimHead({ ...c, id: S.uid(), tr: 'none' }, b); tl.start = a; out.push(trimTail(c, a), tl); }
+      else if (c.start < a && e > b) { const tl = trimHead({ ...c, id: S.uid(), tr: 'none' }, b); tl.start = b - d; out.push(trimTail(c, a), tl); }
       else if (c.start < a) out.push(trimTail(c, a));
-      else { trimHead(c, b); c.start = a; out.push(c); }
+      else { trimHead(c, b); c.start = b - d; out.push(c); }
     }
     t.clips = out.filter(c => len(c) > 0.02);
   }
@@ -343,7 +410,7 @@ async function freeze() {
 
 // Copiar y pegar ajustes entre clips (encuadre, color, efectos, transición, voz)
 const ATTRS = {
-  video: ['fit', 'bg', 'kb', 'x', 'y', 'scale', 'rot', 'opacity', 'exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain', 'lut', 'lutMix', 'tr', 'trD', 'trDir', 'trK'],
+  video: ['fit', 'bg', 'kb', 'x', 'y', 'scale', 'rot', 'opacity', 'crop', 'box', 'exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain', 'lut', 'lutMix', 'cw', 'curves', 'tr', 'trD', 'trDir', 'trK'],
   audio: ['vol', 'fadeIn', 'fadeOut', 'voz', 'duck'],
   text: ['font', 'weight', 'size', 'color', 'stroke', 'box', 'boxColor', 'x', 'y', 'anim']
 };
@@ -356,20 +423,28 @@ function copyAttrs() {
   say('Ajustes copiados. Elegí otro clip y tocá «Pegar ajustes» (Ctrl+Alt+V).');
 }
 function pasteAttrs() {
-  const f = sel && find(sel);
-  if (!f || !clipboard) return say(clipboard ? 'Elegí un clip para pegarle los ajustes.' : 'Primero copiá los ajustes de un clip.');
-  const ok = Object.keys(DEF[f.t.kind]);
-  edit(() => { for (const [k, v] of Object.entries(clipboard.v)) if (ok.includes(k)) f.c[k] = structuredClone(v); });
-  say('Ajustes pegados.');
+  const l = picked();
+  if (!l.length || !clipboard) return say(clipboard ? 'Elegí un clip para pegarle los ajustes.' : 'Primero copiá los ajustes de un clip.');
+  edit(() => { for (const f of l) { const ok = Object.keys(DEF[f.t.kind]); for (const [k, v] of Object.entries(clipboard.v)) if (ok.includes(k)) f.c[k] = structuredClone(v); } });
+  say(l.length > 1 ? `Ajustes pegados en ${l.length} clips.` : 'Ajustes pegados.');
 }
 
 // Cambiar la velocidad estira o acorta el clip: lo que sigue en la pista se corre para no pisarse
 function setSpeed(c, t, v) {
   const old = end(c);
   c.speed = clamp(v, 0.25, 4);
-  const d = end(c) - old;
-  for (const o of t.clips) if (o !== c && o.start >= old - 1e-6) o.start += d;
+  shiftAfter(t, c, old);
 }
+function shiftAfter(t, c, old) { const d = end(c) - old; for (const o of t.clips) if (o !== c && o.start >= old - 1e-6) o.start += d; }
+// Marcos para pantalla dividida o imagen en imagen: dónde se ve el clip dentro del cuadro
+const BOXES = {
+  full: { label: 'Todo el cuadro', v: null },
+  top: { label: 'Mitad de arriba', v: [0, 0, 1, 0.5] }, bottom: { label: 'Mitad de abajo', v: [0, 0.5, 1, 0.5] },
+  left: { label: 'Mitad izquierda', v: [0, 0, 0.5, 1] }, right: { label: 'Mitad derecha', v: [0.5, 0, 0.5, 1] },
+  t1: { label: 'Tercio de arriba', v: [0, 0, 1, 1 / 3] }, t2: { label: 'Tercio del medio', v: [0, 1 / 3, 1, 1 / 3] }, t3: { label: 'Tercio de abajo', v: [0, 2 / 3, 1, 1 / 3] },
+  main: { label: 'Principal (65 % arriba)', v: [0, 0, 1, 0.65] }, sec: { label: 'Secundario (35 % abajo)', v: [0, 0.65, 1, 0.35] },
+  pipTR: { label: 'Recuadro arriba a la derecha', v: [0.6, 0.05, 0.35, 0.25] }, pipBR: { label: 'Recuadro abajo a la derecha', v: [0.6, 0.66, 0.35, 0.25] }
+};
 
 // Reencuadre al hablante: busca las caras, ve quién mueve la boca y arma los fotogramas clave de la posición
 function frameGeom(c, m) {
@@ -390,6 +465,7 @@ async function reframeClip(c, opts = {}) {
   return true;
 }
 async function reframe(list) {
+  if (needPro('Seguir a quien habla')) return;
   if (P.aspect === '16:9') return say('El reencuadre es para formatos verticales o cuadrados: cambiá el formato del proyecto primero.');
   job.cancel = false;
   let n = 0;
@@ -513,7 +589,8 @@ function syncMedia() {
     if (!el) continue;
     live.add(c.id);
     const on = T >= c.start && T < shown, want = Math.min(srcAt(c, T), media.get(c.media).duration - 0.05);
-    if (el.playbackRate !== sp(c)) { el.playbackRate = sp(c); el.preservesPitch = true; }
+    const rate = Math.round(spAt(c, clamp(T - c.start, 0, len(c))) * 100) / 100;
+    if (el.playbackRate !== rate) { el.playbackRate = rate; el.preservesPitch = !c.ramp; }
     const audible = T >= c.start && T < end(c) && playing && !t.muted && !c.mute, v = audible ? c.vol * fadeGain(c, T - c.start) * (c.duck ? duckNow : 1) : 0;
     if (el.cc) { route(el, c); el.cc.out.gain.setTargetAtTime(v, actx.currentTime, 0.012); el.muted = false; }
     else { el.muted = !audible; el.volume = clamp(v, 0, 1); }
@@ -562,6 +639,57 @@ function compose(g, t, srcOf) {
     const a = NEEDS_PREV.has(b.tr) ? prevOf(tr, b) : null, sa = a && srcOf(a);
     transition(g, b, ease((t - b.start) / d), sa ? fx => drawVisual(g, a, sa, fx, t) : null, B);
   }
+  endCard(g, t); progressBar(g, t); watermark(g);
+  g.restore();
+}
+// Barra de progreso arriba (cuánto falta del video), placa final y marca del plan Gratis
+function progressBar(g, t) {
+  const pr = P.progress, D = dur();
+  if (!pr?.on || !D) return;
+  const W = g.canvas.width, h = Math.max(4, Math.round(g.canvas.height * 0.006));
+  g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(0, 0, W, h);
+  g.fillStyle = pr.color || '#ff5a1f'; g.fillRect(0, 0, W * clamp(t / D, 0, 1), h);
+}
+function endCard(g, t) {
+  const ec = P.endCard, D = dur(), logo = ec?.logo && media.get(ec.logo), im = logo && bitmapOf(logo), text = (ec?.text || '').trim();
+  if (!ec?.on || !D || (!im && !text)) return;
+  const al = clamp((t - (D - (ec.sec || 3))) / 0.4, 0, 1);
+  if (!al) return;
+  const W = g.canvas.width, H = g.canvas.height, e = ease(al), s = 0.85 + 0.15 * e;
+  g.save();
+  g.fillStyle = `rgba(0,0,0,${0.72 * al})`; g.fillRect(0, 0, W, H);
+  g.globalAlpha = al;
+  const m = Math.min(W, H);
+  let y = H * (text ? 0.42 : 0.5);
+  if (im) {
+    let w = m * 0.45 * s, h = w * im.height / im.width;
+    if (h > H * 0.28) { w *= H * 0.28 / h; h = H * 0.28; }
+    g.drawImage(im, (W - w) / 2, y - h / 2, w, h);
+    y += h / 2 + m * 0.12;
+  } else y = H * 0.5;
+  if (text) { // en renglones; las palabras con @ o # van en el color destacado
+    const fs = m * 0.065;
+    g.font = `900 ${fs}px Montserrat, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+    wrap(g, text, W * 0.84).forEach((row, r) => {
+      const ry = y + r * fs * 1.25 + (1 - e) * fs * 0.6, sp = g.measureText(' ').width;
+      let x = (W - g.measureText(row).width) / 2;
+      g.textAlign = 'left';
+      for (const w of row.split(' ')) {
+        g.lineWidth = fs * 0.16; g.strokeStyle = 'rgba(0,0,0,.6)'; g.strokeText(w, x, ry);
+        g.fillStyle = /^[@#]/.test(w) ? ec.color || '#ff5a1f' : '#fff'; g.fillText(w, x, ry);
+        x += g.measureText(w).width + sp;
+      }
+    });
+  }
+  g.restore();
+}
+function watermark(g) {
+  if (!marked()) return;
+  const W = g.canvas.width, H = g.canvas.height, fs = Math.round(Math.min(W, H) * 0.032);
+  g.save();
+  g.font = `800 ${fs}px Montserrat, sans-serif`; g.textAlign = 'right'; g.textBaseline = 'bottom';
+  g.lineWidth = fs * 0.18; g.lineJoin = 'round'; g.strokeStyle = 'rgba(0,0,0,.45)'; g.fillStyle = 'rgba(255,255,255,.85)';
+  g.strokeText('Hecho con ClipCreate', W - fs, H - fs * 1.2); g.fillText('Hecho con ClipCreate', W - fs, H - fs * 1.2);
   g.restore();
 }
 function transition(g, c, p, A, B) {
@@ -601,7 +729,8 @@ const LOOKS = {
 };
 const colorFilter = c => c.exp || c.con || c.sat || c.hue ? `brightness(${1 + c.exp * 0.5}) contrast(${1 + c.con * 0.6}) saturate(${1 + c.sat}) hue-rotate(${c.hue}deg)` : '';
 const GRADE_KEYS = ['exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl'];
-const needsGrade = c => !!c.lut || GRADE_KEYS.some(k => c[k]);
+const cwOn = cw => !!cw && ['lift', 'gamma', 'gain', 'offset'].some(k => cw[k]?.some(v => Math.abs(v) > 1e-4));
+const needsGrade = c => !!c.lut || GRADE_KEYS.some(k => c[k]) || cwOn(c.cw) || GL.curvesOn(c.curves);
 // LUTs: los de la biblioteca propia y los importados al proyecto (.cube)
 const lutCache = new Map();
 function lutOf(c) {
@@ -636,24 +765,33 @@ function grain(g, w, h, amt, t) { // grano de película: ruido que cambia 24 vec
   g.translate(-w / 2 - ox, -h / 2 - oy); g.fillStyle = pat; g.fillRect(ox, oy, w, h);
   g.restore();
 }
-function drawVisual(g, c, s, fx = {}, t = T) {
-  const W = g.canvas.width, H = g.canvas.height, tt = t - c.start, v = k => valAt(c, k, tt);
+// Recorte (crop: izquierda, arriba, derecha, abajo, en fracciones) y marco (box: x, y, ancho, alto del cuadro)
+function cropped(c, s) {
+  const k = c.crop;
+  if (!k || !k.some(v => v > 0)) return s;
+  const sx = k[0] * s.w, sy = k[1] * s.h, sw = Math.max(2, s.w * (1 - k[0] - k[2])), sh = Math.max(2, s.h * (1 - k[1] - k[3]));
+  return { w: sw, h: sh, paint: (g, x, y, w, h) => s.paint(g, sx, sy, sw, sh, x, y, w, h) };
+}
+function drawVisual(g, c, s0, fx = {}, t = T) {
+  const W = g.canvas.width, H = g.canvas.height, tt = t - c.start, v = k => valAt(c, k, tt), s = cropped(c, s0);
+  const bx = c.box ? { x: c.box[0] * W, y: c.box[1] * H, w: c.box[2] * W, h: c.box[3] * H } : { x: 0, y: 0, w: W, h: H };
   const kb = c.kb ? 1 + c.kb * clamp(tt / Math.max(len(c), 0.1), 0, 1) : 1; // zoom lento a lo largo del clip
-  const k = (c.fit === 'contain' ? Math.min(W / s.w, H / s.h) : Math.max(W / s.w, H / s.h)) * v('scale') * kb * (fx.k || 1), w = s.w * k, h = s.h * k;
+  const k = (c.fit === 'contain' ? Math.min(bx.w / s.w, bx.h / s.h) : Math.max(bx.w / s.w, bx.h / s.h)) * v('scale') * kb * (fx.k || 1), w = s.w * k, h = s.h * k;
   const alpha = v('opacity') * (fx.alpha ?? 1), cc = c.kf?.sat ? { ...c, sat: v('sat') } : c;
   g.save();
   if (fx.clip) { g.beginPath(); g.rect(...fx.clip); g.clip(); }
-  if (c.bg === 'blur' && (w < W - 1 || h < H - 1)) { // fondo con la misma imagen desenfocada, en vez de bordes
-    const kc = Math.max(W / s.w, H / s.h) * 1.15;
+  if (c.box) { g.beginPath(); g.rect(bx.x, bx.y, bx.w, bx.h); g.clip(); }
+  if (c.bg === 'blur' && (w < bx.w - 1 || h < bx.h - 1)) { // fondo con la misma imagen desenfocada, en vez de bordes
+    const kc = Math.max(bx.w / s.w, bx.h / s.h) * 1.15;
     g.save(); g.globalAlpha = alpha; g.filter = `blur(${Math.round(W / 28)}px) brightness(0.7)`;
-    s.paint(g, (W - s.w * kc) / 2, (H - s.h * kc) / 2, s.w * kc, s.h * kc); g.restore();
+    s.paint(g, bx.x + (bx.w - s.w * kc) / 2, bx.y + (bx.h - s.h * kc) / 2, s.w * kc, s.h * kc); g.restore();
   }
   g.globalAlpha = alpha;
-  g.translate(W / 2 + (v('x') + (fx.dx || 0)) * W, H / 2 + (v('y') + (fx.dy || 0)) * H);
+  g.translate(bx.x + bx.w / 2 + (v('x') + (fx.dx || 0)) * bx.w, bx.y + bx.h / 2 + (v('y') + (fx.dy || 0)) * bx.h);
   const rot = v('rot') + (fx.rot || 0);
   if (rot) g.rotate(rot * Math.PI / 180);
   let paint = s.paint, graded = false;
-  if (!colorOff && needsGrade(cc)) { // color con la placa de video (luces, sombras, LUT…); si no hay, filtros simples
+  if (!colorOff && needsGrade(cc)) { // color con la placa de video (luces, sombras, ruedas, curvas, LUT…); si no hay, filtros simples
     const gw = Math.max(2, Math.min(s.w, Math.ceil(Math.abs(w)))), gh = Math.max(2, Math.round(gw * s.h / s.w));
     const out = GL.grade((gg, ww, hh) => s.paint(gg, 0, 0, ww, hh), gw, gh, cc, lutOf(c), c.lut);
     if (out) { paint = (gg, x, y, ww, hh) => gg.drawImage(out, x, y, ww, hh); graded = true; }
@@ -669,7 +807,7 @@ function drawVisual(g, c, s, fx = {}, t = T) {
   }
   if (c.grain && !colorOff) grain(g, w, h, c.grain, t);
   if (!colorOff && c.vig) {
-    const r = Math.hypot(Math.min(w, W), Math.min(h, H)) / 2, gr = g.createRadialGradient(0, 0, r * 0.45, 0, 0, r);
+    const r = Math.hypot(Math.min(w, bx.w), Math.min(h, bx.h)) / 2, gr = g.createRadialGradient(0, 0, r * 0.45, 0, 0, r);
     gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.85 * c.vig})`);
     g.fillStyle = gr; g.fillRect(-w / 2, -h / 2, w, h);
   }
@@ -809,7 +947,9 @@ function draw() {
   }
   if (waiting()) { waitFrom ||= performance.now(); if (performance.now() - waitFrom < 500) return false; }
   waitFrom = 0;
-  compose(sg, T, previewSrc); guides(sg); markWord(); refreshKf();
+  compose(sg, T, previewSrc);
+  if (page === 'color') { colorFollow(); scopeDirty = true; } else guides(sg);
+  markWord(); refreshKf();
   return true;
 }
 function loop(now) {
@@ -818,7 +958,10 @@ function loop(now) {
     if (T >= dur() || (stopAt != null && T >= stopAt)) { T = Math.min(T, dur()); pause(); }
     dirty = true;
   }
-  if (P) { syncMedia(); readMeter(); if (dirty && draw()) dirty = false; }
+  if (P) {
+    syncMedia(); readMeter(); if (dirty && draw()) dirty = false;
+    if (page === 'color' && scopeDirty && now - lastScope > 150) { scopeDirty = false; lastScope = now; updateScopes(); }
+  }
   requestAnimationFrame(loop);
 }
 function play() {
@@ -867,7 +1010,15 @@ function renderTimeline() {
     ruler.append(sp);
   }
   for (const [a, b] of silMarks) { const i = document.createElement('i'); i.style.left = a * pps + 'px'; i.style.width = Math.max(2, (b - a) * pps) + 'px'; ruler.append(i); }
+  for (const m of P.markers || []) { const b = document.createElement('b'); b.className = 'mk'; b.style.left = m.t * pps + 'px'; b.style.setProperty('--mc', m.color); b.title = (m.label || 'Marcador') + ' · ' + tc(m.t); ruler.append(b); }
   const rows = [Object.assign(document.createElement('div'), { className: 'corner' }), ruler];
+  const io = P.io || {};
+  if (io.i != null || io.o != null) { // entrada y salida: franja sobre todas las pistas
+    const a = io.i ?? 0, b = io.o ?? Math.max(dur(), a), band = Object.assign(document.createElement('div'), { className: 'ioband' });
+    band.style.left = HW + a * pps + 'px'; band.style.width = Math.max(1, (b - a) * pps) + 'px';
+    band.classList.toggle('open', io.i == null || io.o == null);
+    rows.push(band);
+  }
   for (const t of P.tracks) {
     const th = document.createElement('div');
     th.className = 'th k-' + t.kind;
@@ -889,11 +1040,11 @@ function renderTimeline() {
     th.style.height = LANE_H[t.kind] + 'px';
     for (const c of t.clips) {
       const m = media.get(c.media), el = document.createElement('div'), label = clipLabel(c, t);
-      el.className = `clip k-${t.kind}${c.sub ? ' sub' : ''}${sel === c.id ? ' sel' : ''}${t.kind !== 'text' && (c.mute || t.muted) ? ' muted' : ''}${c.tr && c.tr !== 'none' ? ' tr' : ''}${c.voz?.p ? ' voz' : ''}`;
+      el.className = `clip k-${t.kind}${c.sub ? ' sub' : ''}${isSel(c.id) ? ' sel' : ''}${t.kind !== 'text' && (c.mute || t.muted) ? ' muted' : ''}${c.tr && c.tr !== 'none' ? ' tr' : ''}${c.voz?.p ? ' voz' : ''}`;
       if (c.tr && c.tr !== 'none') el.title = 'Transición: ' + TRANS[c.tr];
       el.dataset.id = c.id; el.tabIndex = 0;
       el.style.left = c.start * pps + 'px'; el.style.width = Math.max(6, len(c) * pps) + 'px';
-      el.setAttribute('role', 'button'); el.setAttribute('aria-pressed', sel === c.id);
+      el.setAttribute('role', 'button'); el.setAttribute('aria-pressed', isSel(c.id));
       el.setAttribute('aria-label', `${NAMES[t.kind]}: ${label}, de ${fmt(c.start)} a ${fmt(end(c))}`);
       el.innerHTML = '<i class="h l" aria-hidden="true"></i><span></span><i class="h r" aria-hidden="true"></i>';
       el.querySelector('span').textContent = label;
@@ -907,7 +1058,8 @@ function renderTimeline() {
   const head = Object.assign(document.createElement('div'), { id: 'head' });
   head.style.left = HW + T * pps + 'px';
   tlIn.replaceChildren(...rows, head);
-  $('split').disabled = $('dup').disabled = $('del').disabled = !sel;
+  $('split').disabled = $('dup').disabled = !sel; $('del').disabled = $('rippleDel').disabled = !picked().length;
+  $('extract').disabled = $('lift').disabled = !ioOk();
   $('detach').disabled = !(sel && find(sel)?.t.kind === 'video' && media.get(find(sel).c.media)?.type === 'video');
 }
 
@@ -923,21 +1075,31 @@ const snapTo = (v, pts) => { if (!snapOn) return null; for (const p of pts) if (
 
 tlIn.addEventListener('pointerdown', e => {
   if (e.button !== 0) return;
-  const clipEl = e.target.closest('.clip');
-  if (e.target.closest('#ruler') || (!clipEl && e.target.closest('.lane'))) {
-    if (!clipEl && e.target.closest('.lane') && sel) { sel = null; renderTimeline(); renderProps(); }
-    drag = { mode: 'scrub' }; seek(timeAt(e.clientX));
-  } else if (clipEl && tool === 'blade') { // cuchilla: corta ese clip donde hiciste clic
-    sel = clipEl.dataset.id; seek(Math.round(timeAt(e.clientX) * 30) / 30); split();
+  const clipEl = e.target.closest('.clip'), add = e.shiftKey || e.ctrlKey || e.metaKey;
+  if (e.target.closest('#ruler')) { drag = { mode: 'scrub' }; seek(timeAt(e.clientX)); }
+  else if (!clipEl && e.target.closest('.lane')) { // espacio vacío: clic = ir ahí; arrastrar = recuadro para elegir varios
+    drag = { mode: 'marq', x0: e.clientX, y0: e.clientY, base: new Set(add ? picked().map(f => f.c.id) : []), moved: false };
+  } else if (clipEl && tool === 'blade') { // cuchilla: corta ese clip (con Shift, todas las pistas) donde hiciste clic
+    seek(Math.round(timeAt(e.clientX) * 30) / 30);
+    if (e.shiftKey) splitAll(); else { sel = clipEl.dataset.id; multi.clear(); split(); }
     e.preventDefault(); return;
   } else if (clipEl) {
     const f = find(clipEl.dataset.id);
     if (!f) return;
+    if (add) { // Shift o Ctrl + clic: suma o saca el clip de la selección
+      if (!multi.size && sel) multi.add(sel);
+      if (multi.has(f.c.id)) { multi.delete(f.c.id); if (sel === f.c.id) sel = [...multi].at(-1) ?? null; }
+      else { multi.add(f.c.id); sel = f.c.id; }
+      if (multi.size <= 1) { sel = [...multi][0] ?? sel; multi.clear(); }
+      renderTimeline(); renderProps(); e.preventDefault(); return;
+    }
+    if (!multi.has(f.c.id)) multi.clear();
     if (sel !== f.c.id) { sel = f.c.id; renderProps(); }
     const mode = e.target.classList.contains('l') ? 'l' : e.target.classList.contains('r') ? 'r' : 'move';
     const others = f.t.clips.filter(o => o !== f.c);
+    const group = mode === 'move' ? picked().filter(g => g.c !== f.c).map(g => ({ g, s0: g.c.start })) : [];
     drag = {
-      mode, f, x0: e.clientX, before: snap(), c0: { ...f.c }, pts: snapPts(f.c), moved: false,
+      mode, f, x0: e.clientX, before: snap(), c0: { ...f.c }, pts: snapPts(f.c), moved: false, group,
       prevEnd: Math.max(0, ...others.filter(o => end(o) <= f.c.start + 1e-6).map(end)),
       nextStart: Math.min(Infinity, ...others.filter(o => o.start >= end(f.c) - 1e-6).map(o => o.start))
     };
@@ -947,9 +1109,25 @@ tlIn.addEventListener('pointerdown', e => {
   tlIn.setPointerCapture(e.pointerId);
   e.preventDefault();
 });
+function marquee(e) {
+  const d = drag, r0 = tlIn.getBoundingClientRect();
+  if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 4) return;
+  d.moved = true;
+  const x1 = Math.min(d.x0, e.clientX), x2 = Math.max(d.x0, e.clientX), y1 = Math.min(d.y0, e.clientY), y2 = Math.max(d.y0, e.clientY);
+  let box = $('marq');
+  if (!box) { box = Object.assign(document.createElement('div'), { id: 'marq' }); tlIn.append(box); }
+  Object.assign(box.style, { left: x1 - r0.left + 'px', top: y1 - r0.top + 'px', width: x2 - x1 + 'px', height: y2 - y1 + 'px' });
+  d.hits = new Set(d.base);
+  for (const el of tlIn.querySelectorAll('.clip')) {
+    const r = el.getBoundingClientRect(), hit = r.right > x1 && r.left < x2 && r.bottom > y1 && r.top < y2;
+    if (hit) d.hits.add(el.dataset.id);
+    el.classList.toggle('sel', d.hits.has(el.dataset.id));
+  }
+}
 tlIn.addEventListener('pointermove', e => {
   if (!drag) return;
   if (drag.mode === 'scrub') return seek(timeAt(e.clientX));
+  if (drag.mode === 'marq') return marquee(e);
   const { f, c0 } = drag, c = f.c, dx = (e.clientX - drag.x0) / pps;
   if (!drag.moved && Math.abs(e.clientX - drag.x0) < 3) return;
   drag.moved = true;
@@ -959,10 +1137,15 @@ tlIn.addEventListener('pointermove', e => {
     const a = snapTo(s, drag.pts), b = snapTo(s + len(c), drag.pts);
     s = a ?? (b !== null ? b - len(c) : s);
     c.start = Math.max(0, s);
-    // pasar a otra pista del mismo tipo
-    const lane = document.elementFromPoint(e.clientX, e.clientY)?.closest('.lane');
-    const to = lane && P.tracks.find(t => t.id === lane.dataset.track);
-    if (to && to !== f.t && to.kind === f.t.kind) { f.t.clips = f.t.clips.filter(x => x !== c); to.clips.push(c); f.t = to; }
+    if (drag.group.length) { // varios clips: se mueven juntos, cada uno en su pista
+      const dd = Math.max(c.start - c0.start, -Math.min(c0.start, ...drag.group.map(x => x.s0)));
+      c.start = c0.start + dd;
+      for (const x of drag.group) x.g.c.start = x.s0 + dd;
+    } else { // pasar a otra pista del mismo tipo
+      const lane = document.elementFromPoint(e.clientX, e.clientY)?.closest('.lane');
+      const to = lane && P.tracks.find(t => t.id === lane.dataset.track);
+      if (to && to !== f.t && to.kind === f.t.kind) { f.t.clips = f.t.clips.filter(x => x !== c); to.clips.push(c); f.t = to; }
+    }
   } else if (drag.mode === 'l') {
     let s = clamp(c0.start + dx, drag.prevEnd, end(c0) - MIN);
     s = snapTo(s, drag.pts) ?? s;
@@ -978,11 +1161,21 @@ tlIn.addEventListener('pointermove', e => {
   }
   renderTimeline(); dirty = true;
 });
-const endDrag = () => {
+const endDrag = e => {
   if (!drag) return;
   const d = drag; drag = null;
+  if (d.mode === 'marq') {
+    $('marq')?.remove();
+    if (!d.moved) { seek(timeAt(e.clientX)); if (sel || multi.size) { sel = null; multi.clear(); renderTimeline(); renderProps(); } return; }
+    multi.clear(); for (const id of d.hits || []) multi.add(id);
+    sel = [...multi].at(-1) ?? null;
+    if (multi.size <= 1) multi.clear();
+    renderTimeline(); renderProps();
+    if (multi.size) say(`${multi.size} clips elegidos: podés moverlos juntos, borrarlos o pegarles ajustes.`);
+    return;
+  }
   if (d.mode === 'scrub' || !d.moved) return;
-  if (d.mode === 'move') fitFree(d.f.t, d.f.c);
+  if (d.mode === 'move') { fitFree(d.f.t, d.f.c); for (const x of d.group) fitFree(x.g.t, x.g.c); }
   if (remember(d.before)) changed(); else renderTimeline();
 };
 tlIn.addEventListener('pointerup', endDrag);
@@ -994,7 +1187,7 @@ tl.addEventListener('wheel', e => {
 }, { passive: false });
 tlIn.addEventListener('focusin', e => {
   const c = e.target.closest('.clip');
-  if (c && sel !== c.dataset.id && !drag) { sel = c.dataset.id; renderProps(); renderTimeline(); tlIn.querySelector(`[data-id="${sel}"]`)?.focus(); }
+  if (c && sel !== c.dataset.id && !drag && !multi.size) { sel = c.dataset.id; renderProps(); renderTimeline(); tlIn.querySelector(`[data-id="${sel}"]`)?.focus(); }
 });
 
 // Soltar archivos de la lista en una pista
@@ -1485,6 +1678,7 @@ function sentences() {
 }
 let picks = [], stopAt = null;
 $('aiFind').onclick = async () => {
+  if (needPro('Clips inteligentes')) return;
   const sents = sentences();
   if (sents.length < 3) return say('Primero generá los subtítulos: la IA lee la transcripción para elegir los momentos.');
   if (!Smart.aiReady()) return say('Para usar la IA, entrá con tu cuenta en ClipCreate o cargá una clave de DeepSeek en sus Ajustes.');
@@ -1606,8 +1800,19 @@ function renderProps() {
       <p class="hint">Duración: ${fmt(dur())}. Tocá un clip de la línea de tiempo para editarlo.</p>
       ${P.desc ? `<h3>Para publicar</h3><label>Descripción sugerida por la IA<textarea readonly rows="5">${esc(P.desc)}</textarea></label>${acts(['copyDesc', 'Copiar descripción'])}` : ''}
       ${soundClips().length ? `<h3>Voz</h3>${acts(['vozEvery', '✨ Mejorar todas las voces'])}<p class="hint">Limpia y empareja el audio de todos los clips con el perfil Entrevista. Después podés ajustar cada uno.</p>` : ''}
+      <h3>Final del video</h3>
+      ${check('progress.on', 'Barra de progreso arriba')}
+      ${P.progress?.on ? color('progress.color', 'Color de la barra') : ''}
+      ${check('endCard.on', 'Placa final (logo y texto)')}
+      ${P.endCard?.on ? `${field('endCard.text', 'Texto', '<input type="text" maxlength="80" placeholder="Seguinos en @tucuenta">')}
+        ${opts('endCard.sec', 'Dura', { 2: '2 segundos', 3: '3 segundos', 4: '4 segundos', 5: '5 segundos' })}
+        ${color('endCard.color', 'Color de @ y #')}
+        <p class="hint">${P.endCard.logo && media.has(P.endCard.logo) ? 'Logo: ' + esc(media.get(P.endCard.logo).name) : 'Sin logo.'}</p>
+        ${acts(['endLogo', P.endCard.logo ? 'Cambiar logo' : 'Elegir logo'], ...(P.endCard.logo ? [['endLogoOff', 'Sin logo']] : []))}` : ''}
+      <h3>Marcadores</h3>
+      ${(P.markers || []).length ? `<ul class="mlist">${P.markers.map((m, i) => `<li style="--mc:${m.color}"><button type="button" data-mgo="${i}" title="Ir a este marcador">${tc(m.t)}</button><input type="text" data-mlabel="${i}" value="${esc(m.label)}" maxlength="60" aria-label="Nota del marcador ${i + 1}" placeholder="Nota"><button type="button" class="ghost ico" data-mdel="${i}" aria-label="Borrar el marcador ${i + 1}"><svg class="i"><use href="#i-x"/></svg></button></li>`).join('')}</ul>` : '<p class="hint">Tocá M para marcar el momento actual. Shift+↑ ↓ salta entre marcadores.</p>'}
       <h3>Atajos</h3>
-      <p class="hint">Espacio: reproducir · S: dividir · Supr: borrar · Ctrl+D: duplicar · Ctrl+Z / Ctrl+Shift+Z: deshacer / rehacer · ← →: un cuadro (con Shift, 1 s) · Alt+← →: mover el clip · Ctrl+rueda: zoom</p>`;
+      <p class="hint">Espacio: reproducir · S: dividir (Shift+S: todas las pistas) · Supr: borrar (Shift+Supr: borrar y cerrar el hueco) · I / O: entrada y salida (Alt+X las borra) · M: marcador · ↑ ↓: corte anterior o siguiente · Shift/Ctrl+clic o arrastrar en vacío: elegir varios · Ctrl+A: todo · Ctrl+D: duplicar · Ctrl+Z / Ctrl+Shift+Z: deshacer / rehacer · ← →: un cuadro (con Shift, 1 s) · Alt+← →: mover el clip · Ctrl+rueda: zoom</p>`;
   } else if (c.sub) {
     h = `<h2>Subtítulo</h2>
       ${field('text', 'Texto', '<textarea rows="3"></textarea>')}
@@ -1633,6 +1838,7 @@ function renderProps() {
     if (visual) h += `<h3>Encuadre</h3>
       ${opts('fit', 'Ajuste', { cover: 'Llenar el cuadro (recorta)', contain: 'Entero (con bordes)' })}
       ${c.fit === 'contain' ? opts('bg', 'Fondo', { color: 'Color del proyecto', blur: 'La misma imagen desenfocada' }) : ''}
+      <label>Marco<select data-boxp>${Object.entries(BOXES).map(([k2, b]) => `<option value="${k2}"${JSON.stringify(c.box) === JSON.stringify(b.v) ? ' selected' : ''}>${b.label}</option>`).join('')}</select></label>
       ${krange('scale', 'Zoom', 0.1, 4, 0.01, 'pct')}
       ${krange('x', 'Horizontal', -1, 1, 0.005, 'num')}${krange('y', 'Vertical', -1, 1, 0.005, 'num')}
       ${krange('rot', 'Rotación', -180, 180, 1, 'deg')}${krange('opacity', 'Opacidad', 0, 1, 0.01, 'pct')}
@@ -1652,7 +1858,7 @@ function renderProps() {
       ${range('hue', 'Matiz', -30, 30, 1, 'deg')}${range('vig', 'Viñeta', 0, 1, 0.01, 'pct')}
       ${range('grain', 'Grano de película', 0, 1, 0.01, 'pct')}
       ${GL.available() ? '' : '<p class="hint">Este navegador no tiene WebGL2: luces, sombras, blancos, negros, vibrance y LUTs no se aplican.</p>'}
-      ${acts(['orig', colorOff ? 'Ver con color' : 'Ver original'])}
+      ${acts(['orig', colorOff ? 'Ver con color' : 'Ver original'], ['colorPage', '🎨 Página de Color'])}
       <h3>Transición de entrada</h3>
       ${opts('tr', 'Tipo', TRANS)}
       ${c.tr !== 'none' ? `${range('trD', 'Duración', 0.1, 2, 0.05, 's')}
@@ -1674,7 +1880,10 @@ function renderProps() {
         <p class="hint">Baja el ruido entre frases, el zumbido y las resonancias, y deja la voz pareja. No hace milagros con ruido fuerte encima de la voz: ajustalo a oído.</p>`
         : `${acts(['voz', '✨ Mejorar voz'])}<p class="hint">Analiza el audio y aplica el perfil Entrevista. Después lo podés cambiar.</p>`;
     }
-    if (!isImg) h += `<h3>Velocidad</h3>${range('speed', 'Velocidad', 0.25, 4, 0.05, 'x')}<p class="hint">La voz mantiene su tono. Lo que sigue en la pista se corre solo.</p>`;
+    if (visual) h += `<h3>Recorte</h3>${range('crop.0', 'Izquierda', 0, 0.9, 0.005, 'pct')}${range('crop.2', 'Derecha', 0, 0.9, 0.005, 'pct')}${range('crop.1', 'Arriba', 0, 0.9, 0.005, 'pct')}${range('crop.3', 'Abajo', 0, 0.9, 0.005, 'pct')}${c.crop?.some(v => v > 0) ? acts(['cropReset', 'Sin recorte']) : ''}`;
+    if (!isImg) h += c.ramp
+      ? `<h3>Velocidad</h3>${range('ramp.a', 'Empieza a', 0.25, 4, 0.05, 'x')}${range('ramp.b', 'Termina a', 0.25, 4, 0.05, 'x')}<p class="hint">Rampa: acelera o frena a lo largo del clip. El sonido acompaña el cambio (cambia el tono).</p>${acts(['rampOff', 'Velocidad fija'])}`
+      : `<h3>Velocidad</h3>${range('speed', 'Velocidad', 0.25, 4, 0.05, 'x')}<p class="hint">La voz mantiene su tono. Lo que sigue en la pista se corre solo.</p>${acts(['rampOn', 'Hacer una rampa'])}`;
     const others = P.tracks.flatMap(x => x.clips.filter(o => o !== c && x !== t && o.media && media.get(o.media)?.hasAudio));
     if (!isImg && others.length) h += `<h3>Multicámara</h3><label>Sincronizar por el sonido con<select id="syncWith">${others.map(o => `<option value="${o.id}">${esc(media.get(o.media).name)} (${fmt(o.start)})</option>`).join('')}</select></label>${acts(['sync', 'Sincronizar'])}`;
     h += `<h3>Tiempo</h3><div class="two">${num('start', 'Empieza (s)', 0, 0.1)}${isImg ? num('out', 'Dura (s)', MIN, 0.1) : `<label>Dura<input type="text" value="${len(c).toFixed(2)} s" readonly></label>`}</div>`;
@@ -1682,6 +1891,7 @@ function renderProps() {
   if (f) h += '<div class="foot"></div>' + acts(['copyA', 'Copiar ajustes'], ['pasteA', 'Pegar ajustes'])
     + (t.kind === 'video' && m?.type === 'video' ? acts(...[['freeze', 'Congelar cuadro'], !c.mute && m.hasAudio ? ['detach', 'Separar audio'] : null].filter(Boolean)) : '')
     + acts(['split', 'Dividir'], ['dup', 'Duplicar'], ['del', 'Borrar']);
+  if (multi.size > 1) h = `<p class="hint msel">${multi.size} clips elegidos. Lo de abajo cambia solo el último que tocaste; «Pegar ajustes» y Borrar van para todos.</p>` + h;
   $('props').innerHTML = h;
   sectionize();
   const o = c || P;
@@ -1714,7 +1924,7 @@ $('props').addEventListener('input', e => {
   if (!k) return;
   const f = sel && find(sel), o = f ? f.c : P;
   pending ??= snap();
-  let v = el.type === 'checkbox' ? el.checked : el.type === 'range' || el.type === 'number' || k === 'weight' ? +el.value : el.value;
+  let v = el.type === 'checkbox' ? el.checked : el.type === 'range' || el.type === 'number' || k === 'weight' || k === 'endCard.sec' ? +el.value : el.value;
   if (el.type === 'number') { if (!isFinite(v) || el.value === '') return; v = Math.max(+el.min || 0, v); }
   if (k === 'out' && f) v = o.in + v; // "Dura" se guarda como punto final
   if (k === 'lut' && v === '__import') { el.value = o.lut; return lutFile.click(); }
@@ -1725,22 +1935,29 @@ $('props').addEventListener('input', e => {
     return;
   }
   if (k === 'speed' && f) { setSpeed(o, f.t, v); showOut(el); dirty = true; renderTimeline(); return; }
+  if (k.startsWith('ramp.') && f) { const old = end(o); o.ramp = { ...o.ramp, [k[5]]: clamp(v, 0.25, 4) }; shiftAfter(f.t, o, old); showOut(el); dirty = true; renderTimeline(); return; }
+  if (k.startsWith('crop.') && f) { o.crop = o.crop ? [...o.crop] : [0, 0, 0, 0]; o.crop[+k[5]] = v; if (o.crop[0] + o.crop[2] > 0.95 || o.crop[1] + o.crop[3] > 0.95) o.crop[+k[5]] -= 0.05; showOut(el); dirty = true; return; }
   if (k === 'voz.p') { // al cambiar de perfil, los controles vuelven a los valores del perfil
     if (!v) o.voz = null;
     else { const pr = Voz.PROFILES[v]; o.voz = { ...o.voz, p: v, noise: pr.noise, clarity: pr.pres, level: 0.5 }; }
   } else setK(o, k, v);
+  if (k === 'progress.on' && v) P.progress.color ??= '#ff5a1f';
+  if (k === 'endCard.on' && v) P.endCard = { sec: 3, text: brand().handle ? 'Seguinos en ' + brand().handle : '', color: brand().color || '#ff5a1f', ...P.endCard };
   if (k === 'start' && f) fitFree(f.t, o);
   if (k === 'aspect') sizeStage();
   showOut(el); dirty = true;
   if (['text', 'start', 'out'].includes(k)) renderTimeline();
 });
 $('props').addEventListener('change', e => {
+  const ml = e.target.dataset.mlabel;
+  if (ml !== undefined) { const m = P.markers[+ml]; if (m) edit(() => { m.label = e.target.value.trim(); }); return; }
+  if (e.target.dataset.boxp !== undefined) { const c = find(sel)?.c; if (c) edit(() => { c.box = BOXES[e.target.value].v; }); return; }
   const look = e.target.dataset.look !== undefined && LOOKS[e.target.value];
   if (look) { const c = find(sel)?.c; if (c) edit(() => Object.assign(c, look)); return; }
   if (!pending) return;
   const s = pending; pending = null;
   if (remember(s)) changed();
-  else if (['box', 'tr', 'voz.p', 'fit', 'lut'].includes(e.target.dataset.k)) renderProps();
+  else if (['box', 'tr', 'voz.p', 'fit', 'lut', 'progress.on', 'endCard.on'].includes(e.target.dataset.k)) renderProps();
 });
 $('props').addEventListener('click', e => {
   const kfb = e.target.closest('[data-kf]');
@@ -1756,6 +1973,12 @@ $('props').addEventListener('click', e => {
     });
     return;
   }
+  const mk = e.target.closest('[data-mgo],[data-mdel]');
+  if (mk) {
+    if (mk.dataset.mgo !== undefined) seek(P.markers[+mk.dataset.mgo]?.t ?? T);
+    else edit(() => P.markers.splice(+mk.dataset.mdel, 1));
+    return;
+  }
   const a = e.target.closest('[data-act]')?.dataset.act, f = sel && find(sel);
   const more = {
     orig() { colorOff = !colorOff; dirty = true; renderProps(); say(colorOff ? 'Viendo el video original, sin corrección de color.' : 'Viendo el color corregido.'); },
@@ -1768,6 +1991,12 @@ $('props').addEventListener('click', e => {
     voz: () => improve([f.c]),
     vozAll() { const c = f.c; edit(() => { for (const t of P.tracks) for (const x of t.clips) if (x.media === c.media && x !== c) x.voz = { ...c.voz }; }); say('Mismos ajustes de voz en todo este archivo.'); },
     vozEvery: () => improve(soundClips().map(x => x.c)),
+    rampOn() { const c = f.c, old = end(c); edit(() => { c.ramp = { a: sp(c), b: Math.min(4, sp(c) * 2) }; shiftAfter(f.t, c, old); }); },
+    rampOff() { const c = f.c, old = end(c); edit(() => { c.speed = sp(c); c.ramp = null; shiftAfter(f.t, c, old); }); },
+    cropReset() { edit(() => { f.c.crop = null; }); },
+    colorPage: () => setPage('color'),
+    endLogo: () => logoFile.click(),
+    endLogoOff() { edit(() => { P.endCard.logo = null; }); },
     kfClear() { edit(() => { for (const k of KF_KEYS) if (f.c.kf?.[k]?.length) f.c[k] = valAt(f.c, k, T - f.c.start); f.c.kf = null; }); },
     rf: () => reframe([f.c]),
     sync: () => syncTo(f.c, $('syncWith').value),
@@ -1780,6 +2009,16 @@ $('props').addEventListener('click', e => {
   };
   ({ split, dup: duplicate, del: remove, detach, ...more })[a]?.();
 });
+
+// Logo de la placa final: se guarda con los archivos del proyecto
+const logoFile = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', hidden: true });
+document.body.append(logoFile);
+logoFile.onchange = async () => {
+  const fl = logoFile.files[0]; logoFile.value = '';
+  if (!fl) return;
+  try { const rec = await importOne(fl, 'image'); edit(() => { P.endCard = { ...P.endCard, logo: rec.id }; }); renderBin(); say('Logo de la placa final listo.'); }
+  catch (e) { say(e.message || 'No se pudo abrir esa imagen.'); }
+};
 
 // Importar un LUT .cube al proyecto (queda guardado con el proyecto)
 const lutFile = Object.assign(document.createElement('input'), { type: 'file', accept: '.cube', hidden: true });
@@ -1809,6 +2048,7 @@ async function levelOf(m) {
   return r;
 }
 async function improve(list) {
+  if (needPro('Mejorar voz')) return;
   if (improving) return say('Ya se está analizando la voz, esperá un momento.');
   improving = true;
   try {
@@ -1850,7 +2090,8 @@ class Sound {
       if (when >= 0) src.start(when); else src.start(0, -when);
     }
     const buf = await off.startRendering();
-    const [l, r] = Smart.stretch([buf.getChannelData(0), buf.getChannelData(1)], sp(c), RATE); // más rápido o lento, sin cambiar el tono
+    // velocidad fija: más rápido o lento sin cambiar el tono; con rampa, el sonido acompaña la aceleración (cambia el tono)
+    const [l, r] = c.ramp ? [buf.getChannelData(0), buf.getChannelData(1)] : Smart.stretch([buf.getChannelData(0), buf.getChannelData(1)], sp(c), RATE);
     return { t0: a0, l, r };
   }
   async mix(L, R, s0, n) {
@@ -1860,7 +2101,7 @@ class Sound {
       if (tt < c.start || tt >= end(c)) continue;
       const src = srcAt(c, tt), k = Math.floor((src - c.in) / CH);
       if (k !== this.k) { this.cur = await this.chunk(k); this.k = k; }
-      const j = Math.round((src - this.cur.t0) / sp(c) * RATE);
+      const j = Math.round((src - this.cur.t0) / (c.ramp ? 1 : sp(c)) * RATE);
       if (j < 0 || j >= this.cur.l.length) continue;
       const g = c.vol * fadeGain(c, tt - c.start);
       L[i] += this.cur.l[j] * g; R[i] += this.cur.r[j] * g;
@@ -2000,6 +2241,8 @@ async function runExport(preset = null) {
   colorOff = false; // el video sale siempre con el color corregido
   try {
     await fontsReady;
+    const lg = P.endCard?.on && media.get(P.endCard.logo);
+    if (lg) { bitmapOf(lg); await lg.loading; }
     const M = await mb(), D = dur();
     if (!video) {
       const parts = [];
@@ -2055,7 +2298,7 @@ async function runExport(preset = null) {
         let cur = cursors.get(c.id);
         if (!cur) { const vt = await trackOf(M, m, 'video'); if (!vt) continue; cur = new Frames(new M.VideoSampleSink(vt), c.in, Math.min(m.duration, srcAt(c, shown))); cursors.set(c.id, cur); }
         const s = await cur.at(srcAt(c, t));
-        if (s) frames.set(c.id, { w: s.displayWidth, h: s.displayHeight, paint: (gg, x, y, w, h) => s.draw(gg, x, y, w, h) });
+        if (s) frames.set(c.id, { w: s.displayWidth, h: s.displayHeight, paint: (gg, ...r) => s.draw(gg, ...r) });
       }
       compose(g, t, c => frames.get(c.id));
       await vsrc.add(t, 1 / fps);
@@ -2116,7 +2359,8 @@ const pickFiles = () => $('file').click();
 $('importBtn').onclick = $('importBtn2').onclick = pickFiles;
 $('file').onchange = () => { const f = [...$('file').files]; $('file').value = ''; importFiles(f); };
 $('undo').onclick = undo; $('redo').onclick = redo;
-$('play').onclick = toggle; $('split').onclick = split; $('dup').onclick = duplicate; $('del').onclick = remove; $('detach').onclick = detach;
+$('play').onclick = toggle; $('split').onclick = split; $('dup').onclick = duplicate; $('del').onclick = () => remove(); $('detach').onclick = detach;
+$('rippleDel').onclick = ripple; $('extract').onclick = extract; $('lift').onclick = lift;
 $('addV').onclick = () => edit(() => newTrack('video'));
 $('addA').onclick = () => edit(() => newTrack('audio'));
 $('addT').onclick = () => edit(() => newTrack('text'));
@@ -2150,6 +2394,7 @@ addEventListener('keydown', e => {
   if (e.target.closest('input,textarea,select') || document.querySelector('dialog[open]')) return;
   const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
   const step = e.shiftKey ? 1 : 1 / 30;
+  if (page === 'color' && !mod && ['delete', 'backspace', 's', 'd', 'b', 'i', 'o'].includes(k)) return; // en Color no se corta ni se borra
   if (k === ' ' && !e.target.closest('button')) { e.preventDefault(); toggle(); }
   else if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
   else if (mod && k === 'y') { e.preventDefault(); redo(); }
@@ -2157,13 +2402,19 @@ addEventListener('keydown', e => {
   else if (mod && e.altKey && k === 'v') { e.preventDefault(); pasteAttrs(); }
   else if (mod && k === 'd') { e.preventDefault(); duplicate(); }
   else if (!mod && e.shiftKey && k === 'f') freeze();
+  else if (mod && k === 'a') { e.preventDefault(); multi.clear(); for (const t of P.tracks) for (const c of t.clips) multi.add(c.id); sel = [...multi].at(-1) ?? null; if (multi.size <= 1) multi.clear(); renderTimeline(); renderProps(); }
   else if (mod && k === 's') { e.preventDefault(); save(); }
   else if (mod) return;
-  else if (k === 's') split();
+  else if (k === 's') e.shiftKey ? splitAll() : split();
+  else if (e.altKey && k === 'x') { e.preventDefault(); clearIO(); }
+  else if (k === 'i') mark('i');
+  else if (k === 'o') mark('o');
+  else if (k === 'm') toggleMarker();
+  else if (k === 'arrowup' || k === 'arrowdown') { e.preventDefault(); jump(e.shiftKey ? (P.markers || []).map(m => m.t) : editPts(), k === 'arrowdown' ? 1 : -1); }
   else if (k === 'v') setTool('select');
   else if (k === 'b') setTool('blade');
   else if (k === 'n') $('snapBtn').click();
-  else if (k === 'delete' || k === 'backspace') { e.preventDefault(); remove(); }
+  else if (k === 'delete' || k === 'backspace') { e.preventDefault(); remove(e.shiftKey); }
   else if (e.altKey && (k === 'arrowleft' || k === 'arrowright')) { e.preventDefault(); moveSel(k === 'arrowleft' ? -step * 3 : step * 3); }
   else if (k === 'arrowleft') { e.preventDefault(); seek(T - step); }
   else if (k === 'arrowright') { e.preventDefault(); seek(T + step); }
@@ -2171,8 +2422,382 @@ addEventListener('keydown', e => {
   else if (k === 'end') seek(dur());
   else if (k === '+' || k === '=') setPps(pps * 1.3);
   else if (k === '-') setPps(pps / 1.3);
-  else if (k === 'escape') { if (tool === 'blade') setTool('select'); else if (sel) { sel = null; renderTimeline(); renderProps(); } }
+  else if (k === 'escape') { if (tool === 'blade') setTool('select'); else if (sel || multi.size) { sel = null; multi.clear(); renderTimeline(); renderProps(); } }
 });
+
+// ---------- Plan de la cuenta ----------
+// Gratis: todo, con la marca «Hecho con ClipCreate». Básico: sin las herramientas Pro. Pro: todo, sin marca.
+const Plan = { name: null };
+const PLAN_NOMBRE = { gratis: 'Gratis', basico: 'Básico', pro: 'Pro' };
+const marked = () => Plan.name !== 'basico' && Plan.name !== 'pro';
+function showPlan() {
+  const ch = $('planChip');
+  ch.textContent = Plan.name ? 'Plan ' + (PLAN_NOMBRE[Plan.name] || Plan.name) : 'Entrar';
+  ch.href = Plan.name ? 'index.html?planes=1' : 'index.html';
+  ch.title = Plan.name ? 'Tu plan de ClipCreate' + (marked() ? ': los videos salen con la marca de ClipCreate' : '') : 'Entrá con tu cuenta de ClipCreate (sin cuenta, los videos salen con la marca de ClipCreate)';
+  dirty = true;
+}
+async function loadPlan() {
+  try { Plan.name = JSON.parse(localStorage.getItem('clipcreate.cuenta') || 'null')?.plan || null; } catch {}
+  showPlan();
+  try {
+    const c = await Smart.cuenta();
+    Plan.name = c?.plan || null;
+    try { c ? localStorage.setItem('clipcreate.cuenta', JSON.stringify({ plan: c.plan })) : localStorage.removeItem('clipcreate.cuenta'); } catch {}
+  } catch { /* sin conexión: queda lo último que se supo */ }
+  showPlan();
+}
+function needPro(what) {
+  if (Plan.name !== 'basico') return false;
+  $('planMsg').textContent = `${what} es del plan Pro. Con el plan Pro tenés todas las herramientas del editor.`;
+  $('planDlg').showModal();
+  return true;
+}
+
+// ---------- Página de Color (estilo sala de color) ----------
+let page = 'edit', scopeDirty = false, lastScope = 0, crvCh = 'y', crvDrag = null;
+const EDIT_ONLY = ['.rail', '#left', '#right', '#split2', '.tlbox'];
+const GRADE = ['exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain', 'lut', 'lutMix', 'cw', 'curves'];
+const WHEELS = { lift: ['Sombras', 'Lift', 0.25, 0.5], gamma: ['Medios', 'Gamma', 0.25, 0.5], gain: ['Luces', 'Gain', 0.5, 1], offset: ['Todo', 'Offset', 0.25, 0.5] };
+const PHASE = [0, 2 * Math.PI / 3, 4 * Math.PI / 3]; // rojo a la derecha, verde arriba a la izquierda, azul abajo a la izquierda
+const PRIM = [['exp', 'Exposición', -1, 1, 0.01], ['con', 'Contraste', -1, 1, 0.01], ['sat', 'Saturación', -1, 1, 0.01], ['vib', 'Vibrance', -1, 1, 0.01],
+  ['temp', 'Temperatura', -1, 1, 0.01], ['tint', 'Tinte', -1, 1, 0.01], ['hue', 'Matiz', -30, 30, 1], ['hl', 'Luces', -1, 1, 0.01], ['sh', 'Sombras', -1, 1, 0.01], ['vig', 'Viñeta', 0, 1, 0.01]];
+const CURVES = { suave: [[0, 0], [0.25, 0.21], [0.75, 0.79], [1, 1]], fuerte: [[0, 0], [0.25, 0.16], [0.75, 0.85], [1, 1]], mate: [[0, 0.08], [0.25, 0.26], [0.75, 0.76], [1, 0.95]],
+  claro: [[0, 0], [0.5, 0.58], [1, 1]], oscuro: [[0, 0], [0.5, 0.42], [1, 1]], lineal: [[0, 0], [1, 1]] };
+const CH_COL = { y: '#e8e8ec', r: '#ff5a5a', g: '#4ddc6a', b: '#4f8dff' };
+
+const vClips = () => tracks('video').flatMap(t => t.clips.filter(c => media.has(c.media))).sort((a, b) => a.start - b.start);
+const graded = c => needsGrade(c) || c.vig > 0 || c.grain > 0;
+function gclip() { // el clip que se está corrigiendo
+  const f = sel && find(sel);
+  return f?.t.kind === 'video' && media.has(f.c.media) ? f.c : null;
+}
+function underHead() {
+  for (const t of tracks('video')) if (!t.hidden) { const c = t.clips.find(x => T >= x.start && T < end(x) && media.has(x.media)); if (c) return c; }
+  return null;
+}
+function setPage(p) {
+  if (p === 'color' && needPro('La página de Color')) return;
+  if (p === 'color' && !vClips().length) return say('Poné un video o una imagen en la línea de tiempo para corregir el color.');
+  page = p;
+  document.body.classList.toggle('color', p === 'color');
+  for (const q of EDIT_ONLY) document.querySelector(q).hidden = p === 'color';
+  for (const el of document.querySelectorAll('.cpage')) el.hidden = p !== 'color';
+  $('pgEdit').setAttribute('aria-pressed', p === 'edit'); $('pgColor').setAttribute('aria-pressed', p === 'color');
+  if (p === 'color') {
+    multi.clear();
+    if (!gclip()) { const c = underHead() || vClips()[0]; sel = c.id; if (T < c.start || T >= end(c)) seek(c.start + Math.min(0.5, len(c) / 2)); }
+    renderColor(); say('Página de Color: corregí cada clip con las ruedas, las curvas y los scopes.');
+  } else { renderTimeline(); renderProps(); }
+  dirty = true;
+}
+$('pgEdit').onclick = () => setPage('edit');
+$('pgColor').onclick = () => setPage('color');
+// En la página de Color, el clip elegido sigue al cursor (como en una sala de color)
+function colorFollow() {
+  const c = underHead();
+  if (c && c.id !== sel) { sel = c.id; renderColor(); }
+}
+
+function renderColor() {
+  const c = gclip();
+  const list = vClips();
+  $('strip').replaceChildren(...list.map((x, i) => {
+    const m = media.get(x.media), b = document.createElement('button');
+    b.type = 'button'; b.dataset.id = x.id; b.setAttribute('aria-pressed', x.id === sel);
+    b.setAttribute('aria-label', `Clip ${i + 1}: ${m.name}, en ${tc(x.start)}${graded(x) ? ', con color corregido' : ''}`);
+    b.innerHTML = `${m.thumb ? `<img src="${m.thumb}" alt="">` : ''}<span>${String(i + 1).padStart(2, '0')}</span><small>${tc(x.start)}</small>${graded(x) ? '<i></i>' : ''}`;
+    return b;
+  }));
+  $('strip').querySelector('[aria-pressed=true]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  if (!c) return;
+  $('cName').textContent = media.get(c.media).name;
+  $('cOrig').setAttribute('aria-pressed', colorOff); $('cOrig').textContent = colorOff ? 'Ver con color' : 'Ver original';
+  $('cLut').innerHTML = Object.entries({ '': 'Sin LUT', ...Object.fromEntries(Object.entries(Assets.LUTS).map(([k, v]) => [k, v.label])), ...Object.fromEntries(Object.entries(P.luts || {}).map(([k, v]) => [k, v.name])) })
+    .map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+  $('cLut').value = c.lut || ''; $('cLutMix').value = c.lutMix ?? 1; $('cLutMix').disabled = !c.lut;
+  $('cLutMixO').textContent = Math.round((c.lutMix ?? 1) * 100) + ' %';
+  for (const w of Object.keys(WHEELS)) wheelShow(c, w);
+  for (const el of $('prim').querySelectorAll('[data-ck]')) { el.value = c[el.dataset.ck] || 0; el.previousElementSibling.textContent = fmtP(el); }
+  drawCurve();
+  renderStills();
+}
+const fmtP = el => el.dataset.ck === 'hue' ? (+el.value).toFixed(0) + '°' : (+el.value > 0 ? '+' : '') + (+el.value).toFixed(2);
+$('strip').onclick = e => {
+  const b = e.target.closest('button[data-id]'), f = b && find(b.dataset.id);
+  if (!f) return;
+  sel = f.c.id; seek(f.c.start + Math.min(0.5, len(f.c) / 2)); renderColor();
+};
+
+// Ruedas: el disco mueve el color (rojo, verde, azul) y la barra de abajo, el brillo
+for (const [w, [name, en]] of Object.entries(WHEELS)) {
+  const d = document.createElement('div');
+  d.className = 'wheel';
+  d.innerHTML = `<b>${name} <span class="sr-only">(${en})</span><span aria-hidden="true" style="color:var(--faint);font-weight:500"> · ${en}</span></b>
+    <div class="wpad" data-w="${w}" tabindex="0" role="slider" aria-label="Color de ${name.toLowerCase()} (flechas para mover, Supr para volver al centro)" aria-valuemin="0" aria-valuemax="1"><i class="puck"></i></div>
+    <input type="range" data-wm="${w}" min="-${WHEELS[w][3]}" max="${WHEELS[w][3]}" step="0.005" aria-label="Brillo de ${name.toLowerCase()}">
+    <output data-wo="${w}"></output>`;
+  $('wheels').append(d);
+}
+const cwOf = c => (c.cw ??= { lift: [0, 0, 0, 0], gamma: [0, 0, 0, 0], gain: [0, 0, 0, 0], offset: [0, 0, 0, 0] });
+function wheelXY(v, R) { // de rojo, verde y azul a la posición en el disco
+  return [2 / (3 * R) * PHASE.reduce((s, f, k) => s + v[k] * Math.cos(f), 0), 2 / (3 * R) * PHASE.reduce((s, f, k) => s + v[k] * Math.sin(f), 0)];
+}
+function wheelShow(c, w) {
+  const v = c.cw?.[w] || [0, 0, 0, 0], [x, y] = wheelXY(v, WHEELS[w][2]);
+  const pad = $('wheels').querySelector(`[data-w="${w}"]`), pk = pad.firstElementChild;
+  pk.style.left = 50 + x * 46 + '%'; pk.style.top = 50 - y * 46 + '%';
+  pad.setAttribute('aria-valuenow', Math.hypot(x, y).toFixed(2));
+  const txt = `R ${v[0] >= 0 ? '+' : ''}${v[0].toFixed(2)}  G ${v[1] >= 0 ? '+' : ''}${v[1].toFixed(2)}  B ${v[2] >= 0 ? '+' : ''}${v[2].toFixed(2)}`;
+  pad.setAttribute('aria-valuetext', txt);
+  $('wheels').querySelector(`[data-wm="${w}"]`).value = v[3];
+  $('wheels').querySelector(`[data-wo="${w}"]`).textContent = `${txt} · Y ${v[3] >= 0 ? '+' : ''}${v[3].toFixed(2)}`;
+}
+function wheelSet(c, w, x, y) {
+  const r = Math.hypot(x, y);
+  if (r > 1) { x /= r; y /= r; }
+  const R = WHEELS[w][2], v = cwOf(c)[w];
+  PHASE.forEach((f, k) => { v[k] = R * (x * Math.cos(f) + y * Math.sin(f)); });
+  wheelShow(c, w); dirty = true;
+}
+let wDrag = null;
+$('wheels').addEventListener('pointerdown', e => {
+  const pad = e.target.closest('.wpad'), c = gclip();
+  if (!pad || !c || e.button !== 0) return;
+  wDrag = { w: pad.dataset.w, pad, before: snap() };
+  pad.setPointerCapture(e.pointerId); pad.focus();
+  wMove(e); e.preventDefault();
+});
+function wMove(e) {
+  if (!wDrag) return;
+  const r = wDrag.pad.getBoundingClientRect(), fine = e.shiftKey ? 0.25 : 1;
+  wheelSet(gclip(), wDrag.w, fine * ((e.clientX - r.left) / r.width - 0.5) / 0.46, fine * (0.5 - (e.clientY - r.top) / r.height) / 0.46);
+}
+$('wheels').addEventListener('pointermove', wMove);
+const wEnd = () => { if (!wDrag) return; const b = wDrag.before; wDrag = null; if (remember(b)) changed(); };
+$('wheels').addEventListener('pointerup', wEnd);
+$('wheels').addEventListener('pointercancel', wEnd);
+$('wheels').addEventListener('dblclick', e => {
+  const pad = e.target.closest('.wpad'), c = gclip();
+  if (pad && c) edit(() => { const v = cwOf(c)[pad.dataset.w]; v[0] = v[1] = v[2] = 0; });
+});
+$('wheels').addEventListener('keydown', e => {
+  const pad = e.target.closest('.wpad'), c = gclip();
+  if (!pad || !c) return;
+  const w = pad.dataset.w, st = e.shiftKey ? 0.1 : 0.02, [x, y] = wheelXY(c.cw?.[w] || [0, 0, 0, 0], WHEELS[w][2]);
+  const mv = { ArrowLeft: [-st, 0], ArrowRight: [st, 0], ArrowUp: [0, st], ArrowDown: [0, -st] }[e.key];
+  if (mv) { e.preventDefault(); e.stopPropagation(); edit(() => wheelSet(c, w, x + mv[0], y + mv[1])); }
+  else if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Home') { e.preventDefault(); e.stopPropagation(); edit(() => { const v = cwOf(c)[w]; v[0] = v[1] = v[2] = 0; }); }
+});
+let cPending = null;
+$('wheels').addEventListener('input', e => {
+  const w = e.target.dataset.wm, c = gclip();
+  if (!w || !c) return;
+  cPending ??= snap();
+  cwOf(c)[w][3] = +e.target.value; wheelShow(c, w); dirty = true;
+});
+$('wheels').addEventListener('dblclick', e => { const w = e.target.dataset.wm, c = gclip(); if (w && c) edit(() => { cwOf(c)[w][3] = 0; }); });
+const cCommit = () => { if (!cPending) return; const s = cPending; cPending = null; if (remember(s)) changed(); };
+$('wheels').addEventListener('change', cCommit);
+
+// Ajustes primarios
+$('prim').innerHTML = PRIM.map(([k, l, a, b, st]) => `<label>${l} <output></output><input type="range" data-ck="${k}" min="${a}" max="${b}" step="${st}"></label>`).join('');
+$('prim').addEventListener('input', e => {
+  const k = e.target.dataset.ck, c = gclip();
+  if (!k || !c) return;
+  cPending ??= snap();
+  c[k] = +e.target.value; e.target.previousElementSibling.textContent = fmtP(e.target); dirty = true;
+});
+$('prim').addEventListener('change', cCommit);
+$('prim').addEventListener('dblclick', e => { const k = e.target.dataset.ck, c = gclip(); if (k && c) edit(() => { c[k] = 0; }); });
+$('cLut').onchange = () => { const c = gclip(); if (c) edit(() => { c.lut = $('cLut').value; c.lutMix ??= 1; }); };
+$('cLutMix').oninput = () => { const c = gclip(); if (!c) return; cPending ??= snap(); c.lutMix = +$('cLutMix').value; $('cLutMixO').textContent = Math.round(c.lutMix * 100) + ' %'; dirty = true; };
+$('cLutMix').onchange = cCommit;
+$('cOrig').onclick = () => { colorOff = !colorOff; dirty = true; renderColor(); };
+const gradeOf = c => Object.fromEntries(GRADE.map(k => [k, structuredClone(c[k] ?? DEF.video[k])]));
+$('cReset').onclick = () => { const c = gclip(); if (c) { edit(() => Object.assign(c, gradeOf(DEF.video))); say('Color del clip restablecido.'); } };
+$('cPrev').onclick = () => {
+  const c = gclip(), l = vClips(), i = l.indexOf(c);
+  if (i < 1) return say('No hay un clip antes de este.');
+  edit(() => Object.assign(c, gradeOf(l[i - 1]))); say('Mismo color que el clip anterior.');
+};
+$('cAll').onclick = () => {
+  const c = gclip();
+  if (!c) return;
+  const g = gradeOf(c), l = vClips();
+  edit(() => { for (const x of l) if (x !== c) Object.assign(x, structuredClone(g)); });
+  say(`Color copiado a ${l.length - 1} clip(s).`);
+};
+
+// Curvas: Y (brillo) y por canal, con el histograma de la imagen atrás
+const crv = $('crv'), cg = crv.getContext('2d');
+let histo = null; // { y, r, g, b } de 256 valores, del último scope
+const ptsOf = (c, ch) => c.curves?.[ch]?.length >= 2 ? c.curves[ch] : [[0, 0], [1, 1]];
+function drawCurve() {
+  const c = gclip(), W = crv.width, H = crv.height, pad = 8, S = W - pad * 2;
+  cg.clearRect(0, 0, W, H);
+  cg.strokeStyle = '#ffffff12'; cg.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) { const p = pad + S * i / 4; cg.beginPath(); cg.moveTo(p, pad); cg.lineTo(p, pad + S); cg.moveTo(pad, p); cg.lineTo(pad + S, p); cg.stroke(); }
+  const hh = histo?.[crvCh];
+  if (hh) {
+    const mx = Math.max(1, ...hh.slice(2, 254));
+    cg.fillStyle = CH_COL[crvCh] + '30'; cg.beginPath(); cg.moveTo(pad, pad + S);
+    for (let i = 0; i < 256; i++) cg.lineTo(pad + S * i / 255, pad + S - S * 0.9 * Math.min(1, hh[i] / mx));
+    cg.lineTo(pad + S, pad + S); cg.fill();
+  }
+  cg.strokeStyle = '#ffffff30'; cg.setLineDash([3, 3]); cg.beginPath(); cg.moveTo(pad, pad + S); cg.lineTo(pad + S, pad); cg.stroke(); cg.setLineDash([]);
+  if (!c) return;
+  const pts = ptsOf(c, crvCh), f = GL.curveFn(pts);
+  cg.strokeStyle = CH_COL[crvCh]; cg.lineWidth = 2; cg.beginPath();
+  for (let i = 0; i <= 128; i++) { const x = i / 128, y = clamp(f(x), 0, 1); cg[i ? 'lineTo' : 'moveTo'](pad + S * x, pad + S - S * y); }
+  cg.stroke();
+  for (const [x, y] of pts) { cg.fillStyle = '#111'; cg.strokeStyle = CH_COL[crvCh]; cg.beginPath(); cg.arc(pad + S * x, pad + S - S * y, 4.5, 0, 7); cg.fill(); cg.stroke(); }
+}
+function crvPos(e) {
+  const r = crv.getBoundingClientRect(), k = crv.width / r.width, pad = 8, S = crv.width - pad * 2;
+  return [clamp(((e.clientX - r.left) * k - pad) / S, 0, 1), clamp(1 - ((e.clientY - r.top) * k - pad) / S, 0, 1), S / k];
+}
+function crvSet(c, pts) { c.curves = { y: [[0, 0], [1, 1]], r: [[0, 0], [1, 1]], g: [[0, 0], [1, 1]], b: [[0, 0], [1, 1]], ...c.curves, [crvCh]: pts }; }
+crv.addEventListener('pointerdown', e => {
+  const c = gclip();
+  if (!c || e.button !== 0) return;
+  const [x, y, S] = crvPos(e), pts = ptsOf(c, crvCh).map(p => [...p]);
+  let i = pts.findIndex(([px, py]) => Math.hypot(px - x, py - y) * S < 9);
+  const before = snap();
+  if (i < 0) { pts.push([x, y]); pts.sort((a, b) => a[0] - b[0]); i = pts.findIndex(p => p[0] === x && p[1] === y); }
+  crvSet(c, pts);
+  crvDrag = { i, before };
+  crv.setPointerCapture(e.pointerId); dirty = true; drawCurve(); e.preventDefault();
+});
+crv.addEventListener('pointermove', e => {
+  const c = gclip();
+  if (!crvDrag || !c) return;
+  const [x, y] = crvPos(e), pts = c.curves[crvCh], i = crvDrag.i, n = pts.length;
+  pts[i][1] = y;
+  if (i > 0 && i < n - 1) pts[i][0] = clamp(x, pts[i - 1][0] + 0.01, pts[i + 1][0] - 0.01);
+  dirty = true; drawCurve();
+});
+const crvEnd = () => { if (!crvDrag) return; const b = crvDrag.before; crvDrag = null; if (remember(b)) changed(); };
+crv.addEventListener('pointerup', crvEnd);
+crv.addEventListener('pointercancel', crvEnd);
+crv.addEventListener('dblclick', e => {
+  const c = gclip();
+  if (!c) return;
+  const [x, y, S] = crvPos(e), pts = ptsOf(c, crvCh), i = pts.findIndex(([px, py]) => Math.hypot(px - x, py - y) * S < 9);
+  if (i > 0 && i < pts.length - 1) edit(() => crvSet(c, pts.filter((_, j) => j !== i)));
+});
+for (const b of document.querySelectorAll('.ctabs [data-ch]')) b.onclick = () => {
+  crvCh = b.dataset.ch;
+  for (const x of document.querySelectorAll('.ctabs [data-ch]')) x.setAttribute('aria-checked', x === b);
+  drawCurve();
+};
+$('crvPreset').onchange = () => {
+  const c = gclip(), v = $('crvPreset').value;
+  $('crvPreset').value = '';
+  if (c && CURVES[v]) edit(() => crvSet(c, structuredClone(CURVES[v])));
+};
+
+// Scopes: se calculan de la imagen de la vista previa (achicada), unas 6 veces por segundo
+const smp = document.createElement('canvas'), smpG = smp.getContext('2d', { willReadFrequently: true });
+const scope = $('scope'), scG = scope.getContext('2d');
+function updateScopes() {
+  const kind = $('scopeKind').value, sw = 200, sh = Math.max(8, Math.round(sw * stage.height / stage.width));
+  smp.width = sw; smp.height = sh;
+  smpG.drawImage(stage, 0, 0, sw, sh);
+  const d = smpG.getImageData(0, 0, sw, sh).data, N = sw * sh;
+  const hist = { y: new Uint32Array(256), r: new Uint32Array(256), g: new Uint32Array(256), b: new Uint32Array(256) };
+  for (let i = 0; i < d.length; i += 4) { hist.r[d[i]]++; hist.g[d[i + 1]]++; hist.b[d[i + 2]]++; hist.y[Math.round(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2])]++; }
+  histo = hist; drawCurve();
+  const W = scope.width, H = scope.height;
+  scG.fillStyle = '#050506'; scG.fillRect(0, 0, W, H);
+  if (kind === 'hist') {
+    scG.globalCompositeOperation = 'lighter';
+    const mx = Math.max(1, ...['r', 'g', 'b'].flatMap(k => [...hist[k].slice(2, 254)]));
+    for (const [k, col] of [['r', '#ff3b3b'], ['g', '#3bd65a'], ['b', '#3b7bff']]) {
+      scG.fillStyle = col + '99'; scG.beginPath(); scG.moveTo(0, H);
+      for (let i = 0; i < 256; i++) scG.lineTo(W * i / 255, H - (H - 10) * Math.min(1, hist[k][i] / mx));
+      scG.lineTo(W, H); scG.fill();
+    }
+    scG.globalCompositeOperation = 'source-over';
+    return grat(W, H, false);
+  }
+  const img = scG.createImageData(W, H), px = img.data, acc = new Float32Array(W * H * 3);
+  const add = (x, y, r, g, b) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const o = (y * W + x) * 3; acc[o] += r; acc[o + 1] += g; acc[o + 2] += b; };
+  const top = 10, hh = H - 20, lv = v => top + Math.round((1 - v / 255) * hh);
+  for (let y = 0, i = 0; y < sh; y++) for (let x = 0; x < sw; x++, i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    if (kind === 'wave') { const X = Math.floor(x * W / sw); add(X, lv(0.2126 * r + 0.7152 * g + 0.0722 * b), 0.55, 1, 0.65); }
+    else if (kind === 'parade') {
+      const X = Math.floor(x * (W / 3 - 6) / sw);
+      add(X, lv(r), 1, 0.25, 0.25); add(X + W / 3 + 3, lv(g), 0.25, 1, 0.35); add(X + 2 * W / 3 + 6, lv(b), 0.3, 0.5, 1);
+    } else { // vectorscopio: Cb a la derecha, Cr arriba
+      const cb = -0.1687 * r - 0.3313 * g + 0.5 * b, cr = 0.5 * r - 0.4187 * g - 0.0813 * b, R0 = H / 2 - 12;
+      add(Math.round(W / 2 + cb / 128 * R0), Math.round(H / 2 - cr / 128 * R0), 0.4 + r / 425, 0.4 + g / 425, 0.4 + b / 425);
+    }
+  }
+  const k = kind === 'vector' ? 0.5 : 3 * W * H / (N * (kind === 'parade' ? 3 : 1) * 12);
+  for (let i = 0, o = 0; i < W * H; i++, o += 3) {
+    px[i * 4] = 255 * (1 - Math.exp(-acc[o] * k)); px[i * 4 + 1] = 255 * (1 - Math.exp(-acc[o + 1] * k)); px[i * 4 + 2] = 255 * (1 - Math.exp(-acc[o + 2] * k)); px[i * 4 + 3] = 255;
+  }
+  scG.putImageData(img, 0, 0);
+  if (kind === 'vector') vgrat(W, H); else grat(W, H, true);
+}
+function grat(W, H, levels) { // líneas de referencia: 0, 25, 50, 75 y 100 %
+  scG.strokeStyle = '#ffffff1c'; scG.fillStyle = '#ffffff55'; scG.font = '10px sans-serif'; scG.lineWidth = 1;
+  if (!levels) return;
+  for (const v of [0, 25, 50, 75, 100]) { const y = 10 + Math.round((1 - v / 100) * (H - 20)) + 0.5; scG.beginPath(); scG.moveTo(0, y); scG.lineTo(W, y); scG.stroke(); scG.fillText(v, 3, y - 2); }
+}
+function vgrat(W, H) {
+  const cx = W / 2, cy = H / 2, R0 = H / 2 - 12;
+  scG.strokeStyle = '#ffffff22'; scG.lineWidth = 1;
+  scG.beginPath(); scG.arc(cx, cy, R0, 0, 7); scG.moveTo(cx - R0, cy); scG.lineTo(cx + R0, cy); scG.moveTo(cx, cy - R0); scG.lineTo(cx, cy + R0); scG.stroke();
+  scG.font = '10px sans-serif';
+  for (const [n, r, g, b] of [['R', 191, 0, 0], ['Am', 191, 191, 0], ['V', 0, 191, 0], ['Ci', 0, 191, 191], ['Az', 0, 0, 191], ['Mg', 191, 0, 191]]) { // colores al 75 %
+    const x = cx + (-0.1687 * r - 0.3313 * g + 0.5 * b) / 128 * R0, y = cy - (0.5 * r - 0.4187 * g - 0.0813 * b) / 128 * R0;
+    scG.strokeStyle = '#ffffff66'; scG.strokeRect(x - 5, y - 5, 10, 10); scG.fillStyle = '#ffffff88'; scG.fillText(n, x + 7, y + 3);
+  }
+  const a = 123 * Math.PI / 180; // línea del tono de piel
+  scG.strokeStyle = '#ffb08a77'; scG.beginPath(); scG.moveTo(cx, cy); scG.lineTo(cx + Math.cos(a) * R0, cy - Math.sin(a) * R0); scG.stroke();
+}
+$('scopeKind').onchange = () => { try { localStorage.setItem('clipcreate.editor.scope', $('scopeKind').value); } catch {} scopeDirty = true; };
+try { const v = localStorage.getItem('clipcreate.editor.scope'); if (v) $('scopeKind').value = v; } catch {}
+
+// Galería: stills con el color de un clip, para usar en otros (y en otros proyectos)
+const GKEY = 'clipcreate.galeria';
+const stills = () => { try { return JSON.parse(localStorage.getItem(GKEY) || '[]'); } catch { return []; } };
+function renderStills() {
+  const l = stills();
+  $('stills').replaceChildren(...l.map((s, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<img src="${s.thumb}" alt=""><div class="sb"><b title="${esc(s.name)}">${esc(s.name)}</b>
+      <div class="row"><button type="button" data-gapply="${i}">Aplicar</button><button type="button" data-gall="${i}">A todos</button><button type="button" class="ico" data-gdel="${i}" aria-label="Borrar el still ${esc(s.name)}"><svg class="i"><use href="#i-x"/></svg></button></div></div>`;
+    return li;
+  }));
+  $('galHint').hidden = l.length > 2;
+}
+$('still').onclick = () => {
+  const c = gclip();
+  if (!c) return;
+  const cv = document.createElement('canvas'); cv.width = 192; cv.height = Math.round(192 * stage.height / stage.width);
+  cv.getContext('2d').drawImage(stage, 0, 0, cv.width, cv.height);
+  const l = stills(), name = `${String(l.length + 1).padStart(2, '0')} · ${media.get(c.media).name.replace(/\.[^.]+$/, '')}`;
+  l.unshift({ name, thumb: cv.toDataURL('image/jpeg', 0.7), grade: gradeOf(c), at: Date.now() });
+  try { localStorage.setItem(GKEY, JSON.stringify(l.slice(0, 30))); say('Still guardado en la galería.'); }
+  catch { say('No hay lugar en el navegador para otro still: borrá alguno.'); }
+  renderStills();
+};
+$('stills').onclick = e => {
+  const b = e.target.closest('button'), l = stills();
+  if (!b) return;
+  if (b.dataset.gdel !== undefined) { l.splice(+b.dataset.gdel, 1); try { localStorage.setItem(GKEY, JSON.stringify(l)); } catch {} return renderStills(); }
+  const s = l[+(b.dataset.gapply ?? b.dataset.gall)], c = gclip();
+  if (!s || !c) return;
+  const g = structuredClone(s.grade);
+  if (g.lut && !Assets.LUTS[g.lut] && !P.luts?.[g.lut]) g.lut = ''; // un LUT importado en otro proyecto no está acá
+  const to = b.dataset.gall !== undefined ? vClips() : [c];
+  edit(() => { for (const x of to) Object.assign(x, structuredClone(g)); });
+  say(to.length > 1 ? `Still «${s.name}» aplicado a ${to.length} clips.` : `Still «${s.name}» aplicado.`);
+};
 
 // Las letras de los textos se cargan antes de dibujar (el lienzo no las pide solo)
 const fontsReady = Promise.all(Object.values(FONTS).flatMap(f => [400, 600, 700, 800, 900].map(w => document.fonts.load(`${w} 40px ${f}`).catch(() => {}))))
@@ -2187,7 +2812,7 @@ const fontsReady = Promise.all(Object.values(FONTS).flatMap(f => [400, 600, 700,
     P.aspect = asp; P.name = asp === '16:9' ? 'Video largo nuevo' : 'Reel nuevo'; P.safe = asp === '9:16';
     await save(); sizeStage(); changed();
     say('Proyecto nuevo. Importá tus videos (botón Importar o arrastralos a la página).');
-    requestAnimationFrame(loop);
+    requestAnimationFrame(loop); loadPlan();
     return;
   }
   if (q.has('proyectos')) { q.delete('proyectos'); setTimeout(() => { renderProjects(); $('projs').showModal(); }, 300); }
@@ -2198,4 +2823,5 @@ const fontsReady = Promise.all(Object.values(FONTS).flatMap(f => [400, 600, 700,
   if (id && P.id === id && dur()) say(`Se abrió «${P.name}». Se guarda solo mientras trabajás.`);
   else say('Importá un video, un audio o una imagen para empezar.');
   requestAnimationFrame(loop);
+  loadPlan();
 })();

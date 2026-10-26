@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v4.0 — diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
+<!-- ClipCreate Editor v5.0 — página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -227,6 +227,71 @@ dialog details summary{cursor:pointer;font-weight:600}
 #xProg{width:100%;accent-color:var(--accent)}
 #pool{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 
+/* herramientas de edición: marcadores, entrada/salida, recuadro de selección */
+#ruler b.mk{position:absolute;top:2px;width:9px;height:12px;margin-left:-4px;background:var(--mc);clip-path:polygon(0 0,100% 0,100% 65%,50% 100%,0 65%);pointer-events:none}
+.ioband{position:absolute;top:0;bottom:0;background:#3fa7ff1f;border-left:1px solid #3fa7ff;border-right:1px solid #3fa7ff;pointer-events:none;z-index:4}
+.ioband.open{border-right-style:dashed}
+#marq{position:absolute;border:1px solid var(--accent);background:#ff5a1f1a;pointer-events:none;z-index:7}
+.msel{background:#ff5a1f1a;border:1px solid #ff5a1f55;border-radius:6px;padding:.45rem .6rem;margin:.6rem .75rem 0}
+.mlist{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
+.mlist li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.3rem;align-items:center;border-left:3px solid var(--mc);padding-left:.35rem}
+.mlist button{min-height:1.7rem;padding:0 .35rem;font-size:.7rem;font-variant-numeric:tabular-nums}
+.mlist input{min-height:1.7rem;width:100%;min-width:0}
+a.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:var(--r);min-height:2rem;padding:.25rem .8rem;font-weight:600;text-decoration:none}
+dialog h2 svg.i{vertical-align:-2px}
+
+/* páginas Editar / Color */
+.pages{display:flex;background:var(--well);border:1px solid var(--line);border-radius:7px;padding:2px;gap:2px}
+.pages button{min-height:1.75rem;border:0;background:none;color:var(--muted);padding:.15rem .7rem;font-size:.78rem}
+.pages button[aria-pressed=true]{background:var(--panel2);color:var(--text);box-shadow:inset 0 -2px 0 var(--accent)}
+.top a.plan{border:1px solid var(--line);font-size:.75rem}
+body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-rows:42px minmax(0,1fr) 92px 290px 26px;
+  grid-template-areas:"top top top" "gal view scopes" "strip strip strip" "cp cp cp" "stat stat stat"}
+#gal{grid-area:gal;background:var(--panel);border-right:1px solid var(--line);overflow:hidden auto;min-height:0}
+#scopes{grid-area:scopes;background:var(--panel);border-left:1px solid var(--line);overflow:hidden auto;min-height:0;display:grid;align-content:start}
+#scopes select{min-height:1.7rem;font-size:.75rem}
+#scope{width:100%;height:auto;display:block;background:#050506;border-bottom:1px solid var(--line)}
+.cinfo{display:grid;gap:.45rem;padding:.6rem .75rem}
+.cinfo p{margin:0}
+#stills{list-style:none;margin:0;padding:.6rem;display:grid;gap:.45rem}
+#stills li{background:var(--panel2);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+#stills img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+#stills .sb{padding:.35rem .45rem;display:grid;gap:.3rem}
+#stills b{font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stills .row button{min-height:1.6rem;font-size:.7rem;padding:0 .4rem}
+#gal .hint{padding:0 .75rem}
+#strip{grid-area:strip;display:flex;gap:.45rem;padding:.45rem .6rem;overflow:auto hidden;background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+#strip button{flex:none;width:118px;height:76px;padding:0;position:relative;overflow:hidden;border-radius:5px;background:#000;display:block}
+#strip img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85}
+#strip span{position:absolute;left:4px;top:3px;font-size:.66rem;background:#000a;padding:0 .3rem;border-radius:3px}
+#strip small{position:absolute;left:0;right:0;bottom:0;font-size:.62rem;background:#000b;padding:.05rem .3rem;text-align:left;font-variant-numeric:tabular-nums;color:#ddd}
+#strip i{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--accent)}
+#strip button[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:-2px}
+#strip button[aria-pressed=true] img{opacity:1}
+#cpanel{grid-area:cp;display:grid;grid-template-columns:minmax(0,1fr) 270px 240px;gap:0;background:var(--panel);min-height:0}
+.wheels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem;padding:.6rem;align-content:center}
+.wheel{display:grid;justify-items:center;gap:.3rem;min-width:0}
+.wheel b{font-size:.72rem;color:#d8d8dd}
+.wpad{position:relative;width:min(100%,150px);aspect-ratio:1;border-radius:50%;cursor:crosshair;touch-action:none;
+  background:radial-gradient(closest-side,#232327 0,#232327d0 30%,#23232700 100%),conic-gradient(#80ff00,#ff0 30deg,#f00 90deg,#f0f 150deg,#00f 210deg,#0ff 270deg,#0f0 330deg,#80ff00);
+  box-shadow:inset 0 0 0 1px #0008,0 0 0 1px var(--line2)}
+.wpad::before,.wpad::after{content:"";position:absolute;background:#ffffff22;pointer-events:none}
+.wpad::before{left:50%;top:8%;bottom:8%;width:1px}.wpad::after{top:50%;left:8%;right:8%;height:1px}
+.wpad .puck{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #000,0 0 6px #000;pointer-events:none}
+.wheel input[type=range]{width:min(100%,150px)}
+.wheel output{font-size:.64rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.curves{border-left:1px solid var(--line);padding:.45rem .6rem;display:grid;grid-template-rows:auto minmax(0,1fr);gap:.35rem;min-height:0}
+.ctabs{display:flex;gap:.2rem;align-items:center}
+.ctabs button{min-height:1.6rem;min-width:1.8rem;padding:0;font-size:.72rem}
+.ctabs button[aria-checked=true]{border-color:var(--accent);color:var(--accent2)}
+.ctabs .grow{flex:1}
+.ctabs select{min-height:1.6rem;font-size:.72rem;max-width:8.5rem}
+#crv{width:100%;height:100%;max-height:230px;aspect-ratio:1;object-fit:contain;justify-self:center;background:#0b0b0d;border:1px solid var(--line);border-radius:5px;cursor:crosshair;touch-action:none}
+.prim{border-left:1px solid var(--line);padding:.55rem .75rem;display:grid;gap:.35rem;align-content:start;overflow:auto}
+.prim label{grid-template-columns:5rem minmax(0,1fr) 2.6rem;display:grid;align-items:center;column-gap:.4rem;font-size:.72rem}
+.prim label>input{grid-column:2;grid-row:1}
+.prim label>output{grid-column:3;grid-row:1;text-align:right;font-size:.68rem}
+
 /* pantallas chicas: todo en columna, con scroll */
 @media (max-width:980px){
   body{overflow:auto}
@@ -246,6 +311,11 @@ dialog details summary{cursor:pointer;font-weight:600}
   .tlbox{grid-template-rows:auto minmax(0,1fr)}
   #left,#right{border:0;border-top:1px solid var(--line);max-height:none;overflow:visible}
   #pname{width:auto;flex:1}
+  body.color .app{grid-template-columns:1fr;grid-template-rows:auto;grid-template-areas:"top" "view" "strip" "cp" "scopes" "gal" "stat"}
+  #cpanel{grid-template-columns:1fr}
+  .wheels{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .curves,.prim{border-left:0;border-top:1px solid var(--line)}
+  #crv{max-height:300px}
 }
 </style>
 </head>
@@ -289,6 +359,12 @@ dialog details summary{cursor:pointer;font-weight:600}
   <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M22 9l-6 6M16 9l6 6"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-ripple" viewBox="0 0 24 24"><path d="M3 7h10M5.5 7l1 12h5l1-12M8 7V4.5h3V7"/><path d="M22 13h-6M18.5 10l-3 3 3 3"/></symbol>
+  <symbol id="i-io" viewBox="0 0 24 24"><path d="M8 4H5v16h3M16 4h3v16h-3"/></symbol>
+  <symbol id="i-color" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="8" r="2"/><circle cx="8.5" cy="14" r="2"/><circle cx="15.5" cy="14" r="2"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 13h18M9 13v6M15 13v6"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
 </svg>
 <div class="app">
 <header class="top">
@@ -306,6 +382,12 @@ dialog details summary{cursor:pointer;font-weight:600}
   <button type="button" id="importBtn" class="ghost"><svg class="i"><use href="#i-import"/></svg>Importar</button>
   <input id="file" type="file" multiple accept="video/*,audio/*,image/*" hidden>
   <span class="grow"></span>
+  <div class="pages" role="group" aria-label="Página">
+    <button type="button" id="pgEdit" aria-pressed="true"><svg class="i"><use href="#i-edit"/></svg>Editar</button>
+    <button type="button" id="pgColor" aria-pressed="false"><svg class="i"><use href="#i-color"/></svg>Color</button>
+  </div>
+  <span class="grow"></span>
+  <a href="index.html?planes=1" id="planChip" class="lnk plan" title="Tu plan de ClipCreate">Plan</a>
   <a href="index.html?volver=1" id="backClips" class="lnk" hidden><svg class="i"><use href="#i-back"/></svg>Volver a los clips</a>
   <a href="index.html" class="lnk"><svg class="i"><use href="#i-home"/></svg>Inicio</a>
   <button type="button" id="openExp" class="go" aria-haspopup="dialog"><svg class="i"><use href="#i-export"/></svg>Exportar</button>
@@ -425,7 +507,11 @@ dialog details summary{cursor:pointer;font-weight:600}
     <button type="button" id="split" class="ghost" title="Dividir en el cursor (S)"><svg class="i"><use href="#i-cut"/></svg>Dividir</button>
     <button type="button" id="dup" class="ghost ico" aria-label="Duplicar (Ctrl+D)" title="Duplicar (Ctrl+D)"><svg class="i"><use href="#i-copy"/></svg></button>
     <button type="button" id="del" class="ghost ico" aria-label="Borrar (Supr)" title="Borrar (Supr)"><svg class="i"><use href="#i-trash"/></svg></button>
+    <button type="button" id="rippleDel" class="ghost ico" aria-label="Borrar y cerrar el hueco (Shift+Supr)" title="Borrar y cerrar el hueco (Shift+Supr)"><svg class="i"><use href="#i-ripple"/></svg></button>
     <button type="button" id="detach" class="ghost ico" aria-label="Separar el audio del video" title="Separar el audio del video"><svg class="i"><use href="#i-unlink"/></svg></button>
+    <span class="sep"></span>
+    <button type="button" id="extract" class="ghost" title="Sacar el tramo entre la entrada (I) y la salida (O) y cerrar el hueco"><svg class="i"><use href="#i-io"/></svg>Extraer</button>
+    <button type="button" id="lift" class="ghost" title="Sacar el tramo entre la entrada (I) y la salida (O) y dejar el hueco">Levantar</button>
     <span class="sep"></span>
     <button type="button" id="addV" class="ghost ico" aria-label="Agregar pista de video" title="Agregar pista de video"><svg class="i"><use href="#i-film"/></svg></button>
     <button type="button" id="addA" class="ghost ico" aria-label="Agregar pista de audio" title="Agregar pista de audio"><svg class="i"><use href="#i-wave"/></svg></button>
@@ -441,6 +527,41 @@ dialog details summary{cursor:pointer;font-weight:600}
   </div>
 </section>
 
+<!-- Página de Color: galería, scopes, tira de clips, ruedas y curvas -->
+<aside id="gal" class="cpage" aria-label="Galería de stills" hidden>
+  <div class="phead"><span>Galería</span><span class="grow"></span><button type="button" id="still" class="ghost" title="Guardar el color de este clip (con una foto) para usarlo en otros"><svg class="i"><use href="#i-cam"/></svg>Guardar still</button></div>
+  <ul id="stills" aria-label="Stills guardados"></ul>
+  <p class="hint" id="galHint">Un still guarda el color de un clip. Queda en este navegador y sirve en cualquier proyecto.</p>
+</aside>
+<aside id="scopes" class="cpage" aria-label="Scopes" hidden>
+  <div class="phead"><span>Scopes</span><span class="grow"></span>
+    <label class="sr-only" for="scopeKind">Tipo de scope</label>
+    <select id="scopeKind"><option value="parade">Desfile RGB</option><option value="wave">Forma de onda</option><option value="vector">Vectorscopio</option><option value="hist">Histograma</option></select>
+  </div>
+  <canvas id="scope" width="512" height="300" role="img" aria-label="Scope de la imagen actual"></canvas>
+  <div class="cinfo">
+    <p id="cName" class="hint"></p>
+    <div class="row"><button type="button" id="cOrig" aria-pressed="false">Ver original</button><button type="button" id="cReset">Restablecer</button></div>
+    <div class="row"><button type="button" id="cPrev" title="Copiar el color del clip anterior">Igual al anterior</button><button type="button" id="cAll">Usar en todos</button></div>
+    <label>LUT<select id="cLut"></select></label>
+    <label>Intensidad del LUT <output id="cLutMixO"></output><input type="range" id="cLutMix" min="0" max="1" step="0.01"></label>
+  </div>
+</aside>
+<nav id="strip" class="cpage" aria-label="Clips del proyecto" hidden></nav>
+<section id="cpanel" class="cpage" aria-label="Corrección de color" hidden>
+  <div class="wheels" id="wheels"></div>
+  <div class="curves">
+    <div class="ctabs" role="radiogroup" aria-label="Canal de la curva">
+      <button type="button" role="radio" data-ch="y" aria-checked="true">Y</button><button type="button" role="radio" data-ch="r" aria-checked="false">R</button><button type="button" role="radio" data-ch="g" aria-checked="false">G</button><button type="button" role="radio" data-ch="b" aria-checked="false">B</button>
+      <span class="grow"></span>
+      <label class="sr-only" for="crvPreset">Forma de la curva</label>
+      <select id="crvPreset"><option value="">Forma…</option><option value="suave">Curva S suave</option><option value="fuerte">Curva S fuerte</option><option value="mate">Negros lavados (mate)</option><option value="claro">Más claro</option><option value="oscuro">Más oscuro</option><option value="lineal">Recta (sin cambio)</option></select>
+    </div>
+    <canvas id="crv" width="300" height="300" aria-label="Curva: clic para agregar un punto, arrastrar para moverlo, doble clic para sacarlo"></canvas>
+  </div>
+  <div class="prim" id="prim"></div>
+</section>
+
 <footer class="stat">
   <p id="status" role="status" aria-live="polite"></p>
   <span id="bgwork"></span>
@@ -450,6 +571,13 @@ dialog details summary{cursor:pointer;font-weight:600}
 </div>
 <div id="pool" aria-hidden="true"></div>
 
+<dialog id="planDlg" aria-labelledby="planT">
+  <form method="dialog">
+    <h2 id="planT"><svg class="i"><use href="#i-lock"/></svg> Herramienta del plan Pro</h2>
+    <p id="planMsg"></p>
+    <div class="row"><a class="btn go" href="index.html?planes=1">Ver planes</a><button value="close">Cerrar</button></div>
+  </form>
+</dialog>
 <dialog id="projs" aria-labelledby="projsT">
   <form method="dialog">
     <h2 id="projsT">Proyectos</h2>

@@ -1,4 +1,4 @@
-# ClipCreate Editor — v4.0 (diseño profesional)
+# ClipCreate Editor — v5.0 (página de Color y herramientas pro)
 
 Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
 
@@ -16,6 +16,39 @@ Editor de video multipista que corre entero en el navegador. Está en el mismo r
 
 No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
 
+## Página de Color (v5.0)
+
+Arriba, en el medio, hay dos botones: **Editar** y **Color**. La página de Color es como una sala de color:
+
+- **Tira de clips** con miniatura, número y código de tiempo. El punto naranja marca los que ya tienen color. El clip elegido sigue al cursor.
+- **Ruedas Sombras (Lift), Medios (Gamma), Luces (Gain) y Todo (Offset)**: el disco cambia el color (se arrastra el punto; con Shift, más fino; con el teclado, flechas y Supr para volver al centro; doble clic lo centra) y la barra de abajo cambia el brillo.
+- **Curvas** Y (brillo), R, G y B con el histograma de la imagen atrás: clic agrega un punto, se arrastra, doble clic lo saca. También hay formas listas (curva S suave o fuerte, mate, más claro, más oscuro, recta).
+- **Ajustes primarios**: exposición, contraste, saturación, vibrance, temperatura, tinte, matiz, luces, sombras y viñeta. Doble clic vuelve a cero.
+- **Scopes**: Desfile RGB, Forma de onda, Vectorscopio (con los colores de referencia y la línea de piel) e Histograma, de la imagen que se ve.
+- **Galería de stills**: guarda el color de un clip con una foto para aplicarlo a otro o a todos. Queda en este navegador y sirve en cualquier proyecto.
+- **Ver original**, **Restablecer**, **Igual al anterior**, **Usar en todos** y el **LUT** con su intensidad.
+- Todo se puede deshacer y sale igual en la exportación.
+
+## Herramientas de edición pro (v5.0)
+
+- **Borrar y cerrar el hueco** (ripple): Shift+Supr o el botón de la papelera con flecha.
+- **Entrada y salida** (I y O) marcan un tramo: **Extraer** lo saca y corre lo que sigue; **Levantar** lo saca y deja el hueco. Alt+X borra las marcas.
+- **Cuchilla en todas las pistas**: Shift+S, o Shift+clic con la cuchilla.
+- **Varios clips a la vez**: Shift o Ctrl+clic, arrastrar un recuadro en una parte vacía, o Ctrl+A. Se mueven juntos, se borran juntos y «Pegar ajustes» va para todos.
+- **Marcadores** (M) en la regla, con nota y lista en el panel del proyecto. ↑ ↓ saltan de corte en corte y Shift+↑ ↓ de marcador en marcador.
+- **Rampas de velocidad**: un clip puede ir acelerando o frenando (Velocidad → Hacer una rampa).
+- **Recorte** y **Marcos** (mitades, tercios, principal y secundario, recuadros) para pantalla dividida e imagen en imagen.
+- **Final del video** (panel del proyecto): **barra de progreso** arriba y **placa final** con logo, texto (las palabras con @ o # en color) y duración.
+
+## Planes
+
+El editor lee el plan de la cuenta de ClipCreate (el mismo `mi_cuenta` del servidor):
+
+- **Sin cuenta o Gratis**: todo funciona y los videos salen con «Hecho con ClipCreate» abajo a la derecha.
+- **Básico**: sin marca, pero sin las herramientas Pro (Mejorar voz, Clips inteligentes, Seguir a quien habla y la página de Color): al tocarlas aparece el aviso con «Ver planes».
+- **Pro**: todo y sin marca.
+- Si no hay internet, usa el último plan que supo. Arriba a la derecha se ve el plan (o «Entrar»), que lleva a los planes en ClipCreate.
+
 ## Diseño profesional (v4.0)
 
 - **Pantalla de sala de edición**: barra superior fina, columna de íconos (Medios, Biblioteca, Subtítulos, IA), visor centrado, inspector a la derecha, línea de tiempo abajo y barra de estado.
@@ -29,14 +62,15 @@ No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica
 - **Alto de la línea de tiempo ajustable**: arrastrás el divisor o usás las flechas, y queda guardado.
 - **En el celular** se acomoda en una sola columna.
 
-## Una sola app (ClipCreate v9.0 + Editor v3.1)
+## Una sola app (ClipCreate v9.1 + Editor v3.1)
 
 - **Inicio con botones** en `index.html`: «Clips de un episodio» (el ClipCreate de siempre), «Un Reel o Short» (editor en 9:16), «Un video largo» (editor en 16:9) y «Mis proyectos».
 - **Misma identidad**: el editor usa el naranja, los colores y el logo de ClipCreate. Tocar «ClipCreate» arriba lleva al inicio.
 - **«Editar a fondo en el editor»** (en Descargar) abre el clip en la misma pestaña con todo lo armado en ClipCreate:
   - el encuadre de cada parte, el zoom viral y el de disimular cortes (como fotogramas clave),
   - las frases fuertes en blanco y negro, el color elegido, los subtítulos con su estilo, tamaño, altura y color,
-  - el título, el invitado, el logo, los whoosh, el sonido de estudio y la descripción para publicar.
+  - el título, el invitado, el logo, los whoosh, el sonido de estudio y la descripción para publicar,
+  - (v9.1) los diseños **Dividido, Trío y Spotlight** (cada franja es un clip en su pista con su recorte y su marco; suena solo la primera), **Centrado** (entero con fondo desenfocado), la **portada**, la **placa final** y la **barra de progreso**.
 - **«← Volver a los clips»** en el editor vuelve a ClipCreate y recupera el episodio solo, sin elegir el archivo de nuevo. En el inicio también aparece «Seguir con «episodio»».
 - No pasan al editor (todavía): la portada, el cierre, la barra de progreso y los diseños Dividido, Trío, Spotlight y Centrado (en esos casos el clip llega con el encuadre centrado).
 
@@ -96,7 +130,7 @@ No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica
 
 ## Atajos
 
-Espacio reproducir · V selección · B cuchilla · N imán · S dividir · Supr borrar · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
+Espacio reproducir · V selección · B cuchilla (Shift+clic: todas las pistas) · N imán · S dividir (Shift+S: todas las pistas) · Supr borrar (Shift+Supr: y cerrar el hueco) · I / O entrada y salida · Alt+X borrar entrada y salida · M marcador · ↑ ↓ corte anterior o siguiente · Shift+↑ ↓ marcador · Ctrl+A todo · Shift/Ctrl+clic elegir varios · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
 
 ## Privacidad
 
@@ -120,12 +154,14 @@ Los videos **no se suben a ningún lado**: se procesan en la compu. La única ex
 
 ## Lo que viene (sin hacer todavía)
 
-- Curvas de color dibujadas a mano (hoy hay luces, sombras, blancos, negros y LUTs).
 - Identificar quién habla en los subtítulos (Groq no lo hace; el reencuadre sí detecta quién habla por la boca).
 - Cambio de cámara automático en multicámara (hoy se sincroniza solo y se corta a mano).
-- Curvas de velocidad (rampas): hoy la velocidad es fija por clip.
+- Nodos de color y máscaras (ventanas) como en DaVinci: hoy hay una corrección por clip.
+- Línea fina entre franjas de Dividido o Trío (en ClipCreate está; en el editor todavía no).
 
 ## Cómo se probó
+
+**v5.0**: en Chromium con videos reales: marcadores, entrada y salida con Extraer y Levantar (y deshacer), Shift+S, borrar con ripple, Shift+clic, recuadro, mover varios juntos, Ctrl+A, barra de progreso y placa final con logo, la página de Color (ruedas con mouse y teclado, brillo, curvas, formas, los cuatro scopes, stills aplicados a todos, ver original, tira de clips, deshacer), exportar con la marca de Gratis y la pantalla del celular. «Editar a fondo» desde ClipCreate con Dividido, portada, placa final y barra. El plan de la cuenta no se pudo probar contra el servidor (desde acá no llega): probalo entrando con una cuenta Básico y otra Pro.
 
 **v3.0**: con videos reales en Chromium se probaron:
 - La biblioteca: sonidos, música y gráficos agregados y exportados.
