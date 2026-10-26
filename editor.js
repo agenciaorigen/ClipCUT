@@ -1,12 +1,12 @@
-// ClipCreate Editor v5.7 (panel de transiciones y volumen de la vista previa; los archivos llevan ?v= para que el navegador no use versiones viejas); v5.6 (Mejorar voz: tarda segundos en videos largos y muestra el avance en el botón); v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v5.8 (si un archivo no entra en el navegador se edita igual, y los archivos perdidos se reconectan al importarlos de nuevo); v5.7 (panel de transiciones y volumen de la vista previa; los archivos llevan ?v= para que el navegador no use versiones viejas); v5.6 (Mejorar voz: tarda segundos en videos largos y muestra el avance en el botón); v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
-import * as Voz from './audio.js?v=5.7';
+import * as Voz from './audio.js?v=5.8';
 import * as Sub from './subs.js';
-import * as Assets from './assets.js?v=5.7';
-import * as GL from './gl.js?v=5.7';
-import * as Smart from './smart.js?v=5.7';
+import * as Assets from './assets.js?v=5.8';
+import * as GL from './gl.js?v=5.8';
+import * as Smart from './smart.js?v=5.8';
 
 const $ = id => document.getElementById(id);
 const MB = 'https://cdn.jsdelivr.net/npm/mediabunny@1.60.0/dist/bundles/mediabunny.min.mjs';
@@ -140,8 +140,9 @@ async function openProject(id) {
   $('backClips').hidden = P.from !== 'clipcreate';
   if (!p) await save();
   sizeStage(); fitZoom(); changed(); $('saved').textContent = 'Guardado';
-  const lost = P.tracks.flatMap(t => t.clips).filter(c => c.media && !media.has(c.media)).length;
-  if (lost) say(`Faltan ${lost} archivo(s) de este proyecto: se borraron del navegador. Importalos de nuevo.`);
+  for (const [id, m] of media) (P.files ??= {})[id] ??= { name: m.name, size: m.blob?.size };
+  const lost = [...new Set(P.tracks.flatMap(t => t.clips).filter(c => c.media && !media.has(c.media)).map(c => c.media))];
+  if (lost.length) { const names = lost.map(id => P.files?.[id]?.name).filter(Boolean); say(`Faltan ${lost.length} archivo(s) de este proyecto${names.length ? ': «' + names.join('», «') + '»' : ''}. Importalos de nuevo${names.length ? ' (los mismos archivos) y se reconectan solos' : ''}.`); }
 }
 
 // ---------- Importar ----------
@@ -193,10 +194,17 @@ async function importOne(f, type = typeOf(f)) {
   say(`Abriendo «${f.name}»…`);
   const info = await probe(f, type);
   say(`Guardando «${f.name}» en el navegador…`);
-  const rec = { id: S.uid(), name: f.name, type, blob: f, ...info };
-  await S.put('media', rec);
-  P.media.push(rec.id);
-  media.set(rec.id, { ...rec, url: URL.createObjectURL(f) });
+  // si es un archivo del proyecto que se perdió del navegador, vuelve con el mismo id y los clips se reconectan solos
+  const lost = Object.entries(P.files || {}).find(([id, x]) => !media.has(id) && x.name === f.name && x.size === f.size)?.[0];
+  const rec = { id: lost || S.uid(), name: f.name, type, blob: f, ...info };
+  let kept = true;
+  navigator.storage?.persist?.().catch(() => {}); // que el navegador no borre los archivos si falta lugar
+  try { await S.put('media', rec); } catch (e) { kept = false; console.warn(e); }
+  if (!P.media.includes(rec.id)) P.media.push(rec.id);
+  P.files = { ...P.files, [rec.id]: { name: f.name, size: f.size } };
+  media.set(rec.id, { ...rec, url: URL.createObjectURL(f), unsaved: !kept });
+  if (!kept) toast(`«${f.name}» se abrió, pero no entró en el navegador (falta lugar en el disco o es muy pesado). Se edita y se exporta igual; si cerrás la pestaña, vas a tener que volver a importarlo.`);
+  if (lost) toast(`«${f.name}» se volvió a conectar con sus clips.`);
   return rec;
 }
 async function importFiles(files) {
@@ -213,7 +221,7 @@ function finishImport(added, wasEmpty) {
   if (!added.length) return;
   // proyecto vacío: cada archivo va uno detrás del otro en su pista (videos e imágenes arriba, audios abajo)
   if (wasEmpty) edit(() => { const at = { video: 0, audio: 0 }; for (const m of added) { const k = m.type === 'audio' ? 'audio' : 'video'; at[k] = end(addMedia(m.id, at[k])); } });
-  else { save(); renderBin(); }
+  else { save(); renderBin(); renderTimeline(); dirty = true; }
   fitZoom();
 }
 
@@ -3309,7 +3317,8 @@ const fontsReady = Promise.all(Object.values(FONTS).flatMap(f => [400, 600, 700,
   try { id ||= localStorage.getItem('clipcreate.editor.ultimo'); } catch {}
   if (!window.indexedDB) say('Este navegador no permite guardar proyectos: se pierden al cerrar la pestaña.');
   await openProject(id);
-  if (id && P.id === id && dur()) say(`Se abrió «${P.name}». Se guarda solo mientras trabajás.`);
+  if ($('status').textContent.startsWith('Faltan')) toast($('status').textContent);
+  else if (id && P.id === id && dur()) say(`Se abrió «${P.name}». Se guarda solo mientras trabajás.`);
   else say('Importá un video, un audio o una imagen para empezar.');
   requestAnimationFrame(loop);
   loadPlan();
