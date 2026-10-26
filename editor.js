@@ -1,12 +1,12 @@
-// ClipCreate Editor v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v5.7 (panel de transiciones y volumen de la vista previa; los archivos llevan ?v= para que el navegador no use versiones viejas); v5.6 (Mejorar voz: tarda segundos en videos largos y muestra el avance en el botón); v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
-import * as Voz from './audio.js';
+import * as Voz from './audio.js?v=5.7';
 import * as Sub from './subs.js';
-import * as Assets from './assets.js';
-import * as GL from './gl.js';
-import * as Smart from './smart.js';
+import * as Assets from './assets.js?v=5.7';
+import * as GL from './gl.js?v=5.7';
+import * as Smart from './smart.js?v=5.7';
 
 const $ = id => document.getElementById(id);
 const MB = 'https://cdn.jsdelivr.net/npm/mediabunny@1.60.0/dist/bundles/mediabunny.min.mjs';
@@ -31,7 +31,7 @@ const RATE = 48000;
 const say = t => {
   $('status').textContent = t;
   // lo importante también sale en un aviso flotante que se va solo
-  if (/^(Listo|No se pudo|Deshecho|Rehecho|Video exportado|Exportación cancelada|Voz en off grabada|Multicámara|Mezcla lista|Capítulos copiados|Still )/.test(t) || /^(Llegaste|Tu sesión|No hay lugar)/.test(t)) toast(t);
+  if (/^(Listo|No se pudo|Deshecho|Rehecho|Video exportado|Exportación cancelada|Voz en off grabada|Multicámara|Mezcla lista|Capítulos copiados|Still |Voz mejorada)/.test(t) || /^(Llegaste|Tu sesión|No hay lugar)/.test(t)) toast(t);
 };
 function toast(t) {
   const box = $('toasts'), el = Object.assign(document.createElement('div'), { className: 'toast' + (/^(No se pudo|Llegaste|Tu sesión|No hay lugar)/.test(t) ? ' bad' : ''), textContent: t });
@@ -545,7 +545,7 @@ let actx = null, master = null, meter = null, voiceMeter = null, duckNow = 1, ga
 function audioCtx() {
   if (actx) return actx;
   try { actx = new AudioContext({ latencyHint: 'interactive' }); } catch { return null; }
-  master = new GainNode(actx); meter = new AnalyserNode(actx, { fftSize: 2048 });
+  master = new GainNode(actx, { gain: monVol() }); meter = new AnalyserNode(actx, { fftSize: 2048 });
   master.connect(meter).connect(actx.destination);
   voiceMeter = new AnalyserNode(actx, { fftSize: 1024 }); // escucha solo las voces, para bajar la música
   Voz.loadGate(actx).then(ok => { gateOk = ok; });
@@ -610,7 +610,7 @@ function syncMedia() {
     if (el.playbackRate !== pr) { el.playbackRate = pr; el.preservesPitch = !c.ramp; }
     const audible = T >= c.start && T < end(c) && playing && !t.muted && !c.mute, v = audible ? valAt(c, 'vol', T - c.start) * fadeGain(c, T - c.start) * (c.duck ? duckNow : 1) : 0;
     if (el.cc) { route(el, c); el.cc.out.gain.setTargetAtTime(v, actx.currentTime, 0.012); el.muted = false; if (el.volume !== 1) el.volume = 1; } // el volumen va por la mezcla: el del elemento queda al máximo (si quedó en 0 de antes, no se oía nada)
-    else { el.muted = !audible; el.volume = clamp(v, 0, 1); }
+    else { el.muted = !audible; el.volume = clamp(v * monVol(), 0, 1); }
     if (!on) { // a punto de entrar: se deja listo en el primer cuadro
       if (!el.paused) el.pause();
       if (!el.seeking && Math.abs(el.currentTime - c.in) > 0.1) el.currentTime = c.in;
@@ -1271,6 +1271,12 @@ tlIn.addEventListener('focusin', e => {
 
 // Soltar archivos de la lista en una pista
 tlIn.addEventListener('dragover', e => {
+  if (e.dataTransfer.types.includes('text/x-clipcreate-tr')) { // transición: se suelta sobre un clip de video
+    const c = e.target.closest('.clip.k-video');
+    tlIn.querySelectorAll('.clip.over').forEach(x => x !== c && x.classList.remove('over'));
+    if (c) { e.preventDefault(); c.classList.add('over'); }
+    return;
+  }
   const lane = e.target.closest('.lane');
   if (!lane || !e.dataTransfer.types.includes('text/x-clipcreate')) return;
   e.preventDefault();
@@ -1279,6 +1285,8 @@ tlIn.addEventListener('dragover', e => {
 });
 tlIn.addEventListener('dragleave', e => e.target.closest?.('.lane')?.classList.remove('over'));
 tlIn.addEventListener('drop', e => {
+  const tr = e.dataTransfer.getData('text/x-clipcreate-tr');
+  if (tr) { const c = e.target.closest('.clip.k-video'); tlIn.querySelectorAll('.clip.over').forEach(x => x.classList.remove('over')); if (c) { e.preventDefault(); e.stopPropagation(); applyTr(tr, find(c.dataset.id)); } return; }
   const lane = e.target.closest('.lane'), mid = e.dataTransfer.getData('text/x-clipcreate');
   tlIn.querySelectorAll('.lane.over').forEach(l => l.classList.remove('over'));
   if (!lane || !media.has(mid)) return;
@@ -2126,7 +2134,10 @@ async function levelOf(m) {
   const M = await mb(), inp = new M.Input({ source: new M.BlobSource(m.blob), formats: M.ALL_FORMATS }), at = await inp.getPrimaryAudioTrack();
   if (!at) return null;
   const used = P.tracks.flatMap(t => t.clips).filter(c => c.media === m.id);
-  const r = await Voz.analyze(M, at, Math.min(...used.map(c => c.in)), Math.max(...used.map(c => c.out)), p => say(`Analizando la voz de «${m.name}»… ${Math.round(p * 100)} %`));
+  // con 4 minutos alcanza para medir el nivel y el ruido (en videos largos se toma la parte del medio: así tarda segundos, no minutos)
+  let a = Math.min(...used.map(c => c.in)), b = Math.max(...used.map(c => c.out));
+  if (b - a > 240) { a += (b - a - 240) / 2; b = a + 240; }
+  const r = await Voz.analyze(M, at, a, b, p => { const t = `Analizando la voz… ${Math.round(p * 100)} %`; say(t + ` («${m.name}»)`); for (const x of $('props').querySelectorAll('[data-act=voz],[data-act=vozEvery]')) { x.disabled = true; x.lastChild.textContent = t; } });
   levels.set(m.id, r);
   return r;
 }
@@ -2140,9 +2151,9 @@ async function improve(list) {
     const pr = Voz.PROFILES.entrevista;
     edit(() => { for (const c of list) { const r = res.get(c.media); c.voz = { p: 'entrevista', noise: pr.noise, clarity: pr.pres, level: 0.5, hum: true, gain: r?.gain ?? 0, floor: r?.floor ?? -60 }; } });
     const r = [...res.values()][0];
-    say(`Voz mejorada${r ? ` (${r.gain >= 0 ? 'se subió' : 'se bajó'} ${Math.abs(r.gain).toFixed(1)} dB para emparejarla)` : ''}. Tocá play para escucharla y compará con «Escuchar original».`);
+    say(`Voz mejorada${r ? ` (${r.gain >= 0 ? 'se subió' : 'se bajó'} ${Math.abs(r.gain).toFixed(1)} dB para emparejarla)` : ''}. Tocá play y compará con «Escuchar original» en la sección Voz.`);
   } catch (e) { say('No se pudo analizar el audio: ' + (e.message || e)); }
-  finally { improving = false; }
+  finally { improving = false; renderProps(); }
 }
 
 // ---------- Exportación ----------
@@ -2870,6 +2881,39 @@ document.addEventListener('focusout', e => {
   r.value = clamp(v, +r.min, +r.max); fire(r, 'input'); fire(r, 'change');
 });
 
+
+// ---------- Volumen de lo que escuchás (solo la vista previa: no cambia el video exportado) ----------
+let mon = { v: 1, mute: false };
+try { mon = { ...mon, ...JSON.parse(localStorage.getItem('clipcreate.editor.monitor') || '{}') }; } catch {}
+function monVol() { return mon.mute ? 0 : mon.v; }
+function monShow() {
+  $('monVol').value = mon.v; $('monMute').setAttribute('aria-pressed', mon.mute);
+  $('monMute').innerHTML = `<svg class="i"><use href="#i-${mon.mute || !mon.v ? 'mute' : 'vol'}"/></svg>`;
+  $('monVol').setAttribute('aria-valuetext', mon.mute ? 'Silenciado' : Math.round(mon.v * 100) + ' %');
+  if (master) master.gain.setTargetAtTime(monVol(), actx.currentTime, 0.02);
+  try { localStorage.setItem('clipcreate.editor.monitor', JSON.stringify(mon)); } catch {}
+}
+$('monVol').oninput = () => { mon.v = +$('monVol').value; mon.mute = false; monShow(); };
+$('monMute').onclick = () => { mon.mute = !mon.mute; monShow(); };
+monShow();
+
+// ---------- Transiciones: tocá una para ponerla en el corte más cercano al cursor, o arrastrala a un clip ----------
+function applyTr(kind, f = null) {
+  if (!f) { // el corte más cercano al cursor (un clip que empieza justo donde termina otro)
+    const all = tracks('video').flatMap(t => t.clips.map(c => ({ c, t })));
+    const cuts = all.filter(({ c, t }) => prevOf(t, c));
+    const pool = cuts.length ? cuts : (NEEDS_PREV.has(kind) ? [] : all);
+    f = pool.sort((a, b) => Math.abs(a.c.start - T) - Math.abs(b.c.start - T))[0];
+    if (!f) return say('Para una transición hace falta un corte entre dos clips: poné el cursor donde querés cambiar y tocá S (Dividir).');
+  }
+  const { c, t } = f;
+  edit(() => { c.tr = kind; c.trD = Math.min(c.trD || 0.5, len(c) / 2); sel = c.id; multi.clear(); });
+  seek(Math.max(0, c.start - 0.8));
+  say(`Transición «${TRANS[kind]}» en ${tc(c.start)}${prevOf(t, c) ? '' : ' (entra desde el fondo: no hay un clip pegado antes)'}. La duración y la dirección se cambian en el panel de la derecha.`);
+}
+$('libTr').innerHTML = Object.entries(TRANS).filter(([k]) => k !== 'none').map(([k, l]) => `<button type="button" draggable="true" data-tr="${k}" title="Tocá para ponerla en el corte más cercano al cursor, o arrastrala a un clip"><i class="trp tr-${k}" aria-hidden="true"></i>${l}</button>`).join('');
+$('libTr').onclick = e => { const b = e.target.closest('[data-tr]'); if (b) applyTr(b.dataset.tr); };
+$('libTr').addEventListener('dragstart', e => { const b = e.target.closest('[data-tr]'); if (b) { e.dataTransfer.setData('text/x-clipcreate-tr', b.dataset.tr); e.dataTransfer.effectAllowed = 'copy'; } });
 // ---------- Plan de la cuenta ----------
 // Gratis: todo, con la marca «Hecho con ClipCreate». Básico: sin las herramientas Pro. Pro: todo, sin marca.
 const Plan = { name: null };

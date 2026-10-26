@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v5.5 — arreglo: la vista previa a veces quedaba sin sonido (el video se preparaba antes de tocar play y quedaba con volumen 0). v5.4: exportar en 1440p (YouTube le da más calidad a los videos subidos en 1440p o más). v5.3: interfaz pro: valores que se arrastran o se escriben, menú del clic derecho (con color de clip y velocidad), J/K/L, ayuda de atajos (?), avisos flotantes e íconos en vez de emojis. v5.2: multicámara a mano: barra con todas las tomas en vivo; tocás una (o 1, 2, 3…) y desde ahí se ve esa; con Shift cambia la toma entera; los clips originales quedan guardados y se puede rehacer cualquier corte. v5.1: multicámara automática según quién habla, quitar muletillas y palabras repetidas, grabar voz en off, volumen con puntos sobre el clip, mezcla automática, capítulos de YouTube desde los marcadores y exportar en varios formatos. v5.0: página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
+<!-- ClipCreate Editor v5.7 — transiciones en la Biblioteca (tocar o arrastrar a un clip) y volumen de lo que escuchás en el visor. v5.6: Mejorar voz mide 4 minutos (segundos en vez de minutos en videos largos), muestra el avance en el botón y avisa al terminar. v5.5: arreglo: la vista previa a veces quedaba sin sonido (el video se preparaba antes de tocar play y quedaba con volumen 0). v5.4: exportar en 1440p (YouTube le da más calidad a los videos subidos en 1440p o más). v5.3: interfaz pro: valores que se arrastran o se escriben, menú del clic derecho (con color de clip y velocidad), J/K/L, ayuda de atajos (?), avisos flotantes e íconos en vez de emojis. v5.2: multicámara a mano: barra con todas las tomas en vivo; tocás una (o 1, 2, 3…) y desde ahí se ve esa; con Shift cambia la toma entera; los clips originales quedan guardados y se puede rehacer cualquier corte. v5.1: multicámara automática según quién habla, quitar muletillas y palabras repetidas, grabar voz en off, volumen con puntos sobre el clip, mezcla automática, capítulos de YouTube desde los marcadores y exportar en varios formatos. v5.0: página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -138,6 +138,20 @@ textarea{width:100%;resize:vertical;min-height:4rem}
 #ruler span{position:absolute;top:0;height:100%;border-left:1px solid #ffffff40;padding-left:4px;font-size:.66rem;color:var(--muted);line-height:20px;font-variant-numeric:tabular-nums}
 #ruler i{position:absolute;bottom:0;height:5px;background:#ff4d4dcc;pointer-events:none}
 #ruler i.fill{background:#b26bffdd}
+.transport label.mon{display:flex;align-items:center;width:6.5rem;margin-right:.3rem}
+.trs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.trs button{justify-content:flex-start;font-size:.72rem;padding:.3rem .4rem;gap:.45rem;font-weight:500}
+.trp{flex:none;width:26px;height:16px;border-radius:3px;background:linear-gradient(90deg,var(--c-video) 50%,#ff5a1f 50%)}
+.tr-disolver{background:linear-gradient(90deg,var(--c-video),#ff5a1f)}
+.tr-negro{background:linear-gradient(90deg,var(--c-video),#000 50%,#ff5a1f)}
+.tr-blanco{background:linear-gradient(90deg,var(--c-video),#fff 50%,#ff5a1f)}
+.tr-zoom{background:radial-gradient(circle,#ff5a1f 30%,var(--c-video) 32%)}
+.tr-deslizar{background:linear-gradient(90deg,var(--c-video) 35%,#ff5a1f 35%)}
+.tr-barrido{background:linear-gradient(120deg,var(--c-video) 48%,#fff 50%,#ff5a1f 52%)}
+.tr-desenfoque{background:linear-gradient(90deg,var(--c-video),#ff5a1f);filter:blur(1.5px)}
+.tr-giro{background:conic-gradient(var(--c-video) 0 50%,#ff5a1f 50%)}
+.tr-glitch{background:repeating-linear-gradient(0deg,var(--c-video) 0 3px,#ff5a1f 3px 5px,#3df 5px 6px)}
+.clip.over{box-shadow:inset 0 0 0 2px #fff,0 0 0 2px var(--accent)}
 /* valores que se arrastran */
 label output{cursor:ew-resize;border-radius:3px;padding:0 .15rem;user-select:none;touch-action:none}
 label output:hover{background:#ffffff12;color:#fff}
@@ -468,6 +482,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     </section>
     <section id="pTexts" class="tabp" role="tabpanel" aria-labelledby="tabTexts" hidden>
       <p class="hint">Todo lo de esta biblioteca lo genera ClipCreate: es propio y se puede usar en cualquier video, también comercial.</p>
+      <details open><summary>Transiciones</summary><div class="trs" id="libTr"></div><p class="hint">Tocá una para ponerla en el corte más cercano al cursor, o arrastrala a un clip. Para tener un corte, dividí el video con S.</p></details>
       <details open><summary>Textos</summary><div class="presets" id="presets"></div></details>
       <details><summary>Efectos de sonido</summary><div class="lib" id="libSfx"></div></details>
       <details><summary>Música</summary><div class="lib" id="libMusic"></div><p class="hint">Se agrega con volumen bajo y «Bajar cuando hablan» prendido.</p></details>
@@ -566,6 +581,8 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
       <button type="button" id="tEnd" class="ghost ico" aria-label="Al final (Fin)" title="Al final (Fin)"><svg class="i"><use href="#i-end"/></svg></button>
     </div>
     <div class="end">
+      <button type="button" id="monMute" class="ghost ico" aria-pressed="false" aria-label="Silenciar lo que escuchás" title="Silenciar lo que escuchás (no cambia el video)"></button>
+      <label class="mon"><span class="sr-only">Volumen de lo que escuchás</span><input type="range" id="monVol" min="0" max="1" step="0.01" title="Volumen de lo que escuchás (no cambia el video exportado)"></label>
       <button type="button" id="tRec" class="ghost ico" aria-pressed="false" aria-label="Grabar voz en off (R)" title="Grabar voz en off desde el micrófono (R)"><svg class="i"><use href="#i-mic"/></svg></button>
       <button type="button" id="tSafe" class="ghost ico" aria-pressed="true" aria-label="Zona segura" title="Mostrar la zona segura de Reels y TikTok"><svg class="i"><use href="#i-safe"/></svg></button>
       <button type="button" id="tFull" class="ghost ico" aria-label="Pantalla completa" title="Pantalla completa"><svg class="i"><use href="#i-full"/></svg></button>
@@ -724,6 +741,6 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
 </dialog>
 
 
-<script type="module" src="editor.js"></script>
+<script type="module" src="editor.js?v=5.7"></script>
 </body>
 </html>
