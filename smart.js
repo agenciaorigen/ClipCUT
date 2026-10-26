@@ -1,4 +1,4 @@
-// ClipCreate Editor — herramientas inteligentes v1.2 (plan de la cuenta para el editor); v1.1: silencios sin pedacitos sueltos; silencios, Clips inteligentes (DeepSeek), reencuadre al
+// ClipCreate Editor — herramientas inteligentes v1.3 (multicámara automática según quién habla); v1.2: plan de la cuenta para el editor; v1.1: silencios sin pedacitos sueltos; silencios, Clips inteligentes (DeepSeek), reencuadre al
 // hablante (MediaPipe), sincronizar cámaras por el audio y estirar el audio sin cambiar el tono.
 import { session } from './subs.js';
 const SERVER_URL = 'https://iodzwovvexubihbrqjho.supabase.co';
@@ -177,6 +177,35 @@ export async function envelope(M, track, a, dur) {
     for (let i = 0; i < b.length; i++) { const k = Math.floor((w.timestamp - a + i / b.sampleRate) * 50); if (k >= 0 && k < out.length) out[k] += d[i] * d[i] / hop; }
   }
   return out.map(x => Math.sqrt(x));
+}
+// Multicámara automática. env: volumen de cada cámara (50 por segundo, en tiempo del proyecto).
+// Cada cámara se compara con su propio nivel (0 = su ruido de fondo, 1 = su voz), así no gana siempre el micrófono más fuerte.
+// Devuelve los planos [desde, hasta, cámara] en segundos. wide: la cámara de plano general (cuando hablan dos a la vez), o -1.
+export function camPlan(env, { min = 2.5, wide = -1, rate = 50 } = {}) {
+  const N = env[0].length, W = Math.round(rate * 0.5), step = Math.round(rate * 0.25);
+  const act = env.map(e => {
+    const db = Array.from(e, x => 20 * Math.log10(Math.max(x, 1e-5))), srt = db.filter(x => x > -95).sort((a, b) => a - b);
+    const floor = srt[Math.floor(srt.length * 0.2)] ?? -60, voice = srt[Math.floor(srt.length * 0.95)] ?? -20, span = Math.max(6, voice - floor);
+    const tr = new Float32Array(N), h = W >> 1; // promedio de medio segundo, centrado (así el corte no llega tarde)
+    let acc = 0;
+    for (let i = 0; i < N; i++) { acc += db[i]; if (i >= W) acc -= db[i - W]; tr[i] = (acc / Math.min(i + 1, W) - floor) / span; }
+    return tr.map((_, i) => tr[Math.min(N - 1, i + h)]);
+  });
+  const segs = [];
+  let cur = -1, since = 0, cand = -1, candT = 0;
+  for (let i = 0; i < N; i += step) {
+    const r = act.map((a, k) => [a[i], k]).filter(([, k]) => k !== wide).sort((x, y) => y[0] - x[0]);
+    let want = r[0][0] > 0.45 ? r[0][1] : cur;
+    if (wide >= 0 && r[1] && r[1][0] > 0.45 && r[0][0] - r[1][0] < 0.15) want = wide; // hablan los dos: plano general
+    if (cur < 0) { cur = want >= 0 ? want : wide >= 0 ? wide : 0; segs.push([0, cur]); since = 0; continue; }
+    if (want === cur || want < 0) { cand = -1; continue; }
+    if (want !== cand) { cand = want; candT = i; }
+    if (i - candT >= rate * 0.6 && i - since >= rate * min) {
+      const at = Math.max(candT, since + Math.round(rate * min)); // se corta cuando empezó a hablar (sin dejar un plano más corto que el mínimo)
+      cur = want; since = at; segs.push([at, cur]); cand = -1;
+    }
+  }
+  return segs.map(([i, k], j) => [i / rate, (segs[j + 1]?.[0] ?? N) / rate, k]).filter(([a, b]) => b > a);
 }
 // Corrimiento (en segundos) que mejor alinea B con A: un sonido en A a los t s está en B a los t + corrimiento s
 export function bestLag(A, B, maxLag = 60) {

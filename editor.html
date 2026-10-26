@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v5.0 — página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
+<!-- ClipCreate Editor v5.4 — exportar en 1440p (YouTube le da más calidad a los videos subidos en 1440p o más). v5.3: interfaz pro: valores que se arrastran o se escriben, menú del clic derecho (con color de clip y velocidad), J/K/L, ayuda de atajos (?), avisos flotantes e íconos en vez de emojis. v5.2: multicámara a mano: barra con todas las tomas en vivo; tocás una (o 1, 2, 3…) y desde ahí se ve esa; con Shift cambia la toma entera; los clips originales quedan guardados y se puede rehacer cualquier corte. v5.1: multicámara automática según quién habla, quitar muletillas y palabras repetidas, grabar voz en off, volumen con puntos sobre el clip, mezcla automática, capítulos de YouTube desde los marcadores y exportar en varios formatos. v5.0: página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -79,7 +79,7 @@ textarea{width:100%;resize:vertical;min-height:4rem}
 .tabp>*,.tabp label{min-width:0}
 .tabp select{width:100%;min-width:0}
 
-.view{grid-area:view;display:grid;grid-template-rows:minmax(0,1fr) auto;background:var(--well);min-width:0;min-height:0}
+.view{grid-area:view;display:grid;grid-template-rows:minmax(0,1fr) auto auto;background:var(--well);min-width:0;min-height:0}
 #stageWrap{display:grid;place-items:center;padding:.9rem;min-height:0;min-width:0;position:relative}
 #stage{display:block;background:#000;box-shadow:0 0 0 1px #ffffff14,0 18px 50px -20px #000}
 .badge{position:absolute;left:.75rem;top:.6rem;font-size:.7rem;color:var(--muted);background:#00000080;padding:.1rem .45rem;border-radius:4px;font-variant-numeric:tabular-nums}
@@ -137,6 +137,55 @@ textarea{width:100%;resize:vertical;min-height:4rem}
   background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--tick,10px) - 1px),#ffffff14 calc(var(--tick,10px) - 1px) var(--tick,10px));background-size:100% 6px;background-repeat:no-repeat;background-position:0 100%}
 #ruler span{position:absolute;top:0;height:100%;border-left:1px solid #ffffff40;padding-left:4px;font-size:.66rem;color:var(--muted);line-height:20px;font-variant-numeric:tabular-nums}
 #ruler i{position:absolute;bottom:0;height:5px;background:#ff4d4dcc;pointer-events:none}
+#ruler i.fill{background:#b26bffdd}
+/* valores que se arrastran */
+label output{cursor:ew-resize;border-radius:3px;padding:0 .15rem;user-select:none;touch-action:none}
+label output:hover{background:#ffffff12;color:#fff}
+label output[contenteditable]{cursor:text;user-select:text;background:var(--well);outline:1px solid var(--accent)}
+/* menú del clic derecho */
+#ctx{position:fixed;z-index:50;min-width:15rem;background:#1f1f23;border:1px solid var(--line2);border-radius:8px;padding:.3rem;box-shadow:0 18px 40px -12px #000;display:grid}
+#ctx button{justify-content:space-between;border:0;background:none;min-height:1.85rem;padding:.2rem .6rem;font-weight:500;font-size:.8rem;border-radius:5px;gap:1.5rem}
+#ctx button:hover:not(:disabled),#ctx button:focus-visible{background:var(--accent);color:#fff;outline:none}
+#ctx kbd{font:inherit;font-size:.7rem;color:var(--muted)}
+#ctx button:hover kbd,#ctx button:focus-visible kbd{color:#fff}
+#ctx hr{border:0;border-top:1px solid var(--line);margin:.25rem .2rem}
+#ctx .sw{display:flex;gap:.3rem;padding:.3rem .5rem;flex-wrap:wrap}
+#ctx .sw button{width:1.15rem;height:1.15rem;min-height:0;padding:0;border-radius:50%;background:var(--sw);box-shadow:inset 0 0 0 1px #fff3}
+#ctx .sw button:hover,#ctx .sw button:focus-visible{background:var(--sw);outline:2px solid #fff;outline-offset:1px}
+:root{--kc0:linear-gradient(135deg,var(--c-video) 50%,var(--c-audio) 50%)}
+/* avisos flotantes */
+#toasts{position:fixed;right:1rem;bottom:2.4rem;z-index:60;display:grid;gap:.4rem;justify-items:end;pointer-events:none}
+.toast{pointer-events:auto;cursor:pointer;max-width:26rem;background:#232328;border:1px solid var(--line2);border-left:3px solid var(--accent);border-radius:7px;padding:.55rem .8rem;font-size:.8rem;box-shadow:0 14px 34px -14px #000;animation:tin .18s ease-out}
+.toast.bad{border-left-color:#ff4d4d}
+.toast.out{opacity:0;transform:translateY(6px);transition:.3s}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+.badge.shuttle{left:auto;right:.75rem;color:var(--text);background:#ff5a1fcc;font-weight:700}
+/* ayuda de atajos */
+#keys{width:min(860px,calc(100vw - 32px))}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1.1rem 1.6rem;margin-bottom:.9rem}
+#keys .row{justify-content:flex-end}#keys .row>*{flex:none;min-width:7rem}
+.kgrid h3{margin:0 0 .4rem;font-size:.78rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em}
+.kgrid dl{margin:0;display:grid;grid-template-columns:9.5rem 1fr;gap:.3rem .6rem;font-size:.78rem;align-items:baseline}
+.kgrid dt{font-weight:700;background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:0 .35rem;font-size:.72rem;justify-self:start}
+.kgrid dd{margin:0;color:#cfcfd4}
+#mcBar{display:flex;gap:.6rem;align-items:stretch;padding:.45rem .6rem;border-top:1px solid var(--line);background:var(--panel);min-width:0}
+#mcTiles{display:flex;gap:.45rem;overflow-x:auto;flex:1;min-width:0}
+#mcTiles button{flex:none;position:relative;padding:0;width:160px;height:90px;border-radius:5px;overflow:hidden;background:#000;border:2px solid var(--line)}
+#mcTiles canvas{width:100%;height:100%;display:block}
+#mcTiles span{position:absolute;left:5px;top:4px;min-width:1.3rem;height:1.3rem;border-radius:4px;background:#000c;font-size:.75rem;display:grid;place-items:center}
+#mcTiles small{position:absolute;left:0;right:0;bottom:0;background:#000b;font-size:.66rem;padding:.05rem .35rem;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mcTiles button[aria-pressed=true]{border-color:#e5322d;box-shadow:0 0 0 1px #e5322d}
+#mcTiles button[aria-pressed=true] span{background:#e5322d}
+.mcside{display:grid;gap:.3rem;align-content:center;width:13rem;flex:none}
+.mcside .hint{margin:0}
+body.color #mcBar{display:none}
+.clip svg.vol{position:absolute;left:0;top:0;pointer-events:none;z-index:1;overflow:visible}
+.clip svg.vol polyline{fill:none;stroke:#ffe27a;stroke-width:1.5}
+.clip svg.vol polyline.vhit{stroke:transparent;stroke-width:9;pointer-events:stroke;cursor:ns-resize}
+.clip svg.vol circle.vk{fill:#ffe27a;stroke:#000;stroke-width:1;pointer-events:all;cursor:move}
+#tRec.rec{color:#fff;background:#e5322d;animation:recb 1s infinite}
+@keyframes recb{50%{background:#a51f1b}}
+@media (prefers-reduced-motion:reduce){#tRec.rec{animation:none}}
 .th{display:flex;align-items:center;gap:.1rem;padding:0 .25rem 0 .55rem;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:.74rem;font-weight:600}
 .th::before{content:"";width:3px;height:60%;border-radius:2px;margin-right:.45rem;background:var(--kc)}
 .th.k-video{--kc:var(--c-video)} .th.k-audio{--kc:var(--c-audio)} .th.k-text{--kc:var(--c-text)}
@@ -302,6 +351,9 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
   .rail [role=tab][aria-selected=true]{box-shadow:inset 0 -2px 0 var(--accent)}
   #stageWrap{height:56vh}
   .transport{grid-template-columns:1fr;justify-items:center;gap:.3rem}
+  #mcBar{flex-direction:column}
+  .mcside{width:auto}
+  #mcTiles button{width:128px;height:72px}
   .transport .tc{font-size:1rem}
   .transport .end{display:none}
   .app>*{min-width:0}
@@ -364,6 +416,12 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
   <symbol id="i-color" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="8" r="2"/><circle cx="8.5" cy="14" r="2"/><circle cx="15.5" cy="14" r="2"/></symbol>
   <symbol id="i-edit" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 13h18M9 13v6M15 13v6"/></symbol>
   <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1"/><rect x="13" y="4" width="8" height="7" rx="1"/><rect x="3" y="13" width="8" height="7" rx="1"/><rect x="13" y="13" width="8" height="7" rx="1"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="i-mix" viewBox="0 0 24 24"><path d="M6 3v18M12 3v18M18 3v18"/><rect x="4" y="13" width="4" height="3" rx="1"/><rect x="10" y="6" width="4" height="3" rx="1"/><rect x="16" y="15" width="4" height="3" rx="1"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+  <symbol id="i-keys" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
 </svg>
 <div class="app">
@@ -389,6 +447,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
   <span class="grow"></span>
   <a href="index.html?planes=1" id="planChip" class="lnk plan" title="Tu plan de ClipCreate">Plan</a>
   <a href="index.html?volver=1" id="backClips" class="lnk" hidden><svg class="i"><use href="#i-back"/></svg>Volver a los clips</a>
+  <button type="button" id="keysBtn" class="ghost ico" aria-label="Atajos de teclado (?)" title="Atajos de teclado (?)"><svg class="i"><use href="#i-keys"/></svg></button>
   <a href="index.html" class="lnk"><svg class="i"><use href="#i-home"/></svg>Inicio</a>
   <button type="button" id="openExp" class="go" aria-haspopup="dialog"><svg class="i"><use href="#i-export"/></svg>Exportar</button>
 </header>
@@ -437,6 +496,18 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
         <div class="row"><button type="button" id="silFind">Buscar silencios</button><button type="button" id="silCut" disabled>Quitarlos</button></div>
         <p class="hint" id="silInfo">Deja 0,15 s de aire antes y después de cada frase para que no quede cortado.</p>
       </details>
+      <details><summary>Muletillas</summary>
+        <label>Palabras a sacar (separadas por coma)<input type="text" id="fillWords" value="eh, ehh, eeh, em, emm, mm, mmm, ah, este, o sea"></label>
+        <label class="check"><input type="checkbox" id="fillRep" checked> También palabras repetidas («que que»)</label>
+        <div class="row"><button type="button" id="fillFind">Buscar muletillas</button><button type="button" id="fillCut" disabled>Quitarlas</button></div>
+        <p class="hint" id="fillInfo">Usa la transcripción (generá los subtítulos primero). «Este» y «o sea» a veces son palabras de verdad: revisá las marcas antes de quitar.</p>
+      </details>
+      <details><summary>Multicámara automática</summary>
+        <p class="hint">Cada cámara en su pista de video, con su sonido y sincronizadas (Inspector → Multicámara). Cambia al plano de quien está hablando.</p>
+        <label>Mínimo por plano <output id="mcMinO"></output><input type="range" id="mcMin" min="1" max="8" step="0.5" value="2.5"></label>
+        <label class="check"><input type="checkbox" id="mcWide"> La pista de video de más abajo es el plano general (cuando hablan los dos)</label>
+        <button type="button" id="mcGo" class="go">Cambiar de cámara solo</button>
+      </details>
       <details><summary>Clips inteligentes</summary>
         <div class="two"><label>Cuántos<select id="aiN"><option>3</option><option selected>5</option><option>8</option><option>10</option></select></label>
         <label>Largo<select id="aiLen"><option value="15-30">15 a 30 s</option><option value="20-60" selected>20 a 60 s</option><option value="45-90">45 a 90 s</option></select></label></div>
@@ -475,6 +546,15 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
   <div id="stageWrap">
     <canvas id="stage" width="360" height="640" aria-label="Vista previa del video"></canvas>
     <span class="badge" id="aspectBadge"></span>
+    <span class="badge shuttle" id="shuttle" hidden aria-live="polite"></span>
+  </div>
+  <div id="mcBar" hidden>
+    <div id="mcTiles" role="group" aria-label="Cámaras: tocá una para cambiar de plano desde el cursor (con Shift, la toma entera)"></div>
+    <div class="mcside">
+      <b>Multicámara</b>
+      <span class="hint">Tocá una cámara o 1, 2, 3… mientras se reproduce. Shift: toda la toma.</span>
+      <div class="row"><button type="button" id="mcEnd" title="Dejar las pistas como están para retocarlas a mano">Terminar</button><button type="button" id="mcHide" class="ghost ico" aria-label="Ocultar la barra de cámaras"><svg class="i"><use href="#i-x"/></svg></button></div>
+    </div>
   </div>
   <div class="transport">
     <div class="tc" id="clock">00:00:00:00 <span>/ 00:00:00:00</span></div>
@@ -486,6 +566,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
       <button type="button" id="tEnd" class="ghost ico" aria-label="Al final (Fin)" title="Al final (Fin)"><svg class="i"><use href="#i-end"/></svg></button>
     </div>
     <div class="end">
+      <button type="button" id="tRec" class="ghost ico" aria-pressed="false" aria-label="Grabar voz en off (R)" title="Grabar voz en off desde el micrófono (R)"><svg class="i"><use href="#i-mic"/></svg></button>
       <button type="button" id="tSafe" class="ghost ico" aria-pressed="true" aria-label="Zona segura" title="Mostrar la zona segura de Reels y TikTok"><svg class="i"><use href="#i-safe"/></svg></button>
       <button type="button" id="tFull" class="ghost ico" aria-label="Pantalla completa" title="Pantalla completa"><svg class="i"><use href="#i-full"/></svg></button>
     </div>
@@ -509,6 +590,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     <button type="button" id="del" class="ghost ico" aria-label="Borrar (Supr)" title="Borrar (Supr)"><svg class="i"><use href="#i-trash"/></svg></button>
     <button type="button" id="rippleDel" class="ghost ico" aria-label="Borrar y cerrar el hueco (Shift+Supr)" title="Borrar y cerrar el hueco (Shift+Supr)"><svg class="i"><use href="#i-ripple"/></svg></button>
     <button type="button" id="detach" class="ghost ico" aria-label="Separar el audio del video" title="Separar el audio del video"><svg class="i"><use href="#i-unlink"/></svg></button>
+    <button type="button" id="mcBtn" class="ghost" aria-pressed="false" title="Multicámara: elegir qué toma se ve en cada momento"><svg class="i"><use href="#i-grid"/></svg>Multicámara</button>
     <span class="sep"></span>
     <button type="button" id="extract" class="ghost" title="Sacar el tramo entre la entrada (I) y la salida (O) y cerrar el hueco"><svg class="i"><use href="#i-io"/></svg>Extraer</button>
     <button type="button" id="lift" class="ghost" title="Sacar el tramo entre la entrada (I) y la salida (O) y dejar el hueco">Levantar</button>
@@ -544,7 +626,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     <div class="row"><button type="button" id="cOrig" aria-pressed="false">Ver original</button><button type="button" id="cReset">Restablecer</button></div>
     <div class="row"><button type="button" id="cPrev" title="Copiar el color del clip anterior">Igual al anterior</button><button type="button" id="cAll">Usar en todos</button></div>
     <label>LUT<select id="cLut"></select></label>
-    <label>Intensidad del LUT <output id="cLutMixO"></output><input type="range" id="cLutMix" min="0" max="1" step="0.01"></label>
+    <label>Intensidad del LUT <output id="cLutMixO"></output><input type="range" id="cLutMix" min="0" max="1" step="0.01" data-f="pct"></label>
   </div>
 </aside>
 <nav id="strip" class="cpage" aria-label="Clips del proyecto" hidden></nav>
@@ -570,6 +652,33 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
 </footer>
 </div>
 <div id="pool" aria-hidden="true"></div>
+<div id="ctx" role="menu" aria-label="Acciones" hidden></div>
+<div id="toasts" aria-hidden="true"></div>
+<dialog id="keys" aria-labelledby="keysT">
+  <form method="dialog">
+    <h2 id="keysT">Atajos de teclado</h2>
+    <div class="kgrid">
+      <section><h3>Reproducir</h3><dl>
+        <dt>Espacio</dt><dd>Reproducir o pausar</dd><dt>J · K · L</dt><dd>Atrás · pausa · adelante (más toques: más rápido)</dd>
+        <dt>← →</dt><dd>Un cuadro (con Shift, 1 s)</dd><dt>↑ ↓</dt><dd>Corte anterior o siguiente</dd>
+        <dt>Shift+↑ ↓</dt><dd>Marcador anterior o siguiente</dd><dt>Inicio · Fin</dt><dd>Al principio o al final</dd></dl></section>
+      <section><h3>Editar</h3><dl>
+        <dt>S</dt><dd>Dividir (Shift+S: todas las pistas)</dd><dt>Supr</dt><dd>Borrar (Shift+Supr: y cerrar el hueco)</dd>
+        <dt>I · O</dt><dd>Entrada y salida (Alt+X las borra)</dd><dt>Ctrl+D</dt><dd>Duplicar</dd>
+        <dt>Shift+F</dt><dd>Congelar el cuadro</dd><dt>Ctrl+Alt+C · V</dt><dd>Copiar y pegar ajustes</dd>
+        <dt>Alt+← →</dt><dd>Mover el clip</dd><dt>Ctrl+Z · Ctrl+Shift+Z</dt><dd>Deshacer · rehacer</dd></dl></section>
+      <section><h3>Herramientas</h3><dl>
+        <dt>V · B · N</dt><dd>Selección · cuchilla · imán</dd><dt>M</dt><dd>Marcador</dd><dt>R</dt><dd>Grabar voz en off</dd>
+        <dt>1 a 9</dt><dd>Elegir cámara (Shift: toda la toma)</dd><dt>Clic derecho</dt><dd>Menú del clip</dd>
+        <dt>Alt+clic</dt><dd>Punto de volumen</dd></dl></section>
+      <section><h3>Elegir y ver</h3><dl>
+        <dt>Shift/Ctrl+clic</dt><dd>Sumar clips a la selección</dd><dt>Arrastrar en vacío</dt><dd>Elegir con un recuadro</dd>
+        <dt>Ctrl+A</dt><dd>Todo</dd><dt>Esc</dt><dd>Quitar la selección</dd><dt>+ · − · Ctrl+rueda</dt><dd>Zoom de la línea de tiempo</dd>
+        <dt>Arrastrar un valor</dt><dd>Cambiarlo (clic: escribirlo)</dd><dt>Ctrl+S</dt><dd>Guardar</dd><dt>?</dt><dd>Esta ayuda</dd></dl></section>
+    </div>
+    <div class="row"><button value="close" class="go">Listo</button></div>
+  </form>
+</dialog>
 
 <dialog id="planDlg" aria-labelledby="planT">
   <form method="dialog">
@@ -592,7 +701,7 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     <h2 id="expT">Exportar</h2>
     <label>Qué exportar<select id="xKind"><option value="video">Video</option><option value="wav">Solo el audio (WAV)</option><option value="srt">Subtítulos (.srt)</option><option value="vtt">Subtítulos (.vtt)</option></select></label>
     <div class="two" id="xVideo">
-      <label>Resolución<select id="xRes"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="2160">4K</option></select></label>
+      <label>Resolución<select id="xRes"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="1440">1440p (más calidad en YouTube)</option><option value="2160">4K</option></select></label>
       <label>Cuadros por segundo<select id="xFps"><option>24</option><option>25</option><option selected>30</option><option>50</option><option>60</option></select></label>
       <label>Calidad<select id="xQ"><option value="1.5">Alta</option><option value="1" selected>Media</option><option value="0.6">Rápida (archivo más chico)</option></select></label>
       <label>Códec<select id="xCodec"></select></label>
@@ -601,6 +710,11 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     <progress id="xProg" max="1" value="0" hidden aria-label="Progreso de la exportación"></progress>
     <p id="xMsg" role="status" aria-live="polite" style="margin:0"></p>
     <div class="row"><button type="button" id="xGo" class="go">Exportar</button><button type="button" id="xStop" hidden>Cancelar</button><button value="close" id="xClose">Cerrar</button></div>
+    <details id="xFmtBox"><summary>Exportar en varios formatos</summary>
+      <p class="hint">El mismo proyecto en vertical, horizontal, cuadrado y retrato, uno detrás del otro, en la carpeta que elijas.</p>
+      <div id="xFmts" class="two"></div>
+      <button type="button" id="xFmtGo">Exportar los formatos elegidos</button>
+    </details>
     <details id="xBatchBox"><summary>Exportar varios proyectos (cola)</summary>
       <p class="hint">Elegí los proyectos: se exportan uno detrás del otro con estos mismos ajustes, en la carpeta que elijas.</p>
       <ul id="xBatch" style="list-style:none;margin:0;padding:0;display:grid;gap:.3rem;max-height:30vh;overflow:auto"></ul>

@@ -1,4 +1,4 @@
-# ClipCreate Editor — v5.0 (página de Color y herramientas pro)
+# ClipCreate Editor — v5.3 (interfaz profesional)
 
 Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
 
@@ -15,6 +15,38 @@ Editor de video multipista que corre entero en el navegador. Está en el mismo r
 | `smart.js` | Silencios, Clips inteligentes con DeepSeek, seguir a quien habla, sincronizar cámaras y velocidad sin cambiar el tono. |
 
 No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
+
+## Interfaz profesional (v5.3)
+
+- **Valores que se arrastran**: en cualquier control con barra (inspector y página de Color), poné el mouse sobre el número y arrastralo a los costados. Shift: más rápido; Alt: más fino. Un clic sobre el número deja escribirlo (Enter confirma, Esc cancela). En los porcentajes se escribe como se ve: 150 es 150 %.
+- **Menú del clic derecho** en los clips: dividir, duplicar, borrar, borrar y cerrar el hueco, copiar y pegar ajustes, separar el audio, congelar el cuadro, velocidad (0,5×, normal, 2×) y **color del clip** (para marcar tomas buenas o cámaras). En una parte vacía: llevar el cursor, poner un marcador o dividir todas las pistas. Con el teclado: Shift+F10 o la tecla de menú sobre un clip, flechas y Esc.
+- **J, K y L**: atrás, pausa y adelante. Cada toque más dobla la velocidad (hasta 8×); arriba a la derecha del visor se ve a qué velocidad va.
+- **Ayuda de atajos**: tecla ? (o el botón del teclado arriba) muestra todos los atajos ordenados.
+- **Avisos flotantes** abajo a la derecha para lo importante (listo, deshecho, errores). Se van solos o con un clic.
+- **Íconos** en vez de emojis en los botones.
+
+## Multicámara a mano (v5.2)
+
+Para editar varias tomas que pasan al mismo tiempo (dos o más cámaras, o varias tomas de lo mismo):
+
+1. Poné cada toma en su propia pista de video, una arriba de la otra. Si son de cámaras distintas, sincronizalas por el sonido (Inspector → Multicámara).
+2. Tocá **Multicámara** en la barra de la línea de tiempo. Aparece debajo del visor una barra con **todas las tomas en vivo**, numeradas. El sonido de cada cámara pasa a su propia pista para que no se corte.
+3. Reproducí y **tocá la toma que querés ver** (o las teclas **1, 2, 3…**): desde ese momento se ve esa. La que está al aire se marca en rojo.
+4. Con el video en pausa, **Shift + la toma** (o Shift+1, 2…) cambia **la toma entera** donde está el cursor.
+5. Cualquier corte se puede rehacer: los clips originales quedan guardados, así que podés volver a elegir una toma en cualquier tramo. Ctrl+Z deshace.
+6. **Terminar** deja las pistas como quedaron para retocarlas a mano.
+
+La **multicámara automática** (IA) ahora arma los cortes en este mismo sistema: después se retocan con la barra.
+
+## Lo nuevo de la v5.1
+
+- **Multicámara automática** (IA → Multicámara automática): con cada cámara en su pista y sincronizadas, escucha el sonido de cada una y pone el plano de quien habla. Cada cámara se compara con su propio nivel (no gana siempre el micrófono más fuerte). Se elige el mínimo por plano y, opcionalmente, un plano general (la pista de video de más abajo) para cuando hablan los dos. El sonido de cada cámara pasa a su propia pista para que no se corte. Es una herramienta Pro.
+- **Quitar muletillas** (IA → Muletillas): busca en la transcripción «eh», «em», «mmm», «este», «o sea»… (la lista se puede cambiar) y las palabras repetidas («que que»). Las marca en violeta arriba de la línea de tiempo para revisarlas y las saca con un botón, sin comerse las palabras de al lado. Los subtítulos se acomodan solos.
+- **Voz en off**: el botón del micrófono (o la tecla R) graba mientras se reproduce el proyecto y deja la grabación en la pista «Voz en off». Conviene usar auriculares.
+- **Volumen con puntos sobre el clip**: una línea amarilla muestra el volumen. Se arrastra para subir o bajar todo el clip; Alt+clic agrega un punto, los puntos se arrastran y doble clic los saca. También con ◆ al lado de Volumen en el inspector.
+- **Mezcla automática** (panel del proyecto → Voz): todas las voces al mismo nivel y la música 16 dB por debajo, bajando sola cuando hablan.
+- **Capítulos de YouTube**: con marcadores, el botón «Copiar capítulos para YouTube» arma la lista (0:00 Inicio, 2:15 Tema…) para pegar en la descripción, y avisa si no cumple las reglas de YouTube (3 capítulos, 10 s cada uno).
+- **Exportar en varios formatos** (Exportar → Exportar en varios formatos): el mismo proyecto en 9:16, 16:9, 1:1 y 4:5, uno detrás del otro.
 
 ## Página de Color (v5.0)
 
@@ -130,7 +162,7 @@ El editor lee el plan de la cuenta de ClipCreate (el mismo `mi_cuenta` del servi
 
 ## Atajos
 
-Espacio reproducir · V selección · B cuchilla (Shift+clic: todas las pistas) · N imán · S dividir (Shift+S: todas las pistas) · Supr borrar (Shift+Supr: y cerrar el hueco) · I / O entrada y salida · Alt+X borrar entrada y salida · M marcador · ↑ ↓ corte anterior o siguiente · Shift+↑ ↓ marcador · Ctrl+A todo · Shift/Ctrl+clic elegir varios · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
+Espacio reproducir · J/K/L atrás, pausa y adelante · ? ayuda · Clic derecho: menú del clip · 1 a 9 elegir cámara (Shift: toda la toma) · R grabar voz en off · Alt+clic en la línea del volumen: punto · V selección · B cuchilla (Shift+clic: todas las pistas) · N imán · S dividir (Shift+S: todas las pistas) · Supr borrar (Shift+Supr: y cerrar el hueco) · I / O entrada y salida · Alt+X borrar entrada y salida · M marcador · ↑ ↓ corte anterior o siguiente · Shift+↑ ↓ marcador · Ctrl+A todo · Shift/Ctrl+clic elegir varios · Ctrl+D duplicar · Shift+F congelar cuadro · Ctrl+Alt+C / V copiar y pegar ajustes · Ctrl+Z / Ctrl+Shift+Z deshacer/rehacer · ← → un cuadro (Shift: 1 s) · Alt+← → mover el clip · Inicio/Fin · + / − zoom · Ctrl+rueda zoom · Esc quitar selección
 
 ## Privacidad
 
@@ -155,11 +187,16 @@ Los videos **no se suben a ningún lado**: se procesan en la compu. La única ex
 ## Lo que viene (sin hacer todavía)
 
 - Identificar quién habla en los subtítulos (Groq no lo hace; el reencuadre sí detecta quién habla por la boca).
-- Cambio de cámara automático en multicámara (hoy se sincroniza solo y se corta a mano).
 - Nodos de color y máscaras (ventanas) como en DaVinci: hoy hay una corrección por clip.
 - Línea fina entre franjas de Dividido o Trío (en ClipCreate está; en el editor todavía no).
 
 ## Cómo se probó
+
+**v5.3**: arrastrar y escribir valores, el menú del clic derecho con mouse y teclado (velocidad 2× y color del clip), J/K/L, la ayuda de atajos, los avisos y que no quedaran emojis; se repitieron las pruebas de v5.0 y v5.2 sin errores.
+
+**v5.2**: con dos tomas en pistas distintas: cambios en vivo con las teclas y tocando la cámara (los cortes quedaron en 1,5 s, 3,5 s y 5,1 s, donde se tocó), toma entera con Shift, deshacer, la automática seguida de un retoque a mano, Terminar y la pantalla del celular.
+
+**v5.1**: en Chromium: muletillas desde un SRT (encontró «eh», «que que» y «o sea», las sacó y los subtítulos quedaron bien), multicámara automática con dos cámaras que hablan por turnos (cambió de plano a los 4,2 s, 8,1 s y 12,2 s; el habla cambiaba a los 4, 8 y 12), volumen con puntos, mezcla automática, capítulos copiados, voz en off con un micrófono simulado y exportar en otro formato.
 
 **v5.0**: en Chromium con videos reales: marcadores, entrada y salida con Extraer y Levantar (y deshacer), Shift+S, borrar con ripple, Shift+clic, recuadro, mover varios juntos, Ctrl+A, barra de progreso y placa final con logo, la página de Color (ruedas con mouse y teclado, brillo, curvas, formas, los cuatro scopes, stills aplicados a todos, ver original, tira de clips, deshacer), exportar con la marca de Gratis y la pantalla del celular. «Editar a fondo» desde ClipCreate con Dividido, portada, placa final y barra. El plan de la cuenta no se pudo probar contra el servidor (desde acá no llega): probalo entrando con una cuenta Básico y otra Pro.
 
