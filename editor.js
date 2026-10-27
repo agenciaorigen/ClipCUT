@@ -1,12 +1,12 @@
-// ClipCreate Editor v5.8 (si un archivo no entra en el navegador se edita igual, y los archivos perdidos se reconectan al importarlos de nuevo); v5.7 (panel de transiciones y volumen de la vista previa; los archivos llevan ?v= para que el navegador no use versiones viejas); v5.6 (Mejorar voz: tarda segundos en videos largos y muestra el avance en el botón); v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
+// ClipCreate Editor v6.1 (arreglo: el video exportado ahora se escribe directo al disco; antes se armaba entero en memoria y los videos largos fallaban); v6.0 (herramientas tipo CapCut: reducir ruido de verdad, aislar voz, normalizar, completar canal, mejorar imagen, mezcla, alinear, efectos y filtros con miniaturas); v5.8 (si un archivo no entra en el navegador se edita igual, y los archivos perdidos se reconectan al importarlos de nuevo); v5.7 (panel de transiciones y volumen de la vista previa; los archivos llevan ?v= para que el navegador no use versiones viejas); v5.6 (Mejorar voz: tarda segundos en videos largos y muestra el avance en el botón); v5.5 (arreglo: a veces la vista previa no tenía sonido); v5.4: exportar en 1440p; v5.3 (interfaz pro: números que se arrastran, menú del clic derecho, J/K/L, atajos, avisos flotantes, íconos); v5.2 (multicámara a mano: barra de cámaras en vivo, teclas 1 a 9); v5.1 (multicámara automática, muletillas, voz en off, volumen con puntos, mezcla automática, capítulos y varios formatos); v5.0: página de Color, herramientas pro, placa final, barra de progreso y planes; v4.0: diseño profesional — editor de video multipista que corre entero en el navegador.
 // Vista previa con <video>/<audio> + canvas; exportación real con WebCodecs (mediabunny). Proyectos y archivos en IndexedDB.
 // v2.0: Mejorar voz, subtítulos automáticos con estilos, transiciones, corrección de color y animación de textos.
 import * as S from './store.js';
-import * as Voz from './audio.js?v=5.8';
+import * as Voz from './audio.js?v=6.1';
 import * as Sub from './subs.js';
-import * as Assets from './assets.js?v=5.8';
-import * as GL from './gl.js?v=5.8';
-import * as Smart from './smart.js?v=5.8';
+import * as Assets from './assets.js?v=6.1';
+import * as GL from './gl.js?v=6.1';
+import * as Smart from './smart.js?v=6.1';
 
 const $ = id => document.getElementById(id);
 const MB = 'https://cdn.jsdelivr.net/npm/mediabunny@1.60.0/dist/bundles/mediabunny.min.mjs';
@@ -19,9 +19,9 @@ const NAMES = { video: 'Video', audio: 'Audio', text: 'Texto' };
 const DEF = {
   video: { vol: 1, mute: false, fadeIn: 0, fadeOut: 0, voz: null, speed: 1, x: 0, y: 0, scale: 1, rot: 0, opacity: 1, fit: 'cover', bg: 'color', kb: 0, kf: null,
     exp: 0, con: 0, sat: 0, temp: 0, tint: 0, hue: 0, vib: 0, hl: 0, sh: 0, wh: 0, bl: 0, vig: 0, grain: 0, lut: '', lutMix: 1,
-    cw: null, curves: null, crop: null, box: null, ramp: null,
+    cw: null, curves: null, crop: null, box: null, ramp: null, sharp: 0, dn: 0, blend: 'source-over', efx: null, filt: null, au: null,
     tr: 'none', trD: 0.5, trDir: 'izq', trK: 1 },
-  audio: { vol: 1, mute: false, fadeIn: 0, fadeOut: 0, voz: null, speed: 1, duck: false },
+  audio: { vol: 1, mute: false, fadeIn: 0, fadeOut: 0, voz: null, speed: 1, duck: false, au: null },
   text: { in: 0, text: 'Texto', font: 'montserrat', weight: 800, size: 0.06, color: '#ffffff', stroke: true, box: 'none', boxColor: '#000000', x: 0, y: 0.25, anim: 'ninguna' }
 };
 const HW = 150;   // ancho de los nombres de pista en la línea de tiempo
@@ -117,6 +117,7 @@ function changed() {
   $('tSafe').setAttribute('aria-pressed', !!P.safe); $('tSafe').disabled = P.aspect !== '9:16';
   $('pname').value = P.name;
   if (page === 'color') { if (!vClips().length) setPage('edit'); else renderColor(); }
+  if (!$('pFilt').hidden) renderFilters();
   if (mcOpen && (!P.mc || $('mcTiles').children.length !== camTracks().length)) P.mc ? renderMc() : mcShow(false);
 }
 
@@ -346,7 +347,7 @@ function detach() {
 }
 function detachClip(c, name = null) { // el sonido del clip pasa a una pista de audio (con su velocidad, voz y volumen)
   const a = { ...DEF.audio, id: S.uid(), media: c.media, start: c.start, in: c.in, out: c.out, vol: c.vol, fadeIn: c.fadeIn, fadeOut: c.fadeOut,
-    speed: c.speed, ramp: structuredClone(c.ramp), voz: structuredClone(c.voz), kf: c.kf?.vol ? { vol: structuredClone(c.kf.vol) } : null };
+    speed: c.speed, ramp: structuredClone(c.ramp), voz: structuredClone(c.voz), au: structuredClone(c.au), kf: c.kf?.vol ? { vol: structuredClone(c.kf.vol) } : null };
   let t = name ? namedTrack('audio', name) : tracks('audio').find(t => t.clips.every(o => end(a) <= o.start || a.start >= end(o)));
   if (name && t.clips.some(o => end(a) > o.start && a.start < end(o))) t = null;
   t ??= newTrack('audio');
@@ -435,8 +436,8 @@ async function freeze() {
 
 // Copiar y pegar ajustes entre clips (encuadre, color, efectos, transición, voz)
 const ATTRS = {
-  video: ['fit', 'bg', 'kb', 'x', 'y', 'scale', 'rot', 'opacity', 'crop', 'box', 'exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain', 'lut', 'lutMix', 'cw', 'curves', 'tr', 'trD', 'trDir', 'trK'],
-  audio: ['vol', 'fadeIn', 'fadeOut', 'voz', 'duck'],
+  video: ['fit', 'bg', 'kb', 'x', 'y', 'scale', 'rot', 'opacity', 'crop', 'box', 'exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain', 'lut', 'lutMix', 'cw', 'curves', 'sharp', 'dn', 'blend', 'efx', 'filt', 'tr', 'trD', 'trDir', 'trK'],
+  audio: ['vol', 'fadeIn', 'fadeOut', 'voz', 'duck', 'au'],
   text: ['font', 'weight', 'size', 'color', 'stroke', 'box', 'boxColor', 'x', 'y', 'anim']
 };
 let clipboard = null;
@@ -566,12 +567,12 @@ function wire(el) {
   catch { el.cc = null; }
 }
 function route(el, c) { // arma (o rearma) la cadena de la voz cuando cambian sus ajustes
-  const key = JSON.stringify(c.voz || null) + bypass + gateOk + !!c.duck;
+  const key = JSON.stringify(c.voz || null) + JSON.stringify(c.au || null) + bypass + gateOk + !!c.duck;
   if (el.cc.key === key) return;
   el.cc.src.disconnect(); el.cc.chain?.output.disconnect(); el.cc.out.disconnect();
   el.cc.out.connect(master);
   if (!c.duck) el.cc.out.connect(voiceMeter);
-  el.cc.chain = c.voz?.p && !bypass ? Voz.buildChain(actx, c.voz, gateOk) : null;
+  el.cc.chain = !bypass ? Voz.buildFx(actx, c, gateOk) : null;
   el.cc.src.connect(el.cc.chain ? el.cc.chain.input : el.cc.out);
   el.cc.chain?.output.connect(el.cc.out);
   el.cc.key = key;
@@ -755,7 +756,7 @@ const LOOKS = {
 const colorFilter = c => c.exp || c.con || c.sat || c.hue ? `brightness(${1 + c.exp * 0.5}) contrast(${1 + c.con * 0.6}) saturate(${1 + c.sat}) hue-rotate(${c.hue}deg)` : '';
 const GRADE_KEYS = ['exp', 'con', 'sat', 'temp', 'tint', 'hue', 'vib', 'hl', 'sh', 'wh', 'bl'];
 const cwOn = cw => !!cw && ['lift', 'gamma', 'gain', 'offset'].some(k => cw[k]?.some(v => Math.abs(v) > 1e-4));
-const needsGrade = c => !!c.lut || GRADE_KEYS.some(k => c[k]) || cwOn(c.cw) || GL.curvesOn(c.curves);
+const needsGrade = c => !!c.lut || GRADE_KEYS.some(k => c[k]) || c.sharp > 0 || c.dn > 0 || cwOn(c.cw) || GL.curvesOn(c.curves);
 // LUTs: los de la biblioteca propia y los importados al proyecto (.cube)
 const lutCache = new Map();
 function lutOf(c) {
@@ -799,6 +800,7 @@ function cropped(c, s) {
 }
 function drawVisual(g, c, s0, fx = {}, t = T) {
   const W = g.canvas.width, H = g.canvas.height, tt = t - c.start, v = k => valAt(c, k, tt), s = cropped(c, s0);
+  if (c.efx) fx = efxMove(c, tt, fx);
   const bx = c.box ? { x: c.box[0] * W, y: c.box[1] * H, w: c.box[2] * W, h: c.box[3] * H } : { x: 0, y: 0, w: W, h: H };
   const kb = c.kb ? 1 + c.kb * clamp(tt / Math.max(len(c), 0.1), 0, 1) : 1; // zoom lento a lo largo del clip
   const k = (c.fit === 'contain' ? Math.min(bx.w / s.w, bx.h / s.h) : Math.max(bx.w / s.w, bx.h / s.h)) * v('scale') * kb * (fx.k || 1), w = s.w * k, h = s.h * k;
@@ -823,8 +825,10 @@ function drawVisual(g, c, s0, fx = {}, t = T) {
   }
   const f = ((!graded && !colorOff ? colorFilter(cc) : '') + (fx.blur ? ` blur(${(fx.blur * W / 1080).toFixed(1)}px)` : '')).trim();
   if (f) g.filter = f;
+  if (c.blend && c.blend !== 'source-over') g.globalCompositeOperation = c.blend;
   paint(g, -w / 2, -h / 2, w, h);
-  g.filter = 'none';
+  g.filter = 'none'; g.globalCompositeOperation = 'source-over';
+  if (c.efx) efxOver(g, c, tt, paint, w, h, t);
   if (!graded && !colorOff && c.temp) {
     g.globalCompositeOperation = 'soft-light'; g.globalAlpha *= Math.min(1, Math.abs(c.temp) * 0.8);
     g.fillStyle = c.temp > 0 ? '#ff9a3c' : '#3c8cff'; g.fillRect(-w / 2, -h / 2, w, h);
@@ -1939,6 +1943,7 @@ function renderProps() {
       ${krange('scale', 'Zoom', 0.1, 4, 0.01, 'pct')}
       ${krange('x', 'Horizontal', -1, 1, 0.005, 'num')}${krange('y', 'Vertical', -1, 1, 0.005, 'num')}
       ${krange('rot', 'Rotación', -180, 180, 1, 'deg')}${krange('opacity', 'Opacidad', 0, 1, 0.01, 'pct')}
+      <div class="row align" role="group" aria-label="Alinear">${[['l', 'a la izquierda'], ['c', 'al centro'], ['r', 'a la derecha'], ['t', 'arriba'], ['m', 'al medio'], ['b', 'abajo']].map(([k2, l]) => `<button type="button" class="ghost ico" data-act="al${k2}" aria-label="Alinear ${l}" title="Alinear ${l}"><svg class="i"><use href="#i-al${k2}"/></svg></button>`).join('')}</div>
       <p class="hint">◆ guarda el valor en este momento (fotograma clave): con dos o más, se anima entre ellos.${c.kf ? '' : ''}</p>
       ${c.kf ? acts(['kfClear', 'Borrar fotogramas clave']) : ''}
       ${range('kb', 'Zoom lento a lo largo del clip', 0, 0.3, 0.01, 'pct')}
@@ -1956,6 +1961,14 @@ function renderProps() {
       ${range('grain', 'Grano de película', 0, 1, 0.01, 'pct')}
       ${GL.available() ? '' : '<p class="hint">Este navegador no tiene WebGL2: luces, sombras, blancos, negros, vibrance y LUTs no se aplican.</p>'}
       ${acts(['orig', colorOff ? 'Ver con color' : 'Ver original'], ['colorPage', 'Página de Color', 'color'])}
+      <h3>Mejorar imagen</h3>
+      ${range('dn', 'Reducir ruido y bloques', 0, 1, 0.01, 'pct')}${range('sharp', 'Nitidez', 0, 1, 0.01, 'pct')}
+      ${acts(['enhAuto', 'Automático', 'spark'], ['enhOff', 'Quitar'])}
+      <p class="hint">Para videos borrosos o pixelados: suaviza el granulado y los cuadraditos de la compresión y devuelve definición a los bordes.${GL.available() ? '' : ' Este navegador no tiene WebGL2: no se puede aplicar.'}</p>
+      <h3>Mezcla</h3>
+      ${opts('blend', 'Modo', BLENDS)}
+      <h3>Efecto</h3>
+      ${c.efx ? `${opts('efx.id', 'Efecto', Object.fromEntries(Object.entries(EFX).map(([k2, e]) => [k2, e.label])))}${range('efx.amt', 'Intensidad', 0.05, 1, 0.01, 'pct')}${acts(['efxOff', 'Quitar el efecto'])}` : '<p class="hint">Elegí uno en la pestaña Efectos de la izquierda.</p>'}
       <h3>Transición de entrada</h3>
       ${opts('tr', 'Tipo', TRANS)}
       ${c.tr !== 'none' ? `${range('trD', 'Duración', 0.1, 2, 0.05, 's')}
@@ -1970,6 +1983,12 @@ function renderProps() {
       ${check('mute', 'Silenciar este clip')}
       ${t.kind === 'audio' ? check('duck', 'Bajar cuando hablan (para música)') : ''}
       <div class="two">${range('fadeIn', 'Fundido de entrada', 0, 5, 0.1, 's')}${range('fadeOut', 'Fundido de salida', 0, 5, 0.1, 's')}</div>
+      <h3>Limpiar el audio</h3>
+      ${opts('au.den', 'Reducir el ruido', { 0: 'Apagado', 0.35: 'Suave', 0.6: 'Medio', 0.9: 'Fuerte' })}
+      ${check('au.iso', 'Aislar voz (deja solo la voz)')}
+      ${c.voz?.p ? '' : check('au.norm', 'Normalizar intensidad')}
+      ${opts('au.chan', 'Completar canal', { '': 'No', L: 'Usar el izquierdo en los dos lados', R: 'Usar el derecho en los dos lados' })}
+      <p class="hint">Reducir el ruido aprende el ruido de fondo (aire, ventilador, calle) y lo saca también mientras se habla. Completar canal: para cuando el micrófono quedó grabado de un solo lado.</p>
       <h3>Voz</h3>`;
       h += c.voz?.p ? `${opts('voz.p', 'Perfil', { '': 'Apagado', podcast: 'Podcast: cálida y presente', entrevista: 'Entrevista: natural y pareja', viral: 'Voz viral: fuerte, para el celular' })}
         ${range('voz.noise', 'Reducción de ruido', 0, 1, 0.01, 'pct')}${range('voz.clarity', 'Claridad', 0, 8, 0.1, 'db')}
@@ -2022,7 +2041,8 @@ $('props').addEventListener('input', e => {
   if (!k) return;
   const f = sel && find(sel), o = f ? f.c : P;
   pending ??= snap();
-  let v = el.type === 'checkbox' ? el.checked : el.type === 'range' || el.type === 'number' || k === 'weight' || k === 'endCard.sec' ? +el.value : el.value;
+  let v = el.type === 'checkbox' ? el.checked : el.type === 'range' || el.type === 'number' || k === 'weight' || k === 'endCard.sec' || k === 'au.den' ? +el.value : el.value;
+  if (k === 'au.norm' && f) { pending = null; normalize(f.c, v); return; }
   if (el.type === 'number') { if (!isFinite(v) || el.value === '') return; v = Math.max(+el.min || 0, v); }
   if (k === 'out' && f) v = o.in + v; // "Dura" se guarda como punto final
   if (k === 'lut' && v === '__import') { el.value = o.lut; return lutFile.click(); }
@@ -2055,7 +2075,7 @@ $('props').addEventListener('change', e => {
   if (!pending) return;
   const s = pending; pending = null;
   if (remember(s)) changed();
-  else if (['box', 'tr', 'voz.p', 'fit', 'lut', 'progress.on', 'endCard.on'].includes(e.target.dataset.k)) renderProps();
+  else if (['box', 'tr', 'voz.p', 'fit', 'lut', 'progress.on', 'endCard.on', 'efx.id'].includes(e.target.dataset.k)) renderProps();
 });
 $('props').addEventListener('click', e => {
   const kfb = e.target.closest('[data-kf]');
@@ -2092,6 +2112,10 @@ $('props').addEventListener('click', e => {
     rampOn() { const c = f.c, old = end(c); edit(() => { c.ramp = { a: sp(c), b: Math.min(4, sp(c) * 2) }; shiftAfter(f.t, c, old); }); },
     rampOff() { const c = f.c, old = end(c); edit(() => { c.speed = sp(c); c.ramp = null; shiftAfter(f.t, c, old); }); },
     cropReset() { edit(() => { f.c.crop = null; }); },
+    enhAuto() { edit(() => { for (const { c } of picked()) if (c.media) Object.assign(c, { dn: 0.4, sharp: 0.45 }); }); },
+    enhOff() { edit(() => { for (const { c } of picked()) Object.assign(c, { dn: 0, sharp: 0 }); }); },
+    efxOff() { edit(() => { f.c.efx = null; }); },
+    all: () => align('l'), alc: () => align('c'), alr: () => align('r'), alt: () => align('t'), alm: () => align('m'), alb: () => align('b'),
     colorPage: () => setPage('color'),
     autoMix, ytCh: chapters, keys: () => $('keys').showModal(),
     endLogo: () => logoFile.click(),
@@ -2185,7 +2209,7 @@ class Sound {
     const c = this.c, a = c.in + k * CH, b = Math.min(c.out, a + CH), a0 = Math.max(0, a - PRE);
     const off = new OfflineAudioContext(2, Math.max(1, Math.round((b - a0) * RATE)), RATE);
     let input = off.destination;
-    if (c.voz?.p) { const ch = Voz.buildChain(off, c.voz, await Voz.loadGate(off)); ch.output.connect(off.destination); input = ch.input; }
+    if (c.voz?.p || Voz.auOn(c.au)) { const ch = Voz.buildFx(off, c, await Voz.loadGate(off)); if (ch) { ch.output.connect(off.destination); input = ch.input; } }
     for await (const w of this.sink.buffers(a0, b)) {
       const src = new AudioBufferSourceNode(off, { buffer: w.buffer }), when = w.timestamp - a0;
       src.connect(input);
@@ -2368,6 +2392,9 @@ async function runExport(preset = null) {
 
     const [W, H] = outSize(+$('xRes').value), fps = +$('xFps').value;
     const cv = new OffscreenCanvas(W, H), g = cv.getContext('2d');
+    // sin dónde escribir directo al disco, el video se arma en memoria: pasado ~1,5 GB el navegador no da abasto
+    const est = (bitrateFor(W, H, fps, +$('xQ').value, codec) + 192e3) * D / 8;
+    if (!writable && est > 1.5e9) { msg(`Este video pesaría unos ${(est / 1e9).toFixed(1)} GB: es demasiado para armarlo en memoria. Usá Chrome o Edge en una compu (ahí se escribe directo al disco) o bajá la resolución o la calidad.`); return; }
     const target = writable ? new M.StreamTarget(writable, { chunked: true }) : new M.BufferTarget();
     const output = new M.Output({ format: mp4 ? new M.Mp4OutputFormat({ fastStart: writable ? false : 'in-memory' }) : new M.WebMOutputFormat(), target });
     const vsrc = new M.CanvasSource(cv, { codec, bitrate: bitrateFor(W, H, fps, +$('xQ').value, codec), keyFrameInterval: 2 });
@@ -2424,7 +2451,9 @@ async function runExport(preset = null) {
     say('Video exportado.');
   } catch (e) {
     console.error(e);
-    msg('No se pudo exportar: ' + (e.message || e) + '. Probá con 1080p o con otro códec.');
+    const full = e?.name === 'QuotaExceededError' || /space|quota|lugar/i.test(e?.message || '');
+    msg(full ? 'No se pudo exportar: no queda lugar en el disco. Liberá espacio o guardalo en otro disco (por ejemplo, uno externo).' : 'No se pudo exportar: ' + (e.message || e) + '. Probá con 1080p o con otro códec.');
+    try { await writable?.abort?.(); } catch {}
   } finally {
     inputs.clear(); colorOff = wasOff;
     $('xGo').disabled = $('xClose').disabled = false; $('xStop').hidden = true;
@@ -2473,15 +2502,16 @@ $('pname').onchange = () => edit(() => { P.name = $('pname').value.trim() || 'Pr
 $('openProjs').onclick = () => { renderProjects(); $('projs').showModal(); };
 $('newProj').onclick = async () => { $('projs').close(); await save(); P = null; openProject(null); };
 $('openExp').onclick = () => { $('exp').showModal(); prepareExport(); };
-$('xGo').onclick = runExport;
+$('xGo').onclick = () => runExport(); // sin argumentos: si no, el clic llegaba como «preset» y el video se armaba entero en memoria
 $('xStop').onclick = () => { job.cancel = true; };
 $('exp').addEventListener('cancel', e => { if (!$('xStop').hidden) e.preventDefault(); });
-const TABS = [['tabFiles', 'pFiles'], ['tabTexts', 'pTexts'], ['tabSubs', 'pSubs'], ['tabAI', 'pAI']];
+const TABS = [['tabFiles', 'pFiles'], ['tabTexts', 'pTexts'], ['tabTr', 'pTr'], ['tabFx', 'pFx'], ['tabFilt', 'pFilt'], ['tabSubs', 'pSubs'], ['tabAI', 'pAI']];
 for (const [a] of TABS) $(a).onclick = () => {
   for (const [x, y] of TABS) { const on = x === a; $(x).setAttribute('aria-selected', on); $(x).tabIndex = on ? 0 : -1; $(y).hidden = !on; }
   $('leftTitle').textContent = $(a).title; $('importBtn2').hidden = a !== 'tabFiles';
   if (a === 'tabSubs') renderSubs();
   if (a === 'tabAI') renderTranscript();
+  if (a === 'tabFilt') renderFilters();
 };
 
 // Archivos soltados desde la compu en cualquier parte de la página
@@ -2922,6 +2952,174 @@ function applyTr(kind, f = null) {
 $('libTr').innerHTML = Object.entries(TRANS).filter(([k]) => k !== 'none').map(([k, l]) => `<button type="button" draggable="true" data-tr="${k}" title="Tocá para ponerla en el corte más cercano al cursor, o arrastrala a un clip"><i class="trp tr-${k}" aria-hidden="true"></i>${l}</button>`).join('');
 $('libTr').onclick = e => { const b = e.target.closest('[data-tr]'); if (b) applyTr(b.dataset.tr); };
 $('libTr').addEventListener('dragstart', e => { const b = e.target.closest('[data-tr]'); if (b) { e.dataTransfer.setData('text/x-clipcreate-tr', b.dataset.tr); e.dataTransfer.effectAllowed = 'copy'; } });
+// ---------- Audio: normalizar intensidad (mide la voz y la lleva al nivel de referencia) ----------
+async function normalize(c, on) {
+  if (!on) return edit(() => { c.au = { ...c.au, norm: null }; });
+  const m = media.get(c.media);
+  if (!m) return;
+  try {
+    const r = await levelOf(m);
+    if (!r) return say('No se pudo medir el audio de este clip.');
+    edit(() => { c.au = { ...c.au, norm: r.gain || 0.01 }; });
+    say(`Listo: intensidad normalizada (${r.gain >= 0 ? '+' : ''}${r.gain.toFixed(1)} dB).`);
+  } catch (e) { say('No se pudo medir el audio: ' + (e.message || e)); renderProps(); }
+}
+
+// ---------- Alinear el clip dentro del cuadro ----------
+function align(where) {
+  const l = picked().filter(({ c, t }) => t.kind !== 'text' && c.media);
+  if (!l.length) return;
+  const W = stage.width, H = stage.height;
+  edit(() => { for (const { c } of l) {
+    const m = media.get(c.media), bx = c.box ? [c.box[2] * W, c.box[3] * H] : [W, H];
+    if (!m?.w) continue;
+    const k = (c.fit === 'contain' ? Math.min(bx[0] / m.w, bx[1] / m.h) : Math.max(bx[0] / m.w, bx[1] / m.h)) * (c.scale || 1);
+    const fw = m.w * k / bx[0], fh = m.h * k / bx[1], ax = (1 - fw) / 2, ay = (1 - fh) / 2;
+    if ('lcr'.includes(where)) c.x = where === 'l' ? -ax : where === 'r' ? ax : 0;
+    else c.y = where === 't' ? -ay : where === 'b' ? ay : 0;
+    if (c.kf) { delete c.kf[where && 'lcr'.includes(where) ? 'x' : 'y']; if (!Object.keys(c.kf).length) c.kf = null; }
+  } });
+}
+
+// ---------- Mezcla (como las capas de un programa de diseño) ----------
+const BLENDS = { 'source-over': 'Normal', screen: 'Trama (aclara)', multiply: 'Multiplicar (oscurece)', overlay: 'Superponer', 'soft-light': 'Luz suave', 'hard-light': 'Luz fuerte',
+  lighten: 'Aclarar', darken: 'Oscurecer', difference: 'Diferencia', color: 'Color', luminosity: 'Luminosidad' };
+
+// ---------- Efectos de video ----------
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const EFX = {
+  shake: { label: 'Sacudida', desc: 'Cámara que tiembla' },
+  pulse: { label: 'Pulso', desc: 'Golpe de zoom cada segundo' },
+  blur: { label: 'Desenfoque', desc: 'Imagen fuera de foco' },
+  vhs: { label: 'Retro VHS', desc: 'Líneas, color corrido y temblor' },
+  glitch: { label: 'Glitch', desc: 'Cortes digitales de a ratos' },
+  flash: { label: 'Destello', desc: 'Flash blanco cada segundo' },
+  mirror: { label: 'Espejo', desc: 'La mitad se refleja' },
+  leak: { label: 'Luz cálida', desc: 'Una luz naranja que pasa' },
+  film: { label: 'Película antigua', desc: 'Grano, viñeta y parpadeo' },
+  zoom: { label: 'Acercamiento', desc: 'Se acerca de a poco' }
+};
+function efxMove(c, tt, fx) {
+  const a = c.efx.amt ?? 0.6, f = { ...fx };
+  if (c.efx.id === 'shake' || c.efx.id === 'vhs') { const n = Math.floor(tt * 24), k = c.efx.id === 'vhs' ? 0.006 : 0.035; f.dx = (f.dx || 0) + (hash(n) - 0.5) * k * a; f.dy = (f.dy || 0) + (hash(n + 7) - 0.5) * k * a; }
+  if (c.efx.id === 'pulse') f.k = (f.k || 1) * (1 + 0.09 * a * Math.max(0, 1 - (tt % 1) / 0.35) ** 2);
+  if (c.efx.id === 'zoom') f.k = (f.k || 1) * (1 + 0.25 * a * clamp(tt / Math.max(len(c), 0.1), 0, 1));
+  if (c.efx.id === 'blur') f.blur = (f.blur || 0) + 14 * a;
+  return f;
+}
+function efxOver(g, c, tt, paint, w, h, t) {
+  const a = c.efx.amt ?? 0.6, id = c.efx.id;
+  g.save();
+  if (id === 'flash') { g.fillStyle = `rgba(255,255,255,${(0.85 * a * Math.max(0, 1 - (tt % 1) / 0.18)).toFixed(3)})`; g.fillRect(-w / 2, -h / 2, w, h); }
+  if (id === 'mirror') { g.beginPath(); g.rect(0, -h / 2, w / 2, h); g.clip(); g.scale(-1, 1); paint(g, -w / 2, -h / 2, w, h); }
+  if (id === 'leak') {
+    const x = -w / 2 + w * (0.5 + 0.55 * Math.sin(tt * 0.8)), r = Math.max(w, h) * 0.6, gr = g.createRadialGradient(x, -h * 0.2, 0, x, -h * 0.2, r);
+    gr.addColorStop(0, `rgba(255,150,60,${0.6 * a})`); gr.addColorStop(1, 'rgba(255,90,20,0)');
+    g.globalCompositeOperation = 'screen'; g.fillStyle = gr; g.fillRect(-w / 2, -h / 2, w, h);
+  }
+  if (id === 'vhs' || id === 'film') {
+    if (id === 'vhs') { // líneas y un halo de color corrido
+      g.fillStyle = `rgba(0,0,0,${0.22 * a})`;
+      const step = Math.max(2, Math.round(h / 240));
+      for (let y = -h / 2; y < h / 2; y += step * 2) g.fillRect(-w / 2, y, w, step);
+      g.globalCompositeOperation = 'screen'; g.globalAlpha = 0.25 * a; g.filter = 'sepia(1) saturate(6) hue-rotate(290deg)';
+      paint(g, -w / 2 + w * 0.008 * a, -h / 2, w, h);
+    } else { // película: tono cálido, parpadeo, grano y viñeta
+      g.globalCompositeOperation = 'soft-light'; g.fillStyle = `rgba(255,190,120,${0.35 * a})`; g.fillRect(-w / 2, -h / 2, w, h);
+      g.globalCompositeOperation = 'source-over'; g.fillStyle = `rgba(0,0,0,${(0.12 * a * hash(Math.floor(tt * 12))).toFixed(3)})`; g.fillRect(-w / 2, -h / 2, w, h);
+      grain(g, w, h, 0.5 * a, t);
+      const r = Math.hypot(w, h) / 2, gr = g.createRadialGradient(0, 0, r * 0.4, 0, 0, r);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.8 * a})`); g.fillStyle = gr; g.fillRect(-w / 2, -h / 2, w, h);
+    }
+  }
+  g.restore();
+  if (id === 'glitch' && hash(Math.floor(tt * 4)) > 0.55) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); glitch(g, a, t); g.restore(); }
+}
+// Pestaña Efectos: tocar = poner en los clips elegidos (o en el que está bajo el cursor)
+function fxTargets() {
+  const l = picked().filter(({ c, t }) => t.kind === 'video' && c.media);
+  if (l.length) return l;
+  for (const t of tracks('video')) { const c = t.clips.find(x => T >= x.start && T < end(x) && x.media); if (c) return [{ c, t }]; }
+  return [];
+}
+$('libFx').innerHTML = Object.entries(EFX).map(([k, e]) => `<button type="button" data-fx="${k}"><i class="fxp fx-${k}" aria-hidden="true"></i><b>${e.label}</b><small>${e.desc}</small></button>`).join('');
+$('libFx').onclick = e => {
+  const b = e.target.closest('[data-fx]');
+  if (!b) return;
+  const l = fxTargets();
+  if (!l.length) return say('Elegí un clip de video (o poné el cursor sobre uno) para ponerle el efecto.');
+  edit(() => { for (const { c } of l) c.efx = { id: b.dataset.fx, amt: c.efx?.amt ?? 0.6 }; sel = l.at(-1).c.id; });
+  say(`Efecto «${EFX[b.dataset.fx].label}» en ${l.length > 1 ? l.length + ' clips' : 'el clip'}. La intensidad se cambia en el panel de la derecha.`);
+};
+$('fxOff').onclick = () => { const l = fxTargets(); if (l.length) edit(() => { for (const { c } of l) c.efx = null; }); };
+
+// ---------- Pestaña Filtros: el cuadro actual con cada filtro, para elegir mirando ----------
+const MATE = [[0, 0.08], [0.25, 0.26], [0.75, 0.76], [1, 0.95]], SUAVE = [[0, 0], [0.25, 0.21], [0.75, 0.79], [1, 1]];
+const FILTERS = {
+  'Retrato': { natural: ['Natural', { exp: 0.05, con: 0.1, sat: 0.1, vib: 0.2 }], piel: ['Piel cálida', { temp: 0.25, vib: 0.15, con: 0.05, hl: -0.1 }],
+    suave: ['Suave', { con: -0.15, sh: 0.2, sat: -0.05, vig: 0.1 }], brillo: ['Luminoso', { exp: 0.15, con: 0.1, sat: 0.15, wh: 0.2 }] },
+  'Cine': { cine: ['Cine', { lut: 'teal', lutMix: 0.7, vig: 0.3 }], drama: ['Drama', { con: 0.35, sat: -0.25, sh: -0.2, vig: 0.4, temp: -0.1 }],
+    moody: ['Moody', { lut: 'moody', lutMix: 0.9, vig: 0.25 }], noir: ['Noir', { sat: -1, con: 0.45, vig: 0.5, grain: 0.2 }] },
+  'Retro': { setenta: ['Años 70', { temp: 0.35, sat: -0.2, con: -0.1, grain: 0.3, curves: { y: MATE } }], polaroid: ['Polaroid', { exp: 0.08, con: -0.1, temp: 0.2, tint: 0.1, sat: -0.1, curves: { y: MATE } }],
+    vintage: ['Vintage', { lut: 'vintage', lutMix: 1, grain: 0.15 }], pelicula: ['Película', { lut: 'pelicula', lutMix: 1, grain: 0.35, vig: 0.3 }] },
+  'Blanco y negro': { byn: ['Clásico', { sat: -1, con: 0.2 }], bynsuave: ['Suave', { sat: -1, con: -0.05, sh: 0.2 }], bynfuerte: ['Alto contraste', { sat: -1, con: 0.6, curves: { y: SUAVE } }] },
+  'Paisaje': { vivo: ['Vivo', { sat: 0.4, vib: 0.3, con: 0.2 }], atardecer: ['Atardecer', { temp: 0.45, tint: 0.1, sat: 0.2, hl: -0.1 }], frio: ['Frío', { temp: -0.35, sat: -0.05, con: 0.1 }] },
+  'Noche': { noche: ['Noche azul', { lut: 'noche', lutMix: 1, con: 0.15, vig: 0.35 }], neon: ['Neón', { sat: 0.5, con: 0.3, hue: 10, tint: 0.2 }] }
+};
+const FALL = Object.assign({}, ...Object.values(FILTERS));
+const FKEYS = ['exp', 'con', 'sat', 'vib', 'temp', 'tint', 'hue', 'hl', 'sh', 'wh', 'bl', 'vig', 'grain'];
+function filterVals(id, amt) { // los valores del filtro, con su intensidad (0 a 1)
+  const f = FALL[id]?.[1] || {}, o = Object.fromEntries(FKEYS.map(k => [k, +((f[k] || 0) * amt).toFixed(3)]));
+  o.lut = f.lut || ''; o.lutMix = +((f.lutMix ?? 1) * amt).toFixed(3);
+  o.curves = f.curves ? Object.fromEntries(Object.entries(f.curves).map(([k, l]) => [k, l.map(([x, y]) => [x, +(x + (y - x) * amt).toFixed(4)])])) : null;
+  o.filt = id ? { id, amt } : null;
+  return o;
+}
+let filtBusy = 0;
+function renderFilters() {
+  const box = $('libFilt');
+  if (!box.childElementCount) {
+    box.innerHTML = `<button type="button" class="ft" data-filt=""><canvas width="96" height="64"></canvas><span>Sin filtro</span></button>` + Object.entries(FILTERS).map(([cat, l]) => `<h4>${cat}</h4>` + Object.entries(l).map(([k, [n]]) => `<button type="button" class="ft" data-filt="${k}"><canvas width="96" height="64"></canvas><span>${n}</span></button>`).join('')).join('');
+  }
+  const f = fxTargets()[0], cur = f?.c.filt?.id || '';
+  $('filtAmt').value = f?.c.filt?.amt ?? 1; $('filtAmtO').textContent = Math.round($('filtAmt').value * 100) + ' %';
+  for (const b of box.querySelectorAll('[data-filt]')) b.setAttribute('aria-pressed', b.dataset.filt === cur);
+  // miniaturas con el cuadro actual (si el video ya está listo)
+  const src = f && previewSrc(f.c);
+  if (!src) return;
+  const sw = 160, sh = Math.round(sw * src.h / src.w), my = ++filtBusy;
+  for (const b of box.querySelectorAll('[data-filt]')) {
+    if (my !== filtBusy) return;
+    const cv = b.querySelector('canvas'), g = cv.getContext('2d'), v = filterVals(b.dataset.filt, 1);
+    const out = GL.grade((gg, ww, hh) => src.paint(gg, 0, 0, ww, hh), sw, sh, v, lutOf(v), v.lut);
+    const im = out || null, k = Math.max(cv.width / sw, cv.height / sh);
+    g.fillStyle = '#000'; g.fillRect(0, 0, cv.width, cv.height);
+    if (im) g.drawImage(im, (cv.width - sw * k) / 2, (cv.height - sh * k) / 2, sw * k, sh * k); else src.paint(g, (cv.width - sw * k) / 2, (cv.height - sh * k) / 2, sw * k, sh * k);
+  }
+}
+function applyFilter(id, amt) {
+  const l = fxTargets();
+  if (!l.length) return say('Elegí un clip de video (o poné el cursor sobre uno) para ponerle el filtro.');
+  edit(() => { for (const { c } of l) Object.assign(c, filterVals(id, amt)); });
+  renderFilters();
+  if (id) say(`Filtro «${FALL[id][0]}» en ${l.length > 1 ? l.length + ' clips' : 'el clip'}.`);
+}
+$('libFilt').onclick = e => { const b = e.target.closest('[data-filt]'); if (b) applyFilter(b.dataset.filt, +$('filtAmt').value || 1); };
+$('filtAmt').oninput = () => {
+  $('filtAmtO').textContent = Math.round($('filtAmt').value * 100) + ' %';
+  const l = fxTargets();
+  for (const { c } of l) if (c.filt?.id) Object.assign(c, filterVals(c.filt.id, +$('filtAmt').value));
+  dirty = true;
+};
+$('filtAmt').onchange = () => { const l = fxTargets(); if (l.some(({ c }) => c.filt?.id)) { changed(); saveSoon(); } };
+$('filtAll').onclick = () => {
+  const f = fxTargets()[0];
+  if (!f?.c.filt?.id) return say('Primero poné un filtro en un clip.');
+  const v = filterVals(f.c.filt.id, f.c.filt.amt);
+  edit(() => { for (const t of tracks('video')) for (const c of t.clips) if (c.media) Object.assign(c, structuredClone(v)); });
+  say(`Filtro «${FALL[f.c.filt.id][0]}» en todos los clips.`);
+};
+
 // ---------- Plan de la cuenta ----------
 // Gratis: todo, con la marca «Hecho con ClipCreate». Básico: sin las herramientas Pro. Pro: todo, sin marca.
 const Plan = { name: null };

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ClipCreate Editor v5.8 — un archivo que no entra en el navegador (falta lugar) se edita y exporta igual; los archivos que faltan se reconectan solos al importarlos de nuevo. v5.7: transiciones en la Biblioteca (tocar o arrastrar a un clip) y volumen de lo que escuchás en el visor. v5.6: Mejorar voz mide 4 minutos (segundos en vez de minutos en videos largos), muestra el avance en el botón y avisa al terminar. v5.5: arreglo: la vista previa a veces quedaba sin sonido (el video se preparaba antes de tocar play y quedaba con volumen 0). v5.4: exportar en 1440p (YouTube le da más calidad a los videos subidos en 1440p o más). v5.3: interfaz pro: valores que se arrastran o se escriben, menú del clic derecho (con color de clip y velocidad), J/K/L, ayuda de atajos (?), avisos flotantes e íconos en vez de emojis. v5.2: multicámara a mano: barra con todas las tomas en vivo; tocás una (o 1, 2, 3…) y desde ahí se ve esa; con Shift cambia la toma entera; los clips originales quedan guardados y se puede rehacer cualquier corte. v5.1: multicámara automática según quién habla, quitar muletillas y palabras repetidas, grabar voz en off, volumen con puntos sobre el clip, mezcla automática, capítulos de YouTube desde los marcadores y exportar en varios formatos. v5.0: página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
+<!-- ClipCreate Editor v6.1 — arreglo: Exportar escribe directo al disco (los videos largos ya no se quedan sin memoria) y avisa si falta lugar. v6.0: herramientas tipo CapCut: reducir el ruido de verdad (por frecuencias), aislar voz, normalizar intensidad, completar canal; mejorar imagen (ruido, bloques y nitidez), mezcla, alinear; pestañas de Transiciones, Efectos (10) y Filtros (20, con miniaturas del cuadro actual). v5.8: un archivo que no entra en el navegador (falta lugar) se edita y exporta igual; los archivos que faltan se reconectan solos al importarlos de nuevo. v5.7: transiciones en la Biblioteca (tocar o arrastrar a un clip) y volumen de lo que escuchás en el visor. v5.6: Mejorar voz mide 4 minutos (segundos en vez de minutos en videos largos), muestra el avance en el botón y avisa al terminar. v5.5: arreglo: la vista previa a veces quedaba sin sonido (el video se preparaba antes de tocar play y quedaba con volumen 0). v5.4: exportar en 1440p (YouTube le da más calidad a los videos subidos en 1440p o más). v5.3: interfaz pro: valores que se arrastran o se escriben, menú del clic derecho (con color de clip y velocidad), J/K/L, ayuda de atajos (?), avisos flotantes e íconos en vez de emojis. v5.2: multicámara a mano: barra con todas las tomas en vivo; tocás una (o 1, 2, 3…) y desde ahí se ve esa; con Shift cambia la toma entera; los clips originales quedan guardados y se puede rehacer cualquier corte. v5.1: multicámara automática según quién habla, quitar muletillas y palabras repetidas, grabar voz en off, volumen con puntos sobre el clip, mezcla automática, capítulos de YouTube desde los marcadores y exportar en varios formatos. v5.0: página de Color estilo sala de color (ruedas lift/gamma/gain/offset, curvas con histograma, scopes, galería de stills, tira de clips); herramientas pro (borrar con ripple, entrada y salida con extraer y levantar, cuchilla en todas las pistas, varios clips a la vez, marcadores, rampas de velocidad, recorte y marcos); barra de progreso, placa final y plan de la cuenta (marca en Gratis, herramientas Pro). v4.0: diseño profesional: columna de herramientas, visor con transporte y timecode, inspector por secciones, línea de tiempo con miniaturas y forma de onda, cuchilla e imán. v3.1: misma app que ClipCreate. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -140,6 +140,27 @@ textarea{width:100%;resize:vertical;min-height:4rem}
 #ruler i.fill{background:#b26bffdd}
 .transport label.mon{display:flex;align-items:center;width:6.5rem;margin-right:.3rem}
 .trs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.rail [role=tab]{min-height:44px}
+.fxs{display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+.fxs button{flex-direction:column;align-items:flex-start;gap:.15rem;padding:.4rem;text-align:left;white-space:normal;font-weight:500}
+.fxs b{font-size:.76rem}.fxs small{font-size:.66rem;color:var(--muted);line-height:1.25}
+.fxp{width:100%;height:34px;border-radius:4px;background:linear-gradient(135deg,#3d5f93,#7c4fb8)}
+.fx-shake{background:repeating-linear-gradient(100deg,#3d5f93 0 6px,#5577aa 6px 9px)}
+.fx-pulse{background:radial-gradient(circle,#ff5a1f 0 30%,#3d5f93 32% 52%,#2a3f60 54%)}
+.fx-blur{background:radial-gradient(circle,#9ab 0,#3d5f93 70%);filter:blur(2px)}
+.fx-vhs{background:repeating-linear-gradient(0deg,#3d5f93 0 2px,#22324d 2px 4px),linear-gradient(90deg,#f0a,#0ff)}
+.fx-glitch{background:repeating-linear-gradient(0deg,#3d5f93 0 5px,#ff3fa0 5px 7px,#3df 7px 8px)}
+.fx-flash{background:radial-gradient(circle,#fff 0 25%,#3d5f93 70%)}
+.fx-mirror{background:linear-gradient(90deg,#3d5f93,#7c4fb8 50%,#3d5f93)}
+.fx-leak{background:radial-gradient(circle at 70% 30%,#ffb066 0,#ff5a1f 25%,#3d5f93 70%)}
+.fx-film{background:radial-gradient(circle,#c9a27a 0 40%,#3b2a1a 100%)}
+.fx-zoom{background:radial-gradient(circle,#3d5f93 0 20%,#7c4fb8 21% 40%,#3d5f93 41% 60%,#7c4fb8 61%)}
+.fts{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem}
+.fts h4{grid-column:1/-1;margin:.35rem 0 0;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fts button.ft{flex-direction:column;padding:3px;gap:.2rem;background:var(--well);font-size:.7rem;font-weight:500}
+.fts canvas{width:100%;height:auto;aspect-ratio:3/2;border-radius:4px;display:block}
+.fts button[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+#props .row.align{gap:.1rem}#props .row.align button{flex:1;min-width:0}
 .trs button{justify-content:flex-start;font-size:.72rem;padding:.3rem .4rem;gap:.45rem;font-weight:500}
 .trp{flex:none;width:26px;height:16px;border-radius:3px;background:linear-gradient(90deg,var(--c-video) 50%,#ff5a1f 50%)}
 .tr-disolver{background:linear-gradient(90deg,var(--c-video),#ff5a1f)}
@@ -436,6 +457,14 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
   <symbol id="i-mix" viewBox="0 0 24 24"><path d="M6 3v18M12 3v18M18 3v18"/><rect x="4" y="13" width="4" height="3" rx="1"/><rect x="10" y="6" width="4" height="3" rx="1"/><rect x="16" y="15" width="4" height="3" rx="1"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
   <symbol id="i-keys" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+  <symbol id="i-trans" viewBox="0 0 24 24"><rect x="3" y="6" width="9" height="12" rx="1.5"/><path d="M15 6h4.5A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5H15" stroke-dasharray="2 2"/><path d="M10 12h7M14 9l3 3-3 3"/></symbol>
+  <symbol id="i-filt" viewBox="0 0 24 24"><circle cx="9" cy="10" r="5.5"/><circle cx="15" cy="10" r="5.5"/><circle cx="12" cy="15" r="5.5"/></symbol>
+  <symbol id="i-all" viewBox="0 0 24 24"><path d="M4 3v18"/><rect x="7" y="6" width="12" height="4" rx="1"/><rect x="7" y="14" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-alc" viewBox="0 0 24 24"><path d="M12 3v18"/><rect x="6" y="6" width="12" height="4" rx="1"/><rect x="8" y="14" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-alr" viewBox="0 0 24 24"><path d="M20 3v18"/><rect x="5" y="6" width="12" height="4" rx="1"/><rect x="9" y="14" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-alt" viewBox="0 0 24 24"><path d="M3 4h18"/><rect x="6" y="7" width="4" height="12" rx="1"/><rect x="14" y="7" width="4" height="8" rx="1"/></symbol>
+  <symbol id="i-alm" viewBox="0 0 24 24"><path d="M3 12h18"/><rect x="6" y="6" width="4" height="12" rx="1"/><rect x="14" y="8" width="4" height="8" rx="1"/></symbol>
+  <symbol id="i-alb" viewBox="0 0 24 24"><path d="M3 20h18"/><rect x="6" y="5" width="4" height="12" rx="1"/><rect x="14" y="9" width="4" height="8" rx="1"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
 </svg>
 <div class="app">
@@ -469,6 +498,9 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
 <nav class="rail" role="tablist" aria-label="Paneles" aria-orientation="vertical">
   <button type="button" role="tab" id="tabFiles" aria-selected="true" aria-controls="pFiles" title="Medios"><svg class="i"><use href="#i-media"/></svg>Medios</button>
   <button type="button" role="tab" id="tabTexts" aria-selected="false" aria-controls="pTexts" tabindex="-1" title="Biblioteca"><svg class="i"><use href="#i-lib"/></svg>Biblioteca</button>
+  <button type="button" role="tab" id="tabTr" aria-selected="false" aria-controls="pTr" tabindex="-1" title="Transiciones"><svg class="i"><use href="#i-trans"/></svg>Transic.</button>
+  <button type="button" role="tab" id="tabFx" aria-selected="false" aria-controls="pFx" tabindex="-1" title="Efectos"><svg class="i"><use href="#i-spark"/></svg>Efectos</button>
+  <button type="button" role="tab" id="tabFilt" aria-selected="false" aria-controls="pFilt" tabindex="-1" title="Filtros"><svg class="i"><use href="#i-filt"/></svg>Filtros</button>
   <button type="button" role="tab" id="tabSubs" aria-selected="false" aria-controls="pSubs" tabindex="-1" title="Subtítulos"><svg class="i"><use href="#i-cc"/></svg>Subtítulos</button>
   <button type="button" role="tab" id="tabAI" aria-selected="false" aria-controls="pAI" tabindex="-1" title="IA"><svg class="i"><use href="#i-ai"/></svg>IA</button>
 </nav>
@@ -482,7 +514,6 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
     </section>
     <section id="pTexts" class="tabp" role="tabpanel" aria-labelledby="tabTexts" hidden>
       <p class="hint">Todo lo de esta biblioteca lo genera ClipCreate: es propio y se puede usar en cualquier video, también comercial.</p>
-      <details open><summary>Transiciones</summary><div class="trs" id="libTr"></div><p class="hint">Tocá una para ponerla en el corte más cercano al cursor, o arrastrala a un clip. Para tener un corte, dividí el video con S.</p></details>
       <details open><summary>Textos</summary><div class="presets" id="presets"></div></details>
       <details><summary>Efectos de sonido</summary><div class="lib" id="libSfx"></div></details>
       <details><summary>Música</summary><div class="lib" id="libMusic"></div><p class="hint">Se agrega con volumen bajo y «Bajar cuando hablan» prendido.</p></details>
@@ -498,6 +529,21 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
           <p class="hint">Pone el logo arriba, la placa de entrada con el nombre del canal, el nombre del invitado, el cierre con tu usuario y los subtítulos con tu color. Todo queda editable.</p>
         </div>
       </details>
+    </section>
+    <section id="pTr" class="tabp" role="tabpanel" aria-labelledby="tabTr" hidden>
+      <p class="hint">Tocá una para ponerla en el corte más cercano al cursor, o arrastrala a un clip. Para tener un corte, dividí el video con S.</p>
+      <div class="trs" id="libTr"></div>
+    </section>
+    <section id="pFx" class="tabp" role="tabpanel" aria-labelledby="tabFx" hidden>
+      <p class="hint">Tocá un efecto para ponerlo en el clip elegido (o en el que está bajo el cursor). La intensidad se cambia en el panel de la derecha.</p>
+      <div class="fxs" id="libFx"></div>
+      <button type="button" id="fxOff">Quitar el efecto</button>
+    </section>
+    <section id="pFilt" class="tabp" role="tabpanel" aria-labelledby="tabFilt" hidden>
+      <label>Intensidad <output id="filtAmtO"></output><input type="range" id="filtAmt" min="0.1" max="1" step="0.01" value="1" data-f="pct"></label>
+      <div class="fts" id="libFilt"></div>
+      <button type="button" id="filtAll">Usar este filtro en todos los clips</button>
+      <p class="hint">Las miniaturas muestran el cuadro donde está el cursor. Para afinar, después podés seguir en la página de Color.</p>
     </section>
     <section id="pAI" class="tabp" role="tabpanel" aria-labelledby="tabAI" hidden>
       <details open><summary>Editar con el texto</summary>
@@ -741,6 +787,6 @@ body.color .app{grid-template-columns:230px minmax(0,1fr) 340px;grid-template-ro
 </dialog>
 
 
-<script type="module" src="editor.js?v=5.8"></script>
+<script type="module" src="editor.js?v=6.1"></script>
 </body>
 </html>

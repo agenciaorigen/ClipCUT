@@ -1,4 +1,4 @@
-// ClipCreate Editor — color profesional v2.0 con WebGL2: exposición, contraste, luces, sombras, blancos, negros,
+// ClipCreate Editor — color profesional v2.1 con WebGL2 (v2.1: nitidez y reducción de ruido y bloques): exposición, contraste, luces, sombras, blancos, negros,
 // temperatura, tinte, matiz, saturación, vibrance, ruedas (lift, gamma, gain, offset), curvas y LUT 3D. Si el navegador no tiene WebGL2, devuelve null.
 const VS = `#version 300 es
 in vec2 p; out vec2 uv;
@@ -6,7 +6,8 @@ void main() { uv = vec2(p.x * 0.5 + 0.5, 0.5 - p.y * 0.5); gl_Position = vec4(p,
 const FS = `#version 300 es
 precision highp float; precision highp sampler3D;
 uniform sampler2D img; uniform sampler3D lut; uniform sampler2D crv;
-uniform float ex, co, sa, vi, te, ti, hu, hl, sh, wh, bl, mixL, size, useC;
+uniform float ex, co, sa, vi, te, ti, hu, hl, sh, wh, bl, mixL, size, useC, sp, dn;
+uniform vec2 px; // tamaño de un píxel
 uniform vec4 uLift, uGamma, uGain, uOff; // rgb = color de la rueda, a = brillo (master)
 in vec2 uv; out vec4 o;
 float lum(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
@@ -19,6 +20,17 @@ vec3 hue(vec3 c, float a) {
 }
 void main() {
   vec4 t = texture(img, uv);
+  if (dn > 0.0 || sp > 0.0) { // mejorar imagen: suaviza ruido y bloques sin borrar los bordes, y después da nitidez
+    vec3 c0 = t.rgb, sb = vec3(0.0), bx = vec3(0.0); float ws = 0.0;
+    for (int y = -2; y <= 2; y++) for (int x = -2; x <= 2; x++) {
+      vec3 q = texture(img, uv + vec2(float(x), float(y)) * px).rgb, d = q - c0;
+      float w = exp(-dot(d, d) * (30.0 / (0.1 + dn)) - float(x * x + y * y) * 0.2);
+      sb += q * w; ws += w;
+      if (abs(x) <= 1 && abs(y) <= 1) bx += q;
+    }
+    vec3 c1 = mix(c0, sb / ws, dn);
+    t.rgb = clamp(c1 + sp * 1.4 * (c1 - mix(bx / 9.0, sb / ws, dn * 0.5)), 0.0, 1.0);
+  }
   vec3 c = t.rgb * exp2(ex);
   c *= vec3(1.0 + te * 0.12, 1.0 - ti * 0.08, 1.0 - te * 0.12);
   c = (c - bl * 0.12) / max(0.2, 1.0 - bl * 0.12 - wh * 0.12);   // negros y blancos: dónde empieza y termina
@@ -57,7 +69,7 @@ function init() {
     const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    for (const k of ['img', 'lut', 'crv', 'ex', 'co', 'sa', 'vi', 'te', 'ti', 'hu', 'hl', 'sh', 'wh', 'bl', 'mixL', 'size', 'useC', 'uLift', 'uGamma', 'uGain', 'uOff']) U[k] = gl.getUniformLocation(prog, k);
+    for (const k of ['img', 'lut', 'crv', 'ex', 'co', 'sa', 'vi', 'te', 'ti', 'hu', 'hl', 'sh', 'wh', 'bl', 'mixL', 'size', 'useC', 'sp', 'dn', 'px', 'uLift', 'uGamma', 'uGain', 'uOff']) U[k] = gl.getUniformLocation(prog, k);
     gl.uniform1i(U.img, 0); gl.uniform1i(U.lut, 1); gl.uniform1i(U.crv, 2);
     crvTex = gl.createTexture(); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, crvTex);
     for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
@@ -96,6 +108,7 @@ export function grade(paint, w, h, p, lut, lutKey) {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tmp);
   const set = (n, v) => gl.uniform1f(U[n], v || 0);
   set('ex', p.exp); set('co', p.con); set('sa', p.sat); set('vi', p.vib); set('te', p.temp); set('ti', p.tint);
+  set('sp', p.sharp); set('dn', p.dn); gl.uniform2f(U.px, 1 / w, 1 / h);
   set('hu', (p.hue || 0) * Math.PI / 180); set('hl', p.hl); set('sh', p.sh); set('wh', p.wh); set('bl', p.bl);
   if (lut) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_3D, lutTex(lutKey, lut)); gl.activeTexture(gl.TEXTURE0); set('mixL', p.lutMix ?? 1); set('size', lut.size); }
   else set('mixL', 0);

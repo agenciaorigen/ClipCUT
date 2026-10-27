@@ -1,4 +1,4 @@
-# ClipCreate Editor — v5.3 (interfaz profesional)
+# ClipCreate Editor — v6.0 (herramientas tipo CapCut)
 
 Editor de video multipista que corre entero en el navegador. Está en el mismo repo que ClipCreate:
 
@@ -15,6 +15,25 @@ Editor de video multipista que corre entero en el navegador. Está en el mismo r
 | `smart.js` | Silencios, Clips inteligentes con DeepSeek, seguir a quien habla, sincronizar cámaras y velocidad sin cambiar el tono. |
 
 No hay que instalar ni compilar nada: se sube a GitHub y GitHub Pages lo publica igual que antes.
+
+## Herramientas tipo CapCut (v6.0)
+
+**Audio** (sección «Limpiar el audio» del clip):
+- **Reducir el ruido** (Suave, Medio, Fuerte): mira el sonido por frecuencias, aprende el ruido de fondo (aire, ventilador, calle, zumbido) y lo baja también mientras se habla. En la prueba bajó el ruido 15 dB más que la voz.
+- **Aislar voz**: además saca graves y agudos que no son voz y reduce el ruido al máximo.
+- **Normalizar intensidad**: mide la voz y la lleva al nivel de referencia (si ya está «Mejorar voz», no hace falta).
+- **Completar canal**: si el micrófono quedó grabado de un solo lado, lo pasa a los dos.
+- Se escucha igual en la vista previa que en el video exportado, y «Escuchar original» compara.
+
+**Imagen** (en el clip):
+- **Mejorar imagen**: «Reducir ruido y bloques» suaviza el granulado y los cuadraditos de la compresión sin borrar los bordes; «Nitidez» devuelve definición. «Automático» pone valores recomendados.
+- **Mezcla**: modos de capa (trama, multiplicar, superponer, luz suave…).
+- **Alinear**: seis botones para pegar la imagen a un borde o centrarla.
+
+**Pestañas nuevas a la izquierda**:
+- **Transiciones**: tocar o arrastrar a un clip.
+- **Efectos** (10): sacudida, pulso, desenfoque, retro VHS, glitch, destello, espejo, luz cálida, película antigua y acercamiento. Intensidad en el panel del clip.
+- **Filtros** (20, en Retrato, Cine, Retro, Blanco y negro, Paisaje y Noche): las miniaturas muestran el cuadro actual con cada filtro; hay intensidad y «usar en todos».
 
 ## Interfaz profesional (v5.3)
 
@@ -191,6 +210,8 @@ Los videos **no se suben a ningún lado**: se procesan en la compu. La única ex
 - Línea fina entre franjas de Dividido o Trío (en ClipCreate está; en el editor todavía no).
 
 ## Cómo se probó
+
+**v6.0**: reducir ruido medido en un WAV exportado (la diferencia entre voz y ruido pasó de 8,7 dB a 24,3 dB), normalizar, completar canal, mejorar imagen, mezcla, alinear, los 10 efectos, los 20 filtros con miniaturas, «usar en todos» y exportar un MP4 con efecto y filtro; se repitieron las pruebas anteriores sin errores.
 
 **v5.3**: arrastrar y escribir valores, el menú del clic derecho con mouse y teclado (velocidad 2× y color del clip), J/K/L, la ayuda de atajos, los avisos y que no quedaran emojis; se repitieron las pruebas de v5.0 y v5.2 sin errores.
 
